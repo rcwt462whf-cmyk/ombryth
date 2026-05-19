@@ -60,7 +60,7 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 [&_input]:text-gray-900 [&_input]:bg-white [&_label]:text-gray-700">
         <div className="w-full max-w-sm">
           {/* Logo */}
           <div className="text-center mb-8">
@@ -100,7 +100,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 [&_input]:text-gray-900 [&_input]:bg-white [&_label]:text-gray-700">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
