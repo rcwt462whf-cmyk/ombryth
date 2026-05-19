@@ -24,9 +24,9 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">1. Who we are</h2>
             <p>
-              FlowGen is an AI image and caption generation tool operated by an individual developer based in Hungary, European Union.
+              Ombryth is an AI image and caption generation tool operated by an individual developer based in Hungary, European Union.
               If you have any questions about this policy or your data, please contact us at{" "}
-              <a href="mailto:contact@yourdomain.com" className="text-blue-600 hover:underline">contact@yourdomain.com</a>.
+              <a href="mailto:hello@ombryth.com" className="text-blue-600 hover:underline">hello@ombryth.com</a>.
             </p>
           </section>
 
@@ -67,7 +67,7 @@ export default function PrivacyPage() {
           {/* 3. What we do NOT collect */}
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">3. What we do not collect</h2>
-            <p className="mb-3">We have made a deliberate choice to keep FlowGen free of surveillance infrastructure:</p>
+            <p className="mb-3">We have made a deliberate choice to keep Ombryth free of surveillance infrastructure:</p>
             <ul className="space-y-2 list-disc list-inside text-gray-600">
               <li>No analytics or tracking pixels of any kind</li>
               <li>No advertising networks or retargeting</li>
@@ -80,7 +80,7 @@ export default function PrivacyPage() {
           {/* 4. Third-party services */}
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">4. Third-party services we use</h2>
-            <p className="mb-4">FlowGen relies on a small number of trusted third-party services to operate:</p>
+            <p className="mb-4">Ombryth relies on a small number of trusted third-party services to operate:</p>
             <ul className="space-y-3 list-none">
               <li>
                 <strong className="text-gray-900">Supabase</strong> — provides authentication, the PostgreSQL database where your account and
@@ -126,7 +126,7 @@ export default function PrivacyPage() {
             </ul>
             <p className="mt-4">
               You can delete your account at any time via <strong>Settings → Account</strong>. For other data requests, contact us at{" "}
-              <a href="mailto:contact@yourdomain.com" className="text-blue-600 hover:underline">contact@yourdomain.com</a>.
+              <a href="mailto:hello@ombryth.com" className="text-blue-600 hover:underline">hello@ombryth.com</a>.
             </p>
           </section>
 
@@ -134,7 +134,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">7. Cookies</h2>
             <p>
-              FlowGen sets a single session cookie used by Supabase Auth to keep you logged in. This cookie is strictly necessary
+              Ombryth sets a single session cookie used by Supabase Auth to keep you logged in. This cookie is strictly necessary
               for the service to function and does not track you across other websites. We do not use advertising cookies,
               analytics cookies, or any other tracking cookies.
             </p>
@@ -151,7 +151,7 @@ export default function PrivacyPage() {
             </ul>
             <p className="mt-3 text-sm text-gray-500">
               No system is completely secure. If you discover a security issue, please contact us immediately at{" "}
-              <a href="mailto:contact@yourdomain.com" className="text-blue-600 hover:underline">contact@yourdomain.com</a>.
+              <a href="mailto:hello@ombryth.com" className="text-blue-600 hover:underline">hello@ombryth.com</a>.
             </p>
           </section>
 
@@ -160,7 +160,7 @@ export default function PrivacyPage() {
             <h2 className="text-xl font-semibold text-gray-900 mb-3">9. Changes to this policy</h2>
             <p>
               We may update this Privacy Policy from time to time. When we do, we will update the &ldquo;Last updated&rdquo; date at the top of
-              this page. Your continued use of FlowGen after any changes constitutes your acceptance of the revised policy.
+              this page. Your continued use of Ombryth after any changes constitutes your acceptance of the revised policy.
             </p>
           </section>
 
@@ -169,7 +169,7 @@ export default function PrivacyPage() {
             <h2 className="text-xl font-semibold text-gray-900 mb-3">10. Contact</h2>
             <p>
               Questions about this Privacy Policy or your data? Email us at{" "}
-              <a href="mailto:contact@yourdomain.com" className="text-blue-600 hover:underline">contact@yourdomain.com</a>.
+              <a href="mailto:hello@ombryth.com" className="text-blue-600 hover:underline">hello@ombryth.com</a>.
             </p>
           </section>
 
@@ -177,8 +177,8 @@ export default function PrivacyPage() {
 
         {/* Footer */}
         <div className="mt-16 pt-8 border-t border-gray-100 text-center text-sm text-gray-400">
-          FlowGen &middot;{" "}
-          <a href="mailto:contact@yourdomain.com" className="hover:text-gray-600 transition-colors">contact@yourdomain.com</a>
+          Ombryth &middot;{" "}
+          <a href="mailto:hello@ombryth.com" className="hover:text-gray-600 transition-colors">hello@ombryth.com</a>
           {" "}&middot; Hungary, EU
         </div>
       </div>

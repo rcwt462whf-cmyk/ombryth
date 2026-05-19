@@ -24,18 +24,18 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">1. Acceptance of terms</h2>
             <p>
-              By creating an account or using FlowGen in any way, you agree to be bound by these Terms of Service.
+              By creating an account or using Ombryth in any way, you agree to be bound by these Terms of Service.
               If you do not agree, do not use the service. These terms form a binding agreement between you and
-              FlowGen, operated by an individual developer based in Hungary, EU.
+              Ombryth, operated by an individual developer based in Hungary, EU.
             </p>
           </section>
 
           {/* 2. The service */}
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">2. What FlowGen is</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">2. What Ombryth is</h2>
             <p>
-              FlowGen is a tool that provides a user interface for generating AI images and platform-ready captions
-              (Pinterest titles, Instagram captions, blog copy) using AI models you choose. FlowGen connects to
+              Ombryth is a tool that provides a user interface for generating AI images and platform-ready captions
+              (Pinterest titles, Instagram captions, blog copy) using AI models you choose. Ombryth connects to
               third-party AI providers using API keys you supply. We are a tool, not an AI provider — we do not
               supply, resell, or take responsibility for the underlying AI models or their outputs.
             </p>
@@ -45,16 +45,16 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">3. Your API keys</h2>
             <p className="mb-3">
-              To use FlowGen&apos;s AI features, you must provide valid API keys from your chosen AI providers (e.g. OpenAI,
-              Anthropic, Google, Replicate, Stability AI, BytePlus). By adding your API keys to FlowGen:
+              To use Ombryth&apos;s AI features, you must provide valid API keys from your chosen AI providers (e.g. OpenAI,
+              Anthropic, Google, Replicate, Stability AI, BytePlus). By adding your API keys to Ombryth:
             </p>
             <ul className="space-y-2 list-disc list-inside text-gray-600">
               <li>You confirm the keys belong to you or that you are authorised to use them.</li>
-              <li>You accept full responsibility for any costs incurred at the third-party provider as a result of FlowGen making requests with your keys.</li>
+              <li>You accept full responsibility for any costs incurred at the third-party provider as a result of Ombryth making requests with your keys.</li>
               <li>You must not add keys belonging to other people without their explicit permission.</li>
             </ul>
             <p className="mt-3">
-              FlowGen stores your keys encrypted with AES-256 and uses them only to fulfil generation requests you initiate.
+              Ombryth stores your keys encrypted with AES-256 and uses them only to fulfil generation requests you initiate.
               We will not use your keys for any other purpose.
             </p>
           </section>
@@ -77,7 +77,7 @@ export default function TermsPage() {
                 <strong className="text-gray-900">Refunds.</strong> We do not offer refunds for partial months or unused generations.
               </li>
               <li>
-                <strong className="text-gray-900">Payment processing.</strong> All payments are processed by Stripe. FlowGen never sees your
+                <strong className="text-gray-900">Payment processing.</strong> All payments are processed by Stripe. Ombryth never sees your
                 card number or other payment card data.
               </li>
             </ul>
@@ -86,11 +86,11 @@ export default function TermsPage() {
           {/* 5. Acceptable use */}
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">5. Acceptable use</h2>
-            <p className="mb-3">You agree not to use FlowGen to:</p>
+            <p className="mb-3">You agree not to use Ombryth to:</p>
             <ul className="space-y-2 list-disc list-inside text-gray-600">
               <li>Generate content that is illegal under applicable law, including content that exploits minors.</li>
               <li>Infringe the intellectual property rights of third parties.</li>
-              <li>Violate the terms of service of any AI provider whose API you connect to FlowGen.</li>
+              <li>Violate the terms of service of any AI provider whose API you connect to Ombryth.</li>
               <li>Attempt to reverse-engineer, scrape, or interfere with the operation of the service.</li>
               <li>Use the service for spam, harassment, or deceptive practices.</li>
             </ul>
@@ -103,8 +103,8 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">6. Ownership of generated content</h2>
             <p>
-              You own the images and captions you generate through FlowGen, subject to the terms of the underlying AI provider
-              (e.g. OpenAI&apos;s usage policy). FlowGen claims no ownership over, and takes no licence to, your generated outputs.
+              You own the images and captions you generate through Ombryth, subject to the terms of the underlying AI provider
+              (e.g. OpenAI&apos;s usage policy). Ombryth claims no ownership over, and takes no licence to, your generated outputs.
               You are responsible for ensuring your use of generated content complies with the relevant provider&apos;s terms
               and applicable law.
             </p>
@@ -114,8 +114,8 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">7. Ownership of uploaded content</h2>
             <p>
-              You retain full ownership of any images you upload to FlowGen (style references, product photos, etc.).
-              By uploading content, you grant FlowGen a limited, non-exclusive licence to store and process that content
+              You retain full ownership of any images you upload to Ombryth (style references, product photos, etc.).
+              By uploading content, you grant Ombryth a limited, non-exclusive licence to store and process that content
               for the sole purpose of fulfilling your generation requests. This licence ends when you delete the content
               or your account.
             </p>
@@ -125,7 +125,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">8. Disclaimer of warranties</h2>
             <p>
-              FlowGen is provided &ldquo;as is&rdquo; and &ldquo;as available&rdquo; without warranties of any kind, either express or implied.
+              Ombryth is provided &ldquo;as is&rdquo; and &ldquo;as available&rdquo; without warranties of any kind, either express or implied.
               We do not guarantee uninterrupted uptime, the accuracy or quality of AI-generated outputs, or that the service
               will meet your specific requirements. AI models can produce unexpected, inaccurate, or inappropriate results —
               you use them at your own discretion.
@@ -136,9 +136,9 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-3">9. Limitation of liability</h2>
             <p>
-              To the maximum extent permitted by law, FlowGen&apos;s total liability to you for any claim arising from your use of
-              the service is limited to the total amount you paid to FlowGen in the three (3) months immediately preceding
-              the claim. FlowGen is not liable for any indirect, incidental, special, or consequential damages, including
+              To the maximum extent permitted by law, Ombryth&apos;s total liability to you for any claim arising from your use of
+              the service is limited to the total amount you paid to Ombryth in the three (3) months immediately preceding
+              the claim. Ombryth is not liable for any indirect, incidental, special, or consequential damages, including
               loss of revenue, loss of data, or damage to your reputation, even if advised of the possibility of such damages.
             </p>
           </section>
@@ -159,7 +159,7 @@ export default function TermsPage() {
             <h2 className="text-xl font-semibold text-gray-900 mb-3">11. Governing law</h2>
             <p>
               These Terms are governed by the laws of Hungary and, where applicable, European Union law. Any disputes
-              arising from or relating to these Terms or your use of FlowGen shall be resolved in the competent courts
+              arising from or relating to these Terms or your use of Ombryth shall be resolved in the competent courts
               of Hungary.
             </p>
           </section>
@@ -169,7 +169,7 @@ export default function TermsPage() {
             <h2 className="text-xl font-semibold text-gray-900 mb-3">12. Changes to these terms</h2>
             <p>
               We may update these Terms of Service from time to time. When we do, we will update the &ldquo;Last updated&rdquo; date
-              at the top of this page. Your continued use of FlowGen after any changes constitutes your acceptance of the
+              at the top of this page. Your continued use of Ombryth after any changes constitutes your acceptance of the
               revised terms.
             </p>
           </section>
@@ -179,7 +179,7 @@ export default function TermsPage() {
             <h2 className="text-xl font-semibold text-gray-900 mb-3">13. Contact</h2>
             <p>
               Questions about these Terms? Contact us at{" "}
-              <a href="mailto:contact@yourdomain.com" className="text-blue-600 hover:underline">contact@yourdomain.com</a>.
+              <a href="mailto:hello@ombryth.com" className="text-blue-600 hover:underline">hello@ombryth.com</a>.
             </p>
           </section>
 
@@ -187,8 +187,8 @@ export default function TermsPage() {
 
         {/* Footer */}
         <div className="mt-16 pt-8 border-t border-gray-100 text-center text-sm text-gray-400">
-          FlowGen &middot;{" "}
-          <a href="mailto:contact@yourdomain.com" className="hover:text-gray-600 transition-colors">contact@yourdomain.com</a>
+          Ombryth &middot;{" "}
+          <a href="mailto:hello@ombryth.com" className="hover:text-gray-600 transition-colors">hello@ombryth.com</a>
           {" "}&middot; Hungary, EU
         </div>
       </div>
