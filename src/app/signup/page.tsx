@@ -105,10 +105,7 @@ export default function SignupPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
-              <span className="text-white text-sm font-bold">F</span>
-            </div>
-            <span className="font-semibold text-gray-900 text-lg">FlowGen</span>
+            <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">Ombryth</span>
           </Link>
           <h1 className="mt-6 text-2xl font-bold text-gray-900">Create your account</h1>
           <p className="mt-2 text-sm text-gray-500">10 free generations included</p>
