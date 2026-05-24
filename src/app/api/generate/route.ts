@@ -166,7 +166,9 @@ async function generateWithStability(
 async function generateWithSeedream(
   apiKey: string,
   prompt: string,
-  aspectRatio: string
+  aspectRatio: string,
+  styleBuffer?: Buffer | null,
+  styleStrength?: number
 ): Promise<Buffer> {
   // BytePlus Ark API (OpenAI-compatible)
   // BytePlus Seedream uses named size presets
@@ -179,6 +181,21 @@ async function generateWithSeedream(
   }
   const size = sizeMap[aspectRatio] ?? "4K"
 
+  const body: Record<string, unknown> = {
+    model: "seedream-4-5-251128",
+    prompt,
+    response_format: "url",
+    size,
+    watermark: false,
+  }
+
+  // Pass style reference image natively if provided
+  if (styleBuffer) {
+    const base64 = styleBuffer.toString("base64")
+    body.image = `data:image/jpeg;base64,${base64}`
+    body.image_weight = Math.round((styleStrength ?? 60) / 100 * 100) / 100
+  }
+
   const resp = await fetch(
     "https://ark.ap-southeast.bytepluses.com/api/v3/images/generations",
     {
@@ -187,12 +204,7 @@ async function generateWithSeedream(
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({
-        model: "seedream-4-5-251128",
-        prompt,
-        response_format: "url",
-        size,
-      }),
+      body: JSON.stringify(body),
     }
   )
 
@@ -397,7 +409,7 @@ async function generateOneImage(
     }
     case "seedream": {
       if (!keyMap.byteplus) throw new Error("BytePlus API key not configured. Add it in Settings.")
-      return generateWithSeedream(keyMap.byteplus, prompt, config.aspectRatio)
+      return generateWithSeedream(keyMap.byteplus, prompt, config.aspectRatio, styleBuffer, config.styleReferenceStrength ?? 60)
     }
     default:
       throw new Error(`Unknown image model: ${imageModel}`)
