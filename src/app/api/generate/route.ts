@@ -168,18 +168,18 @@ async function generateWithSeedream(
   prompt: string,
   aspectRatio: string
 ): Promise<Buffer> {
-  // BytePlus Seedream via VolcEngine API
-  const ratioMap: Record<string, { width: number; height: number }> = {
-    "1:1": { width: 1024, height: 1024 },
-    "2:3": { width: 768, height: 1152 },
-    "16:9": { width: 1344, height: 768 },
-    "9:16": { width: 768, height: 1344 },
-    "4:5": { width: 896, height: 1120 },
+  // BytePlus Ark API (OpenAI-compatible)
+  const sizeMap: Record<string, string> = {
+    "1:1": "1024x1024",
+    "2:3": "768x1152",
+    "16:9": "1344x768",
+    "9:16": "768x1344",
+    "4:5": "896x1120",
   }
-  const { width, height } = ratioMap[aspectRatio] ?? { width: 1024, height: 1024 }
+  const size = sizeMap[aspectRatio] ?? "1024x1024"
 
   const resp = await fetch(
-    "https://visual.volcengineapi.com/?Action=CVProcess&Version=2022-08-31",
+    "https://ark.ap-southeast.bytepluses.com/api/v3/images/generations",
     {
       method: "POST",
       headers: {
@@ -187,12 +187,10 @@ async function generateWithSeedream(
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        req_key: "seedream_img_gen",
+        model: "seedream-4-5-251128",
         prompt,
-        width,
-        height,
-        use_pre_llm: true,
-        return_url: true,
+        response_format: "url",
+        size,
       }),
     }
   )
@@ -203,7 +201,7 @@ async function generateWithSeedream(
   }
 
   const data = await resp.json()
-  const imageUrl = data?.data?.image_urls?.[0]
+  const imageUrl = data?.data?.[0]?.url
   if (!imageUrl) throw new Error("Seedream returned no image URL")
 
   const imgResp = await fetch(imageUrl)
