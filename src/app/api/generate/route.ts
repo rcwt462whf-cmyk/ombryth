@@ -174,10 +174,10 @@ async function generateWithSeedream(
   // BytePlus Seedream uses named size presets
   const sizeMap: Record<string, string> = {
     "1:1": "4K",
-    "2:3": "2:3",
-    "16:9": "16:9",
-    "9:16": "9:16",
-    "4:5": "4:5",
+    "2:3": "2048x3072",
+    "16:9": "4096x2304",
+    "9:16": "2304x4096",
+    "4:5": "2048x2560",
   }
   const size = sizeMap[aspectRatio] ?? "4K"
 
