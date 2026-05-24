@@ -101,7 +101,8 @@ function UploadZone({
           <Image src={preview} alt={label} fill className="object-cover" unoptimized />
           <button
             onClick={() => onFileChange(null)}
-            className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-colors"
+            aria-label="Remove image"
+            className="absolute top-1 right-1 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-colors"
           >
             <X className="w-3.5 h-3.5 text-white" />
           </button>
@@ -330,7 +331,8 @@ export default function GeneratePage() {
   const [lightingOpen, setLightingOpen] = useState(true)
   const [customNiches, setCustomNiches] = useState<CustomNiche[]>([])
   const [lighting, setLighting] = useState<LightingPreset>("morning")
-  const [destUrlOpen, setDestUrlOpen] = useState(false)
+  const [destUrlOpen, setDestUrlOpen] = useState(true)
+  const [freeUsedCount, setFreeUsedCount] = useState<number | null>(null)
   const [additionalOpen, setAdditionalOpen] = useState(false)
   const [customPrompt, setCustomPrompt] = useState("")
   const [platforms, setPlatforms] = useState<Platform[]>(["pinterest", "instagram"])
@@ -350,6 +352,9 @@ export default function GeneratePage() {
     fetch("/api/prompts").then(r => r.json()).then(d => setSavedPrompts(d.prompts ?? []))
     fetch("/api/user/defaults").then(r => r.json()).then(d => {
       const def = d.defaults ?? {}
+      // Free usage counter
+      if (def.free_generations_used !== undefined) setFreeUsedCount(def.free_generations_used)
+      // Default model/niche/lighting/language
       if (def.default_image_model) setImageModel(def.default_image_model as ImageModel)
       if (def.default_text_model) setTextModel(def.default_text_model as TextModel)
       if (def.default_category_preset === "off") { setNicheOpen(false); setStyleOpen(false) }
@@ -483,6 +488,8 @@ export default function GeneratePage() {
       }
 
       setResult(data)
+      // Keep free usage counter in sync
+      if (data.freeUsed !== null && data.freeUsed !== undefined) setFreeUsedCount(data.freeUsed)
     } catch {
       toast({ variant: "destructive", title: "Network error", description: "Please try again." })
     } finally {
@@ -610,6 +617,7 @@ export default function GeneratePage() {
                 <button
                   key={key}
                   onClick={() => { setNiche(key); setStylePreset(Object.keys(n.styles)[0]) }}
+                  aria-pressed={niche === key}
                   className={cn(
                     "px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors border",
                     niche === key
@@ -624,6 +632,7 @@ export default function GeneratePage() {
                 <button
                   key={customNiche.id}
                   onClick={() => { setNiche(customNiche.id); setStylePreset(customNiche.presets[0]?.id ?? "") }}
+                  aria-pressed={niche === customNiche.id}
                   className={cn(
                     "px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors border",
                     niche === customNiche.id
@@ -651,6 +660,7 @@ export default function GeneratePage() {
                     <button
                       key={key}
                       onClick={() => setStylePreset(key)}
+                      aria-pressed={stylePreset === key}
                       className={cn(
                         "px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors border",
                         stylePreset === key
@@ -667,6 +677,7 @@ export default function GeneratePage() {
                   <button
                     key={p.id}
                     onClick={() => setStylePreset(p.id)}
+                    aria-pressed={stylePreset === p.id}
                     className={cn(
                       "px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors border",
                       stylePreset === p.id
@@ -694,6 +705,7 @@ export default function GeneratePage() {
                   <button
                     key={key}
                     onClick={() => setLighting(key)}
+                    aria-pressed={lighting === key}
                     className={cn(
                       "flex flex-col items-center justify-center px-1 py-2.5 rounded-lg text-[10px] transition-colors border",
                       lighting === key
@@ -784,7 +796,7 @@ export default function GeneratePage() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") fetchDestinationContext(destinationUrl)
                 }}
-                className="flex-1 h-8 px-3 text-xs rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 placeholder:text-gray-300"
+                className="flex-1 h-10 px-3 text-xs rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 placeholder:text-gray-300"
               />
               {destinationUrl && (
                 <button
@@ -842,6 +854,7 @@ export default function GeneratePage() {
                   <button
                     key={value}
                     onClick={() => togglePlatform(value)}
+                    aria-pressed={platforms.includes(value)}
                     className={cn(
                       "flex-1 py-2 rounded-lg text-xs font-medium border transition-colors flex flex-col items-center gap-1",
                       platforms.includes(value)
@@ -929,9 +942,14 @@ export default function GeneratePage() {
                 </>
               )}
             </Button>
-            {result?.freeUsed !== null && result?.freeUsed !== undefined && (
-              <p className="text-center text-xs text-gray-400">
-                {result.freeUsed}/10 free generations used
+            {freeUsedCount !== null && (
+              <p className={cn(
+                "text-center text-xs",
+                freeUsedCount >= 10 ? "text-red-500 font-medium" : freeUsedCount >= 7 ? "text-amber-500" : "text-gray-400"
+              )}>
+                {freeUsedCount >= 10
+                  ? "Free trial exhausted — upgrade to continue"
+                  : `${freeUsedCount}/10 free generations used · ${10 - freeUsedCount} remaining`}
               </p>
             )}
           </div>
@@ -979,11 +997,15 @@ export default function GeneratePage() {
                           <button
                             key={i}
                             onClick={() => setSelectedImageIndex(i)}
-                            className={cn(
+                            aria-label={`View variation ${i + 1}`}
+                            aria-pressed={i === selectedImageIndex}
+                            className="w-8 h-8 flex items-center justify-center"
+                          >
+                            <span className={cn(
                               "w-1.5 h-1.5 rounded-full transition-colors",
                               i === selectedImageIndex ? "bg-white" : "bg-white/50"
-                            )}
-                          />
+                            )} />
+                          </button>
                         ))}
                       </div>
                     </>

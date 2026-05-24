@@ -44,7 +44,7 @@ export async function GET() {
 
   const { data } = await supabase
     .from("users")
-    .select("default_image_model, default_text_model, default_category_preset, default_lighting_preset, custom_system_prompt, default_language")
+    .select("default_image_model, default_text_model, default_category_preset, default_lighting_preset, custom_system_prompt, default_language, free_generations_used")
     .eq("id", user.id)
     .single()
 
