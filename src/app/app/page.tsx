@@ -43,6 +43,7 @@ interface GenerationResult {
   textOutput: PlatformOutput
   prompt: string
   productDescription?: string
+  textModelUsed?: string
   freeUsed: number | null
 }
 
@@ -1082,11 +1083,27 @@ export default function GeneratePage() {
             <div className="bg-white dark:bg-card rounded-xl border border-gray-100 dark:border-border p-4 space-y-2">
               <div className="flex items-center justify-between">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Prompt Used</p>
-                <CopyButton text={result.prompt} />
+                <div className="flex items-center gap-2">
+                  {result.textModelUsed && (
+                    <span className={cn(
+                      "text-[10px] font-medium px-1.5 py-0.5 rounded-full",
+                      result.textModelUsed === "failed"
+                        ? "bg-red-50 text-red-500"
+                        : result.textModelUsed.includes("claude")
+                          ? "bg-orange-50 text-orange-600 dark:bg-orange-950 dark:text-orange-400"
+                          : result.textModelUsed.includes("gemini")
+                            ? "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400"
+                            : "bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-400"
+                    )}>
+                      {result.textModelUsed}
+                    </span>
+                  )}
+                  <CopyButton text={result.prompt} />
+                </div>
               </div>
-              <p className="text-xs text-gray-600 leading-relaxed">{result.prompt}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{result.prompt}</p>
               {result.productDescription && (
-                <p className="text-xs text-blue-600 flex items-center gap-1 mt-1">
+                <p className="text-xs text-blue-600 dark:text-blue-400 flex items-center gap-1 mt-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
                   Product: &ldquo;{result.productDescription}&rdquo;
                 </p>

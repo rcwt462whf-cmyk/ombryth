@@ -372,7 +372,11 @@ JSON structure:
   }
 }
 
-Return ONLY the JSON. No markdown fences, no explanation.${language && language !== "en" ? `\n\nLANGUAGE: Write ALL output in ${LANGUAGE_NAMES[language] ?? language}. Do not mix languages. For hashtags: join multi-word concepts into one word (no spaces, no hyphens) as is standard on social media in that language.` : ""}`
+Return ONLY the JSON. No markdown fences, no explanation.${language && language !== "en" ? `\n\nLANGUAGE RULES (critical):
+- Write ALL output in ${LANGUAGE_NAMES[language] ?? language}. Do not mix languages.
+- Write as a NATIVE SPEAKER who thinks in ${LANGUAGE_NAMES[language] ?? language} — NOT as someone translating from English. Use natural idioms, rhythm and phrasing that a local would actually use on social media.
+- The hook/first line must feel like something a real ${LANGUAGE_NAMES[language] ?? language}-speaking creator would write — punchy, colloquial, not formal.
+- Hashtags: join multi-word concepts into one word, no spaces, no hyphens (e.g. "lakásdekor" not "lakás dekor").` : ""}`
 }
 
 /** Strip spaces from hashtag strings so "#belső tér" → "belsőtér" */
@@ -410,8 +414,8 @@ async function generateTextWithClaude(
   systemPrompt: string
 ): Promise<PlatformOutput> {
   const resp = await anthropic.messages.create({
-    model: "claude-sonnet-4-5",
-    max_tokens: 1200,
+    model: "claude-3-5-sonnet-20241022",
+    max_tokens: 1400,
     messages: [{ role: "user", content: systemPrompt }],
   })
   const raw = resp.content[0]?.type === "text" ? resp.content[0].text : "{}"
@@ -673,23 +677,28 @@ export async function POST(request: Request) {
     // (finalPrompt may be a Seedream multi-image instruction that Claude can't write captions from)
     const textSystemPrompt = buildTextSystemPrompt(captionContext, config.platforms, customSystemPrompt, config.destinationContext ?? null, config.language ?? null, productDescription)
     let textOutput: PlatformOutput = {}
+    let textModelUsed: string = config.textModel
 
     try {
       if (config.textModel === "gpt4o") {
         if (!keyMap.openai) throw new Error("OpenAI API key not configured. Add it in Settings.")
         const openai = new OpenAI({ apiKey: keyMap.openai })
         textOutput = await generateTextWithOpenAI(openai, textSystemPrompt)
+        textModelUsed = "gpt-4o"
       } else if (config.textModel === "claude") {
         if (!keyMap.anthropic) throw new Error("Anthropic API key not configured. Add it in Settings.")
         const anthropic = new Anthropic({ apiKey: keyMap.anthropic })
         textOutput = await generateTextWithClaude(anthropic, textSystemPrompt)
+        textModelUsed = "claude-3-5-sonnet-20241022"
       } else if (config.textModel === "gemini") {
         if (!keyMap.gemini) throw new Error("Google Gemini API key not configured. Add it in Settings.")
         const genAI = new GoogleGenerativeAI(keyMap.gemini)
         textOutput = await generateTextWithGemini(genAI, textSystemPrompt)
+        textModelUsed = "gemini-1.5-flash"
       }
     } catch (textErr) {
       console.error("[generate] text generation failed:", textErr)
+      textModelUsed = "failed"
       // Non-fatal — return image without text
     }
 
@@ -738,6 +747,7 @@ export async function POST(request: Request) {
       textOutput,
       prompt: finalPrompt,
       productDescription,
+      textModelUsed,
       freeUsed: !isPro ? Math.min(freeUsed + batchCount, 10) : null,
     })
   } catch (err: unknown) {
