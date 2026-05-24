@@ -224,31 +224,35 @@ async function generateWithSeedream(
 // ─── Style analysis (for models that don't support img2img natively) ──────────
 
 async function analyzeStyleReference(
-  openai: OpenAI,
+  anthropic: Anthropic,
   buffer: Buffer,
-  mimeType: string
+  mimeType: string,
+  strength: number
 ): Promise<string> {
   const base64 = buffer.toString("base64")
-  const resp = await openai.chat.completions.create({
-    model: "gpt-4o",
-    max_tokens: 200,
-    messages: [
-      {
-        role: "user",
-        content: [
-          {
-            type: "image_url",
-            image_url: { url: `data:${mimeType};base64,${base64}`, detail: "low" },
-          },
-          {
-            type: "text",
-            text: "Describe this image's visual style in 1-2 sentences for use as an AI image generation style reference. Focus on: color palette, lighting quality, mood, composition, photographic style. Be specific and technical.",
-          },
-        ],
-      },
-    ],
+  const safeType = ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(mimeType)
+    ? (mimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp")
+    : "image/jpeg"
+
+  const instruction = strength >= 70
+    ? "Write a detailed image generation prompt that recreates this scene as closely as possible. Cover: exact lighting (direction, quality, colour temperature), colour palette, mood, composition, materials and textures, camera angle, background details. Write only the prompt, no preamble, max 120 words."
+    : "Describe the lighting, colour palette and overall mood of this image in 2-3 concise sentences for use as a style reference in image generation. No preamble."
+
+  const resp = await anthropic.messages.create({
+    model: "claude-3-5-sonnet-20241022",
+    max_tokens: 300,
+    messages: [{
+      role: "user",
+      content: [
+        {
+          type: "image",
+          source: { type: "base64", media_type: safeType, data: base64 },
+        },
+        { type: "text", text: instruction },
+      ],
+    }],
   })
-  return resp.choices[0]?.message?.content?.trim() ?? ""
+  return resp.content[0]?.type === "text" ? resp.content[0].text.trim() : ""
 }
 
 async function analyzeProductImage(
@@ -477,38 +481,53 @@ export async function POST(request: Request) {
     const styleBuffer = styleFile ? Buffer.from(await styleFile.arrayBuffer()) : null
     const productBuffer = productFile ? Buffer.from(await productFile.arrayBuffer()) : null
 
-    // Vision analysis (requires OpenAI key for all models to analyze references)
+    // Vision analysis
     let productDescription: string | undefined
     let styleDescription: string | undefined
+    const styleStrength = config.styleReferenceStrength ?? 60
 
-    if (keyMap.openai && (productBuffer || styleBuffer)) {
+    // Product analysis — needs OpenAI
+    if (keyMap.openai && productBuffer) {
       const openai = new OpenAI({ apiKey: keyMap.openai })
-
-      const [productDesc, styleDesc] = await Promise.all([
-        productBuffer
-          ? analyzeProductImage(openai, productBuffer, productFile?.type ?? "image/jpeg").catch(() => undefined)
-          : Promise.resolve(undefined),
-        styleBuffer && (config.imageModel === "dalle3" || config.imageModel === "seedream")
-          ? analyzeStyleReference(openai, styleBuffer, styleFile?.type ?? "image/jpeg").catch(() => undefined)
-          : Promise.resolve(undefined),
-      ])
-
-      productDescription = productDesc
-      styleDescription = styleDesc
+      productDescription = await analyzeProductImage(openai, productBuffer, productFile?.type ?? "image/jpeg").catch(() => undefined)
     }
 
-    // Build prompt — inject style description for models without native img2img
-    let finalPrompt = buildPrompt(
-      config.niche ?? config.categoryPreset ?? "home-decor",
-      config.lightingPreset,
-      config.customPrompt,
-      productDescription,
-      config.aspectRatio,
-      config.stylePreset ?? "minimalist"
-    )
+    // Style analysis — use Claude if available, no OpenAI required
+    if (styleBuffer && (config.imageModel === "dalle3" || config.imageModel === "seedream")) {
+      if (keyMap.anthropic) {
+        const anthropic = new Anthropic({ apiKey: keyMap.anthropic })
+        styleDescription = await analyzeStyleReference(anthropic, styleBuffer, styleFile?.type ?? "image/jpeg", styleStrength).catch(() => undefined)
+      } else if (keyMap.openai) {
+        // Fallback to OpenAI if no Claude key
+        const openai = new OpenAI({ apiKey: keyMap.openai })
+        const resp = await openai.chat.completions.create({
+          model: "gpt-4o", max_tokens: 200,
+          messages: [{ role: "user", content: [
+            { type: "image_url", image_url: { url: `data:${styleFile?.type ?? "image/jpeg"};base64,${styleBuffer.toString("base64")}`, detail: "low" } },
+            { type: "text", text: "Describe this image's lighting, colour palette, mood and composition in 2-3 sentences for image generation." },
+          ]}],
+        }).catch(() => null)
+        styleDescription = resp?.choices[0]?.message?.content?.trim()
+      }
+    }
 
-    if (styleDescription) {
-      finalPrompt += `. Style: ${styleDescription}`
+    // Build prompt — high influence: Claude's scene description leads; low: niche preset leads
+    let finalPrompt: string
+    if (styleDescription && styleStrength >= 70) {
+      // Claude's description IS the main prompt — product integrated naturally
+      finalPrompt = styleDescription
+      if (productDescription) finalPrompt += `. The scene features ${productDescription}`
+      if (config.customPrompt) finalPrompt += `. ${config.customPrompt}`
+    } else {
+      finalPrompt = buildPrompt(
+        config.niche ?? config.categoryPreset ?? "home-decor",
+        config.lightingPreset,
+        config.customPrompt,
+        productDescription,
+        config.aspectRatio,
+        config.stylePreset ?? "minimalist"
+      )
+      if (styleDescription) finalPrompt += `. Lighting and atmosphere inspired by: ${styleDescription}`
     }
 
     // Generate images (batch or single)
