@@ -171,13 +171,13 @@ async function generateWithSeedream(
   // BytePlus Ark API (OpenAI-compatible)
   // BytePlus Seedream uses named size presets
   const sizeMap: Record<string, string> = {
-    "1:1": "2K",
+    "1:1": "4K",
     "2:3": "2:3",
     "16:9": "16:9",
     "9:16": "9:16",
     "4:5": "4:5",
   }
-  const size = sizeMap[aspectRatio] ?? "2K"
+  const size = sizeMap[aspectRatio] ?? "4K"
 
   const resp = await fetch(
     "https://ark.ap-southeast.bytepluses.com/api/v3/images/generations",
