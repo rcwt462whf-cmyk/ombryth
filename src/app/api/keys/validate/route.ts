@@ -49,8 +49,9 @@ export async function POST(request: Request) {
           }),
           signal,
         })
-        // 200 = success, 529 = overloaded (still a valid key)
-        if (res.ok || res.status === 529) return NextResponse.json({ valid: true })
+        // 200 = success, 529 = overloaded, 400 = billing/limit issue — all mean the key itself is valid
+        // Only 401 means the key is actually wrong
+        if (res.status !== 401) return NextResponse.json({ valid: true })
         const body = await res.json().catch(() => ({}))
         return NextResponse.json({ valid: false, error: body?.error?.message ?? "Invalid key" })
       }
