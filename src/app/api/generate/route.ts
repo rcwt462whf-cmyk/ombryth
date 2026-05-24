@@ -286,7 +286,7 @@ async function analyzeProductImage(
 // ─── Text generation ──────────────────────────────────────────────────────────
 
 const DEFAULT_SYSTEM_PERSONA =
-  "You are a social media content expert specialising in affiliate marketing for interior, home decor, and lifestyle brands. Your mission is to craft captions, hashtags, and descriptions that feel authentic and aspirational, drive traffic, and convert browsers into buyers. Always focus on benefits and lifestyle over product features. Include a clear call-to-action where appropriate."
+  "You are a top-performing social media content creator for lifestyle and home decor affiliate marketing. Your copy style is punchy, hook-first, and conversational — never corporate or repetitive. Every caption opens with a scroll-stopping first line (a bold claim, a question, or an unexpected tip). Use short sentences. Use numbered lists or line breaks for tips. Add 1-2 relevant emojis naturally. End with a clear CTA ('Link in bio', 'Save this', 'Try it tonight' etc.). Never repeat the same idea twice in one caption. Write like a real person, not a brand."
 
 const LANGUAGE_NAMES: Record<string, string> = {
   "en": "English", "es": "Spanish", "pt-BR": "Brazilian Portuguese",
@@ -309,40 +309,68 @@ function buildTextSystemPrompt(
 
   return `${persona}
 
-Generate engaging platform content based on this image prompt: "${prompt}".
+Generate platform content based on this image prompt: "${prompt}".
 ${destinationBlock}
+CAPTION RULES (apply to all platforms):
+- First sentence must be the hook — a bold statement, unexpected tip, or intriguing question. Make the reader stop scrolling.
+- Short sentences. Use line breaks or numbered steps for tips (e.g. "1. ... 2. ... 3. ...").
+- No filler phrases like "Discover", "Transform your space", "Find the perfect" — these are banned.
+- Never repeat the same idea twice in one caption.
+- End with a concrete CTA: "Link in bio", "Save for later", "Try it tonight", etc.
+- 1-2 relevant emojis max, placed naturally.
+
+HASHTAG RULES (critical):
+- NEVER include spaces inside a hashtag. Multi-word tags must be written as one word (e.g. "lakásvilágítás" not "lakás világítás", "homedecor" not "home decor").
+- Mix niche-specific and broad tags.
+- Do NOT prefix with # — return only the word/words joined together.
+
 Return ONLY a valid JSON object. Include ONLY the platforms listed: ${platforms.join(", ")}.
 
 JSON structure:
 {
   "pinterest": {
-    "title": "max 100 chars, keyword-rich, no hashtags",
-    "description": "max 500 chars, engaging, includes keywords",
-    "altText": "max 500 chars, descriptive, keyword-rich",
-    "caption": "150-300 chars, engaging, lifestyle-oriented",
-    "hashtags": ["array", "of", "20", "strings", "WITHOUT", "the", "hash", "symbol", "mix of niche and broad"]
+    "title": "max 100 chars — curiosity/benefit hook, NOT a keyword list, no hashtags",
+    "description": "2-4 punchy sentences. Hook first. Relevant keywords woven in naturally. Ends with CTA.",
+    "altText": "Concise visual description of the image for accessibility",
+    "caption": "2-4 punchy sentences. Hook first. Ends with CTA.",
+    "hashtags": ["array", "of", "20", "singleword", "or", "joinedwords", "strings", "NO", "hash", "symbol"]
   },
   "instagram": {
-    "caption": "150-300 chars, engaging, ends with a question or CTA",
-    "altText": "descriptive alt text for accessibility",
-    "hashtags": ["array", "of", "30", "strings", "WITHOUT", "the", "hash", "symbol", "mix niche and broad"]
+    "caption": "Hook first line. Short sentences or numbered tip list. Ends with CTA. 150-300 chars total.",
+    "altText": "Concise visual description of the image for accessibility",
+    "hashtags": ["array", "of", "30", "singleword", "or", "joinedwords", "strings", "NO", "hash", "symbol"]
   },
   "facebook": {
-    "caption": "100-250 chars, conversational and engaging, includes a soft CTA",
-    "altText": "descriptive alt text for accessibility",
-    "hashtags": ["array", "of", "5", "strings", "WITHOUT", "the", "hash", "symbol", "broad reach"]
+    "caption": "Hook first. Conversational. 1-3 short sentences. Soft CTA at end. 100-200 chars.",
+    "altText": "Concise visual description of the image for accessibility",
+    "hashtags": ["array", "of", "5", "broad", "singleword", "strings", "NO", "hash", "symbol"]
   },
   "google-ads": {
-    "headline1": "max 30 chars, main keyword or product benefit",
-    "headline2": "max 30 chars, supporting benefit or offer",
-    "headline3": "max 30 chars, CTA or brand",
-    "description1": "max 90 chars, feature-focused, includes keyword",
+    "headline1": "max 30 chars, benefit or product",
+    "headline2": "max 30 chars, supporting benefit",
+    "headline3": "max 30 chars, CTA",
+    "description1": "max 90 chars, feature-focused with keyword",
     "description2": "max 90 chars, benefit-focused, ends with CTA",
-    "altText": "descriptive alt text for the image ad"
+    "altText": "Concise visual description of the image for accessibility"
   }
 }
 
-Return ONLY the JSON. No markdown fences, no explanation.${language && language !== "en" ? `\n\nIMPORTANT: Write ALL output — titles, captions, descriptions, hashtags — in ${LANGUAGE_NAMES[language] ?? language}. Do not mix languages.` : ""}`
+Return ONLY the JSON. No markdown fences, no explanation.${language && language !== "en" ? `\n\nLANGUAGE: Write ALL output in ${LANGUAGE_NAMES[language] ?? language}. Do not mix languages. For hashtags: join multi-word concepts into one word (no spaces, no hyphens) as is standard on social media in that language.` : ""}`
+}
+
+/** Strip spaces from hashtag strings so "#belső tér" → "belsőtér" */
+function sanitizeHashtags(output: PlatformOutput): PlatformOutput {
+  const cleanTags = (tags: unknown): string[] => {
+    if (!Array.isArray(tags)) return []
+    return tags.map((t) =>
+      typeof t === "string" ? t.replace(/\s+/g, "").replace(/^#+/, "") : ""
+    ).filter(Boolean)
+  }
+  const result = { ...output }
+  if (result.pinterest?.hashtags) result.pinterest = { ...result.pinterest, hashtags: cleanTags(result.pinterest.hashtags) }
+  if (result.instagram?.hashtags) result.instagram = { ...result.instagram, hashtags: cleanTags(result.instagram.hashtags) }
+  if (result.facebook?.hashtags) result.facebook = { ...result.facebook, hashtags: cleanTags(result.facebook.hashtags) }
+  return result
 }
 
 async function generateTextWithOpenAI(
@@ -357,7 +385,7 @@ async function generateTextWithOpenAI(
     response_format: { type: "json_object" },
   })
   const raw = resp.choices[0]?.message?.content ?? "{}"
-  return JSON.parse(raw)
+  return sanitizeHashtags(JSON.parse(raw))
 }
 
 async function generateTextWithClaude(
@@ -370,7 +398,7 @@ async function generateTextWithClaude(
     messages: [{ role: "user", content: systemPrompt }],
   })
   const raw = resp.content[0]?.type === "text" ? resp.content[0].text : "{}"
-  return JSON.parse(raw.replace(/```json\n?|\n?```/g, "").trim())
+  return sanitizeHashtags(JSON.parse(raw.replace(/```json\n?|\n?```/g, "").trim()))
 }
 
 async function generateTextWithGemini(
@@ -383,7 +411,7 @@ async function generateTextWithGemini(
   })
   const resp = await model.generateContent(systemPrompt)
   const raw = resp.response.text()
-  return JSON.parse(raw.replace(/```json\n?|\n?```/g, "").trim())
+  return sanitizeHashtags(JSON.parse(raw.replace(/```json\n?|\n?```/g, "").trim()))
 }
 
 // ─── Single image generation pipeline ────────────────────────────────────────
