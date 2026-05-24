@@ -24,8 +24,12 @@ export async function POST(request: Request) {
     let html: string
     try {
       const resp = await fetch(url, {
-        signal: AbortSignal.timeout(5000),
-        headers: { "User-Agent": "Mozilla/5.0" },
+        signal: AbortSignal.timeout(8000),
+        headers: {
+          "User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+          "Accept": "text/html,application/xhtml+xml",
+          "Accept-Language": "en-US,en;q=0.9",
+        },
       })
 
       if (!resp.ok) {
@@ -37,16 +41,53 @@ export async function POST(request: Request) {
       return NextResponse.json({ title: "", description: "", url, error: "Could not fetch page" }, { status: 200 })
     }
 
-    // Extract <title>
-    const titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i)
-    const title = titleMatch ? titleMatch[1].trim() : ""
+    const getMeta = (name: string): string => {
+      const m = html.match(new RegExp(`<meta[^>]+(?:name|property)=["']${name}["'][^>]+content=["']([^"']{1,500})["']`, "i"))
+        ?? html.match(new RegExp(`<meta[^>]+content=["']([^"']{1,500})["'][^>]+(?:name|property)=["']${name}["']`, "i"))
+      return m ? m[1].trim() : ""
+    }
 
-    // Extract <meta name="description" content="...">
-    const descMatch = html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["']/i)
-      ?? html.match(/<meta[^>]+content=["']([^"']*)["'][^>]+name=["']description["']/i)
-    const description = descMatch ? descMatch[1].trim() : ""
+    const getTag = (tag: string): string => {
+      const m = html.match(new RegExp(`<${tag}[^>]*>([^<]{1,300})<\/${tag}>`, "i"))
+      return m ? m[1].replace(/\s+/g, " ").trim() : ""
+    }
 
-    return NextResponse.json({ title, description, url })
+    // Title: prefer og:title or article-specific h1 over generic <title>
+    const ogTitle = getMeta("og:title")
+    const h1 = getTag("h1")
+    const pageTitle = getTag("title")
+    const title = ogTitle || h1 || pageTitle
+
+    // Description: prefer og:description, then pull first meaty paragraph from article body
+    const ogDesc = getMeta("og:description")
+    const metaDesc = getMeta("description")
+
+    // Extract real article content — find paragraphs with actual substance
+    let articleContent = ""
+    if (!ogDesc || ogDesc.length < 60) {
+      const paragraphs = Array.from(html.matchAll(/<p[^>]*>([^<]{80,600})<\/p>/gi))
+        .map(m => m[1].replace(/\s+/g, " ").trim())
+        .filter(p => !p.includes("cookie") && !p.includes("privacy") && !p.includes("©"))
+        .slice(0, 3)
+      if (paragraphs.length > 0) {
+        articleContent = paragraphs.join(" ").slice(0, 400)
+      }
+    }
+
+    // Also extract h2 headings as topic keywords
+    const h2s = Array.from(html.matchAll(/<h2[^>]*>([^<]{5,100})<\/h2>/gi))
+      .map(m => m[1].replace(/\s+/g, " ").trim())
+      .slice(0, 5)
+    const h2Keywords = h2s.join(", ")
+
+    const description = ogDesc || articleContent || metaDesc
+    const keywords = h2Keywords ? `Topics: ${h2Keywords}` : ""
+
+    return NextResponse.json({
+      title,
+      description: [description, keywords].filter(Boolean).join(" | ").slice(0, 600),
+      url,
+    })
   } catch (err) {
     console.error("[/api/scrape-context]", err)
     return NextResponse.json({ title: "", description: "", url: "", error: "Could not fetch page" }, { status: 200 })
