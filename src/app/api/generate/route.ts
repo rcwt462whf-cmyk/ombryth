@@ -311,7 +311,8 @@ function buildTextSystemPrompt(
   platforms: string[],
   customPersona?: string | null,
   destinationContext?: { title: string; description: string } | null,
-  language?: string | null
+  language?: string | null,
+  productDescription?: string
 ): string {
   const persona = customPersona?.trim() || DEFAULT_SYSTEM_PERSONA
 
@@ -319,10 +320,14 @@ function buildTextSystemPrompt(
     ? `\nThe content being promoted links to a page titled "${destinationContext.title}" described as: "${destinationContext.description}". Naturally weave relevant keywords from this context into your captions and descriptions to align with the destination. Do not mention the URL directly.\n`
     : ""
 
+  const productBlock = productDescription
+    ? `\nThe featured product is: ${productDescription}. Make sure the captions clearly reference this specific product — its look, style and use — rather than describing the scene generically.\n`
+    : ""
+
   return `${persona}
 
-Generate platform content based on this image prompt: "${prompt}".
-${destinationBlock}
+Generate platform content for this lifestyle image: "${prompt}".
+${productBlock}${destinationBlock}
 CAPTION RULES (apply to all platforms):
 - First sentence must be the hook — a bold statement, unexpected tip, or intriguing question. Make the reader stop scrolling.
 - Short sentences. Use line breaks or numbered steps for tips (e.g. "1. ... 2. ... 3. ...").
@@ -624,10 +629,17 @@ export async function POST(request: Request) {
       if (styleDescription) finalPrompt += `. Lighting and atmosphere: ${styleDescription}`
     }
 
-    // Seedream with both images: override prompt to reference image slots explicitly
+    // captionContext is what Claude/GPT-4o uses to write captions — always rich and descriptive
+    // For Seedream multi-image we override the IMAGE prompt to use array syntax,
+    // but keep captionContext pointing at the human-readable scene+product description
+    const captionContext = finalPrompt
+
+    // Seedream with both images: override IMAGE prompt to reference image slots explicitly
+    // but preserve captionContext so captions are still written from rich product/scene description
     if (config.imageModel === "seedream" && styleBuffer && productBuffer) {
       const customAddition = config.customPrompt ? ` ${config.customPrompt}.` : ""
       finalPrompt = `Place the product shown in image 2 as the prominent focal point of a lifestyle scene that matches the mood, lighting, colour palette and atmosphere of image 1.${customAddition} The product must be clearly visible and true to its original design and colours. Professional lifestyle photography.`
+      // captionContext stays as the rich text description built above
     } else if (config.imageModel === "seedream" && productBuffer && !styleBuffer) {
       const customAddition = config.customPrompt ? ` ${config.customPrompt}.` : ""
       finalPrompt = `${finalPrompt}${customAddition} The product shown in the reference image must be clearly visible and true to its original design.`
@@ -657,8 +669,9 @@ export async function POST(request: Request) {
     // Base64 for immediate display
     const imagesBase64 = cleanBuffers.map((buf) => buf.toString("base64"))
 
-    // Generate text content
-    const textSystemPrompt = buildTextSystemPrompt(finalPrompt, config.platforms, customSystemPrompt, config.destinationContext ?? null, config.language ?? null)
+    // Generate text content — use captionContext (rich scene+product description), not finalPrompt
+    // (finalPrompt may be a Seedream multi-image instruction that Claude can't write captions from)
+    const textSystemPrompt = buildTextSystemPrompt(captionContext, config.platforms, customSystemPrompt, config.destinationContext ?? null, config.language ?? null, productDescription)
     let textOutput: PlatformOutput = {}
 
     try {
