@@ -170,13 +170,13 @@ async function generateWithSeedream(
 ): Promise<Buffer> {
   // BytePlus Ark API (OpenAI-compatible)
   const sizeMap: Record<string, string> = {
-    "1:1": "1024x1024",
-    "2:3": "768x1152",
-    "16:9": "1344x768",
-    "9:16": "768x1344",
-    "4:5": "896x1120",
+    "1:1": "1920x1920",
+    "2:3": "1568x2352",
+    "16:9": "2560x1440",
+    "9:16": "1440x2560",
+    "4:5": "1728x2160",
   }
-  const size = sizeMap[aspectRatio] ?? "1024x1024"
+  const size = sizeMap[aspectRatio] ?? "1920x1920"
 
   const resp = await fetch(
     "https://ark.ap-southeast.bytepluses.com/api/v3/images/generations",
