@@ -267,15 +267,22 @@ async function analyzeStyleReference(
   return resp.content[0]?.type === "text" ? resp.content[0].text.trim() : ""
 }
 
+interface ProductAnalysis {
+  objectType: string       // e.g. "floor vase", "table lamp", "throw pillow"
+  placement: string        // e.g. "standing on the floor beside the sofa"
+  realWorldHeight: string  // e.g. "~60cm", "~1.2m"
+  description: string      // precise visual description for image gen
+}
+
 async function analyzeProductImage(
   openai: OpenAI,
   buffer: Buffer,
   mimeType: string
-): Promise<string> {
+): Promise<ProductAnalysis> {
   const base64 = buffer.toString("base64")
   const resp = await openai.chat.completions.create({
     model: "gpt-4o",
-    max_tokens: 280,
+    max_tokens: 400,
     messages: [
       {
         role: "user",
@@ -286,19 +293,67 @@ async function analyzeProductImage(
           },
           {
             type: "text",
-            text: "Describe this product in precise detail for an AI image generation prompt. Cover: exact shape, all colours (be specific — e.g. 'terracotta red, steel blue, warm beige'), surface texture and finish (matte, glossy, fabric etc.), pattern or design motif if any, material, and approximate size/scale. Be specific enough that an image model could recreate it accurately. Write 2-3 sentences. No brand names.",
+            text: `Analyze this product and return ONLY a valid JSON object with these exact fields:
+{
+  "objectType": "specific object type, e.g. 'tall floor vase', 'table lamp', 'throw pillow', 'ceramic mug'",
+  "placement": "where this object would naturally sit in an interior scene, e.g. 'standing on the floor beside a sofa', 'placed on a coffee table', 'resting on a shelf', 'sitting on a dining table'",
+  "realWorldHeight": "approximate real-world height, e.g. '~45cm', '~1.2m', '~15cm'",
+  "description": "precise visual description for image generation — exact shape, all colours (specific names like 'terracotta red', 'steel blue'), surface finish (glossy/matte/fabric), pattern or motif, material. 2-3 sentences. No brand names."
+}
+Return ONLY the JSON, no markdown.`,
           },
         ],
       },
     ],
   })
-  return resp.choices[0]?.message?.content?.trim() ?? ""
+  const raw = resp.choices[0]?.message?.content?.trim() ?? "{}"
+  try {
+    return JSON.parse(raw.replace(/```json\n?|\n?```/g, "").trim()) as ProductAnalysis
+  } catch {
+    return {
+      objectType: "decorative object",
+      placement: "placed on a surface in the room",
+      realWorldHeight: "~30cm",
+      description: raw,
+    }
+  }
 }
 
 // ─── Text generation ──────────────────────────────────────────────────────────
 
 const DEFAULT_SYSTEM_PERSONA =
   "You are a top-performing social media content creator for lifestyle and home decor affiliate marketing. Your copy style is punchy, hook-first, and conversational — never corporate or repetitive. Every caption opens with a scroll-stopping first line (a bold claim, a question, or an unexpected tip). Use short sentences. Use numbered lists or line breaks for tips. Add 1-2 relevant emojis naturally. End with a clear CTA ('Link in bio', 'Save this', 'Try it tonight' etc.). Never repeat the same idea twice in one caption. Write like a real person, not a brand."
+
+/** Short instruction for Seedream's explicit image-slot prompt */
+function prominenceStrengthToInstruction(strength: number): string {
+  if (strength < 30) return "The product should be subtly visible, not the main focus. "
+  if (strength < 55) return "The product should be clearly visible at a natural scale. "
+  if (strength < 75) return "The product should be prominent and draw the eye. "
+  return "The product should be the clear hero of the shot, taking up the center. "
+}
+
+/** Translate prominence % into prompt framing language with realistic scale anchor */
+function prominenceToPromptPhrase(
+  strength: number,
+  product: ProductAnalysis
+): string {
+  const { objectType, placement, realWorldHeight } = product
+  const scale = `at its true real-world size (approximately ${realWorldHeight})`
+
+  if (strength < 25) {
+    return `A ${objectType} (${realWorldHeight} tall) ${placement} — visible but not the main focus, ${scale}, clearly part of the scene without dominating it`
+  }
+  if (strength < 45) {
+    return `A ${objectType} ${placement}, clearly visible in the scene at realistic scale (${realWorldHeight}) — proportionate to the surrounding furniture`
+  }
+  if (strength < 65) {
+    return `A ${objectType} ${placement}, prominently displayed at true scale (${realWorldHeight}), the eye is drawn to it but the room is still visible`
+  }
+  if (strength < 80) {
+    return `A ${objectType} ${placement} as the main subject, ${scale}, taking up roughly a third of the frame with the room as backdrop`
+  }
+  return `A ${objectType} ${placement} filling the center of the frame, ${scale}, hero product shot with the room providing atmosphere in the background`
+}
 
 const LANGUAGE_NAMES: Record<string, string> = {
   "en": "English", "es": "Spanish", "pt-BR": "Brazilian Portuguese",
@@ -564,14 +619,15 @@ export async function POST(request: Request) {
     const productBuffer = productFile ? Buffer.from(await productFile.arrayBuffer()) : null
 
     // Vision analysis
-    let productDescription: string | undefined
+    let product: ProductAnalysis | undefined
     let styleDescription: string | undefined
     const styleStrength = config.styleReferenceStrength ?? 60
+    const productStrength = config.productReferenceStrength ?? 50
 
-    // Product analysis — needs OpenAI
+    // Product analysis — GPT-4o identifies object type, natural placement, real-world size
     if (keyMap.openai && productBuffer) {
       const openai = new OpenAI({ apiKey: keyMap.openai })
-      productDescription = await analyzeProductImage(openai, productBuffer, productFile?.type ?? "image/jpeg").catch(() => undefined)
+      product = await analyzeProductImage(openai, productBuffer, productFile?.type ?? "image/jpeg").catch(() => undefined)
     }
 
     // Style analysis — use Claude if available, no OpenAI required
@@ -580,7 +636,6 @@ export async function POST(request: Request) {
         const anthropic = new Anthropic({ apiKey: keyMap.anthropic })
         styleDescription = await analyzeStyleReference(anthropic, styleBuffer, styleFile?.type ?? "image/jpeg", styleStrength).catch(() => undefined)
       } else if (keyMap.openai) {
-        // Fallback to OpenAI if no Claude key
         const openai = new OpenAI({ apiKey: keyMap.openai })
         const resp = await openai.chat.completions.create({
           model: "gpt-4o", max_tokens: 200,
@@ -593,16 +648,18 @@ export async function POST(request: Request) {
       }
     }
 
-    // Build prompt — product is always the hero when provided
+    // Build the prominence-aware product phrase (size-anchored, placement-aware)
+    const productPhrase = product
+      ? prominenceToPromptPhrase(productStrength, product)
+      : undefined
+
+    // Build prompt
     let finalPrompt: string
     if (styleDescription && styleStrength >= 70) {
-      if (productDescription) {
-        // Product leads — scene from style ref is the backdrop
-        finalPrompt = `${productDescription}, prominently displayed as the hero subject of the scene`
-        finalPrompt += `. Setting and atmosphere: ${styleDescription}`
+      if (productPhrase) {
+        finalPrompt = `${productPhrase}. Setting and atmosphere: ${styleDescription}`
         if (config.customPrompt) finalPrompt += `. ${config.customPrompt}`
       } else {
-        // No product — style description drives the whole prompt
         finalPrompt = styleDescription
         if (config.customPrompt) finalPrompt += `. ${config.customPrompt}`
       }
@@ -616,14 +673,13 @@ export async function POST(request: Request) {
           config.niche ?? config.categoryPreset ?? "home-decor",
           hasLighting ? config.lightingPreset! : "morning",
           config.customPrompt,
-          productDescription,
+          productPhrase,
           config.aspectRatio,
           hasStyle ? config.stylePreset : undefined
         )
       } else {
-        // Niche is off — build a minimal prompt from just custom text + product + lighting
         const parts: string[] = []
-        if (productDescription) parts.push(`${productDescription}, as the main focal point`)
+        if (productPhrase) parts.push(productPhrase)
         if (config.customPrompt) parts.push(config.customPrompt)
         if (hasLighting && LIGHTING_PRESETS[config.lightingPreset!]) parts.push(LIGHTING_PRESETS[config.lightingPreset!].append)
         if (config.aspectRatio === "2:3") parts.push("portrait orientation")
@@ -633,20 +689,16 @@ export async function POST(request: Request) {
       if (styleDescription) finalPrompt += `. Lighting and atmosphere: ${styleDescription}`
     }
 
-    // captionContext is what Claude/GPT-4o uses to write captions — always rich and descriptive
-    // For Seedream multi-image we override the IMAGE prompt to use array syntax,
-    // but keep captionContext pointing at the human-readable scene+product description
+    // captionContext: always rich/human-readable — used for caption writing
+    // For Seedream multi-image, finalPrompt gets overridden with image-slot instructions
     const captionContext = finalPrompt
 
-    // Seedream with both images: override IMAGE prompt to reference image slots explicitly
-    // but preserve captionContext so captions are still written from rich product/scene description
-    if (config.imageModel === "seedream" && styleBuffer && productBuffer) {
+    // Seedream multi-image: override finalPrompt to use image array slots with explicit scale
+    if (config.imageModel === "seedream" && styleBuffer && productBuffer && product) {
       const customAddition = config.customPrompt ? ` ${config.customPrompt}.` : ""
-      finalPrompt = `Place the product shown in image 2 as the prominent focal point of a lifestyle scene that matches the mood, lighting, colour palette and atmosphere of image 1.${customAddition} The product must be clearly visible and true to its original design and colours. Professional lifestyle photography.`
-      // captionContext stays as the rich text description built above
-    } else if (config.imageModel === "seedream" && productBuffer && !styleBuffer) {
-      const customAddition = config.customPrompt ? ` ${config.customPrompt}.` : ""
-      finalPrompt = `${finalPrompt}${customAddition} The product shown in the reference image must be clearly visible and true to its original design.`
+      finalPrompt = `Take the ${product.objectType} from image 2 and ${product.placement} in the interior scene from image 1. The ${product.objectType} must appear at its true real-world size (approximately ${product.realWorldHeight}) — do NOT scale it up beyond realistic proportions. Keep the ${product.objectType}'s colours and design exactly as shown. ${prominenceStrengthToInstruction(productStrength)}${customAddition} Professional lifestyle interior photography.`
+    } else if (config.imageModel === "seedream" && productBuffer && product && !styleBuffer) {
+      finalPrompt = `${productPhrase ?? product.description}. ${product.objectType} shown at realistic scale. The product colours and design must match the reference exactly.`
     }
 
     // Generate images (batch or single)
@@ -675,7 +727,7 @@ export async function POST(request: Request) {
 
     // Generate text content — use captionContext (rich scene+product description), not finalPrompt
     // (finalPrompt may be a Seedream multi-image instruction that Claude can't write captions from)
-    const textSystemPrompt = buildTextSystemPrompt(captionContext, config.platforms, customSystemPrompt, config.destinationContext ?? null, config.language ?? null, productDescription)
+    const textSystemPrompt = buildTextSystemPrompt(captionContext, config.platforms, customSystemPrompt, config.destinationContext ?? null, config.language ?? null, product?.description)
     let textOutput: PlatformOutput = {}
     let textModelUsed: string = config.textModel
 
@@ -716,7 +768,7 @@ export async function POST(request: Request) {
           status: "completed",
           has_style_reference: !!styleFile,
           has_product_reference: !!productFile,
-          product_description: productDescription ?? null,
+          product_description: product?.description ?? null,
           image_url: imageUrl ?? null,
         })
       )
@@ -746,7 +798,7 @@ export async function POST(request: Request) {
       imageUrls: imageUrls.filter(Boolean),
       textOutput,
       prompt: finalPrompt,
-      productDescription,
+      productDescription: product?.description,
       textModelUsed,
       freeUsed: !isPro ? Math.min(freeUsed + batchCount, 10) : null,
     })
