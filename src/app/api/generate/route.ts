@@ -168,10 +168,9 @@ async function generateWithSeedream(
   prompt: string,
   aspectRatio: string,
   styleBuffer?: Buffer | null,
-  styleStrength?: number
+  styleStrength?: number,
+  productBuffer?: Buffer | null
 ): Promise<Buffer> {
-  // BytePlus Ark API (OpenAI-compatible)
-  // BytePlus Seedream uses named size presets
   const sizeMap: Record<string, string> = {
     "1:1": "4K",
     "2:3": "3328x4992",
@@ -187,13 +186,26 @@ async function generateWithSeedream(
     response_format: "url",
     size,
     watermark: false,
+    sequential_image_generation: "disabled",
   }
 
-  // Pass style reference image natively if provided
-  if (styleBuffer) {
-    const base64 = styleBuffer.toString("base64")
-    body.image = `data:image/jpeg;base64,${base64}`
+  if (styleBuffer && productBuffer) {
+    // Multi-image: style ref (image 1) + product (image 2)
+    // Seedream can natively combine both — product placement is pixel-accurate
+    body.image = [
+      `data:image/jpeg;base64,${styleBuffer.toString("base64")}`,
+      `data:image/jpeg;base64,${productBuffer.toString("base64")}`,
+    ]
+    // image_weight applies to all reference images
     body.image_weight = Math.round((styleStrength ?? 60) / 100 * 100) / 100
+  } else if (styleBuffer) {
+    // Style reference only
+    body.image = `data:image/jpeg;base64,${styleBuffer.toString("base64")}`
+    body.image_weight = Math.round((styleStrength ?? 60) / 100 * 100) / 100
+  } else if (productBuffer) {
+    // Product only — use it as the sole image reference
+    body.image = `data:image/jpeg;base64,${productBuffer.toString("base64")}`
+    body.image_weight = 0.85
   }
 
   const resp = await fetch(
@@ -329,7 +341,7 @@ Return ONLY a valid JSON object. Include ONLY the platforms listed: ${platforms.
 JSON structure:
 {
   "pinterest": {
-    "title": "max 100 chars — curiosity/benefit hook, NOT a keyword list, no hashtags",
+    "title": "max 100 chars — must be a curiosity gap or benefit hook (e.g. 'The curtain trick nobody tells you — try it tonight'). NOT a keyword list. No hashtags. No generic openers like 'Discover' or 'Explore'.",
     "description": "2-4 punchy sentences. Hook first. Relevant keywords woven in naturally. Ends with CTA.",
     "altText": "Concise visual description of the image for accessibility",
     "caption": "2-4 punchy sentences. Hook first. Ends with CTA.",
@@ -421,7 +433,8 @@ async function generateOneImage(
   keyMap: Record<string, string>,
   prompt: string,
   config: GenerateRequest,
-  styleBuffer: Buffer | null
+  styleBuffer: Buffer | null,
+  productBuffer: Buffer | null
 ): Promise<Buffer> {
   switch (imageModel) {
     case "dalle3": {
@@ -441,7 +454,8 @@ async function generateOneImage(
     }
     case "seedream": {
       if (!keyMap.byteplus) throw new Error("BytePlus API key not configured. Add it in Settings.")
-      return generateWithSeedream(keyMap.byteplus, prompt, config.aspectRatio, styleBuffer, config.styleReferenceStrength ?? 60)
+      // Seedream supports native multi-image: pass both style + product directly
+      return generateWithSeedream(keyMap.byteplus, prompt, config.aspectRatio, styleBuffer, config.styleReferenceStrength ?? 60, productBuffer)
     }
     default:
       throw new Error(`Unknown image model: ${imageModel}`)
@@ -610,12 +624,21 @@ export async function POST(request: Request) {
       if (styleDescription) finalPrompt += `. Lighting and atmosphere: ${styleDescription}`
     }
 
+    // Seedream with both images: override prompt to reference image slots explicitly
+    if (config.imageModel === "seedream" && styleBuffer && productBuffer) {
+      const customAddition = config.customPrompt ? ` ${config.customPrompt}.` : ""
+      finalPrompt = `Place the product shown in image 2 as the prominent focal point of a lifestyle scene that matches the mood, lighting, colour palette and atmosphere of image 1.${customAddition} The product must be clearly visible and true to its original design and colours. Professional lifestyle photography.`
+    } else if (config.imageModel === "seedream" && productBuffer && !styleBuffer) {
+      const customAddition = config.customPrompt ? ` ${config.customPrompt}.` : ""
+      finalPrompt = `${finalPrompt}${customAddition} The product shown in the reference image must be clearly visible and true to its original design.`
+    }
+
     // Generate images (batch or single)
     const batchCount = config.batchMode ? 3 : 1
 
     const imageBuffers = await Promise.all(
       Array.from({ length: batchCount }).map(() =>
-        generateOneImage(config.imageModel, keyMap, finalPrompt, config, styleBuffer)
+        generateOneImage(config.imageModel, keyMap, finalPrompt, config, styleBuffer, productBuffer)
       )
     )
 
