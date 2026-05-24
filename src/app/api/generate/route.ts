@@ -437,7 +437,9 @@ export async function POST(request: Request) {
       .eq("id", user.id)
       .single()
 
-    const isPro = userData?.subscription_status === "active"
+    const ADMIN_EMAILS = ["sz.veres.tamas@gmail.com"]
+    const isAdmin = ADMIN_EMAILS.includes(userData?.email ?? "")
+    const isPro = isAdmin || userData?.subscription_status === "active"
     const freeUsed = userData?.free_generations_used ?? 0
     const customSystemPrompt = userData?.custom_system_prompt ?? null
 

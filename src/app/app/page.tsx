@@ -325,6 +325,9 @@ export default function GeneratePage() {
   const [textModel, setTextModel] = useState<TextModel>("gpt4o")
   const [niche, setNiche] = useState<string>(DEFAULT_NICHE)
   const [stylePreset, setStylePreset] = useState<string>(DEFAULT_STYLE)
+  const [nicheOpen, setNicheOpen] = useState(true)
+  const [styleOpen, setStyleOpen] = useState(true)
+  const [lightingOpen, setLightingOpen] = useState(true)
   const [customNiches, setCustomNiches] = useState<CustomNiche[]>([])
   const [lighting, setLighting] = useState<LightingPreset>("morning")
   const [destUrlOpen, setDestUrlOpen] = useState(false)
@@ -347,6 +350,10 @@ export default function GeneratePage() {
     fetch("/api/prompts").then(r => r.json()).then(d => setSavedPrompts(d.prompts ?? []))
     fetch("/api/user/defaults").then(r => r.json()).then(d => {
       const def = d.defaults ?? {}
+      if (def.default_image_model) setImageModel(def.default_image_model as ImageModel)
+      if (def.default_text_model) setTextModel(def.default_text_model as TextModel)
+      if (def.default_category_preset) setNiche(def.default_category_preset)
+      if (def.default_lighting_preset) setLighting(def.default_lighting_preset as LightingPreset)
       if (def.default_language) setLanguage(def.default_language as Language)
     })
     fetch("/api/niches").then(r => r.ok ? r.json() : { niches: [] }).then(d => setCustomNiches(d.niches ?? []))
@@ -592,8 +599,11 @@ export default function GeneratePage() {
 
           {/* Niche selector */}
           <div className="bg-white dark:bg-card rounded-xl border border-gray-100 dark:border-border p-4 space-y-3">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Niche</p>
-            <div className="flex flex-wrap gap-1.5">
+            <button onClick={() => setNicheOpen(o => !o)} className="flex items-center justify-between w-full">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Niche</p>
+              <ChevronDown className={cn("w-3.5 h-3.5 text-gray-400 transition-transform", nicheOpen && "rotate-180")} />
+            </button>
+            {nicheOpen && <div className="flex flex-wrap gap-1.5">
               {Object.entries(NICHE_PRESETS).map(([key, n]) => (
                 <button
                   key={key}
@@ -622,13 +632,16 @@ export default function GeneratePage() {
                   {customNiche.name}
                 </button>
               ))}
-            </div>
+            </div>}
           </div>
 
           {/* Style preset */}
           <div className="bg-white dark:bg-card rounded-xl border border-gray-100 dark:border-border p-4 space-y-3">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Style</p>
-            <div className="flex flex-wrap gap-1.5">
+            <button onClick={() => setStyleOpen(o => !o)} className="flex items-center justify-between w-full">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Style</p>
+              <ChevronDown className={cn("w-3.5 h-3.5 text-gray-400 transition-transform", styleOpen && "rotate-180")} />
+            </button>
+            {styleOpen && <div className="flex flex-wrap gap-1.5">
               {(() => {
                 const builtIn = NICHE_PRESETS[niche]
                 if (builtIn) {
@@ -663,13 +676,16 @@ export default function GeneratePage() {
                   </button>
                 ))
               })()}
-            </div>
+            </div>}
           </div>
 
           {/* Lighting presets */}
           <div className="bg-white dark:bg-card rounded-xl border border-gray-100 dark:border-border p-4 space-y-3">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Lighting & Camera</p>
-            <div className="grid grid-cols-4 gap-1.5">
+            <button onClick={() => setLightingOpen(o => !o)} className="flex items-center justify-between w-full">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Lighting & Camera</p>
+              <ChevronDown className={cn("w-3.5 h-3.5 text-gray-400 transition-transform", lightingOpen && "rotate-180")} />
+            </button>
+            {lightingOpen && <div className="grid grid-cols-4 gap-1.5">
               {LIGHTING_KEYS.map((key) => {
                 const preset = LIGHTING_PRESETS[key]
                 return (
@@ -689,7 +705,7 @@ export default function GeneratePage() {
                   </button>
                 )
               })}
-            </div>
+            </div>}
           </div>
 
           {/* Custom prompt — collapsible */}
