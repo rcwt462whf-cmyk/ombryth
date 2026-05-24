@@ -352,8 +352,10 @@ export default function GeneratePage() {
       const def = d.defaults ?? {}
       if (def.default_image_model) setImageModel(def.default_image_model as ImageModel)
       if (def.default_text_model) setTextModel(def.default_text_model as TextModel)
-      if (def.default_category_preset) setNiche(def.default_category_preset)
-      if (def.default_lighting_preset) setLighting(def.default_lighting_preset as LightingPreset)
+      if (def.default_category_preset === "off") { setNicheOpen(false) }
+      else if (def.default_category_preset) { setNiche(def.default_category_preset); setNicheOpen(true) }
+      if (def.default_lighting_preset === "off") { setLightingOpen(false) }
+      else if (def.default_lighting_preset) { setLighting(def.default_lighting_preset as LightingPreset); setLightingOpen(true) }
       if (def.default_language) setLanguage(def.default_language as Language)
     })
     fetch("/api/niches").then(r => r.ok ? r.json() : { niches: [] }).then(d => setCustomNiches(d.niches ?? []))
@@ -782,7 +784,7 @@ export default function GeneratePage() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") fetchDestinationContext(destinationUrl)
                 }}
-                className="flex-1 h-8 px-3 text-xs rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 placeholder:text-gray-300"
+                className="flex-1 h-8 px-3 text-xs rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 placeholder:text-gray-300"
               />
               {destinationUrl && (
                 <button

@@ -1198,7 +1198,7 @@ function DefaultsTab() {
   const [defaultImageModel, setDefaultImageModel] = useState<ImageModel>("dalle3")
   const [defaultTextModel, setDefaultTextModel] = useState<TextModel>("gpt4o")
   const [defaultCategory, setDefaultCategory] = useState<string>("home-decor")
-  const [defaultLighting, setDefaultLighting] = useState<LightingPreset>("morning")
+  const [defaultLighting, setDefaultLighting] = useState<string>("morning")
   const [defaultLanguage, setDefaultLanguage] = useState<Language>("en")
   const [saving, setSaving] = useState(false)
 
@@ -1210,7 +1210,7 @@ function DefaultsTab() {
         if (def.default_image_model) setDefaultImageModel(def.default_image_model as ImageModel)
         if (def.default_text_model) setDefaultTextModel(def.default_text_model as TextModel)
         if (def.default_category_preset) setDefaultCategory(def.default_category_preset as string)
-        if (def.default_lighting_preset) setDefaultLighting(def.default_lighting_preset as LightingPreset)
+        if (def.default_lighting_preset) setDefaultLighting(def.default_lighting_preset as string)
         if (def.default_language) setDefaultLanguage(def.default_language as Language)
       })
   }, [])
@@ -1267,6 +1267,7 @@ function DefaultsTab() {
           <Select value={defaultCategory} onValueChange={v => setDefaultCategory(v)}>
             <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
+              <SelectItem value="off" className="text-xs text-muted-foreground">Off (hidden)</SelectItem>
               {NICHE_KEYS.map(k => (
                 <SelectItem key={k} value={k} className="text-xs">
                   {NICHE_PRESETS[k].emoji} {NICHE_PRESETS[k].label}
@@ -1277,9 +1278,10 @@ function DefaultsTab() {
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">Default Lighting</Label>
-          <Select value={defaultLighting} onValueChange={v => setDefaultLighting(v as LightingPreset)}>
+          <Select value={defaultLighting} onValueChange={v => setDefaultLighting(v)}>
             <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
+              <SelectItem value="off" className="text-xs text-muted-foreground">Off (hidden)</SelectItem>
               {LIGHTING_KEYS.map(k => (
                 <SelectItem key={k} value={k} className="text-xs">
                   {LIGHTING_PRESETS[k].emoji} {LIGHTING_PRESETS[k].label}
