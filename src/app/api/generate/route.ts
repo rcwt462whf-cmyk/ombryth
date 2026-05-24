@@ -424,6 +424,14 @@ async function generateOneImage(
 
 export async function POST(request: Request) {
   try {
+    // ── Emergency kill switch ──────────────────────────────────────────────────
+    if (process.env.GENERATION_KILL_SWITCH === "true") {
+      return NextResponse.json(
+        { error: "Generation is temporarily disabled for maintenance. Please try again later." },
+        { status: 503 }
+      )
+    }
+
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -443,6 +451,7 @@ export async function POST(request: Request) {
     const freeUsed = userData?.free_generations_used ?? 0
     const customSystemPrompt = userData?.custom_system_prompt ?? null
 
+    // ── Per-minute rate limit (in-memory) ─────────────────────────────────────
     const rateLimit = checkRateLimit(user.id)
     if (!rateLimit.allowed) {
       const seconds = Math.ceil(rateLimit.resetInMs / 1000)
@@ -450,6 +459,26 @@ export async function POST(request: Request) {
         { error: `Rate limit reached. You can generate up to 8 images per minute. Try again in ${seconds} seconds.` },
         { status: 429 }
       )
+    }
+
+    // ── Daily cap — counts DB rows to survive server restarts ──────────────────
+    if (!isAdmin) {
+      const dailyLimit = isPro
+        ? parseInt(process.env.DAILY_PRO_LIMIT ?? "200")
+        : 10
+      const since = new Date()
+      since.setHours(0, 0, 0, 0)
+      const { count: todayCount } = await supabase
+        .from("generations")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .gte("created_at", since.toISOString())
+      if ((todayCount ?? 0) >= dailyLimit) {
+        return NextResponse.json(
+          { error: `Daily limit of ${dailyLimit} generations reached. Resets at midnight.` },
+          { status: 429 }
+        )
+      }
     }
 
     if (!isPro && freeUsed >= 10) {
