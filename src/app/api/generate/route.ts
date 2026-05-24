@@ -263,18 +263,18 @@ async function analyzeProductImage(
   const base64 = buffer.toString("base64")
   const resp = await openai.chat.completions.create({
     model: "gpt-4o",
-    max_tokens: 120,
+    max_tokens: 280,
     messages: [
       {
         role: "user",
         content: [
           {
             type: "image_url",
-            image_url: { url: `data:${mimeType};base64,${base64}`, detail: "low" },
+            image_url: { url: `data:${mimeType};base64,${base64}`, detail: "high" },
           },
           {
             type: "text",
-            text: "Describe this product in one concise sentence for an AI image generation prompt. Focus on its appearance, material, colour and style. No brand names.",
+            text: "Describe this product in precise detail for an AI image generation prompt. Cover: exact shape, all colours (be specific — e.g. 'terracotta red, steel blue, warm beige'), surface texture and finish (matte, glossy, fabric etc.), pattern or design motif if any, material, and approximate size/scale. Be specific enough that an image model could recreate it accurately. Write 2-3 sentences. No brand names.",
           },
         ],
       },
@@ -542,13 +542,19 @@ export async function POST(request: Request) {
       }
     }
 
-    // Build prompt — high influence: Claude's scene description leads; low: niche preset leads
+    // Build prompt — product is always the hero when provided
     let finalPrompt: string
     if (styleDescription && styleStrength >= 70) {
-      // Claude's description IS the main prompt — product integrated naturally
-      finalPrompt = styleDescription
-      if (productDescription) finalPrompt += `. The scene features ${productDescription}`
-      if (config.customPrompt) finalPrompt += `. ${config.customPrompt}`
+      if (productDescription) {
+        // Product leads — scene from style ref is the backdrop
+        finalPrompt = `${productDescription}, prominently displayed as the hero subject of the scene`
+        finalPrompt += `. Setting and atmosphere: ${styleDescription}`
+        if (config.customPrompt) finalPrompt += `. ${config.customPrompt}`
+      } else {
+        // No product — style description drives the whole prompt
+        finalPrompt = styleDescription
+        if (config.customPrompt) finalPrompt += `. ${config.customPrompt}`
+      }
     } else {
       const hasNiche = !!(config.niche ?? config.categoryPreset)
       const hasLighting = !!(config.lightingPreset)
@@ -566,14 +572,14 @@ export async function POST(request: Request) {
       } else {
         // Niche is off — build a minimal prompt from just custom text + product + lighting
         const parts: string[] = []
+        if (productDescription) parts.push(`${productDescription}, as the main focal point`)
         if (config.customPrompt) parts.push(config.customPrompt)
-        if (productDescription) parts.push(`featuring ${productDescription}`)
         if (hasLighting && LIGHTING_PRESETS[config.lightingPreset!]) parts.push(LIGHTING_PRESETS[config.lightingPreset!].append)
         if (config.aspectRatio === "2:3") parts.push("portrait orientation")
         if (config.aspectRatio === "16:9") parts.push("landscape widescreen")
         finalPrompt = parts.length > 0 ? parts.join(", ") : "professional lifestyle product photography"
       }
-      if (styleDescription) finalPrompt += `. Lighting and atmosphere inspired by: ${styleDescription}`
+      if (styleDescription) finalPrompt += `. Lighting and atmosphere: ${styleDescription}`
     }
 
     // Generate images (batch or single)

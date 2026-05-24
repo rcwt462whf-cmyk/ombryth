@@ -210,9 +210,10 @@ export function buildPrompt(
   const nichePrompt = getNichePrompt(niche, stylePreset ?? DEFAULT_STYLE, customNiches)
   const lightingAppend = LIGHTING_PRESETS[lighting]?.append ?? ""
 
-  let prompt = `${nichePrompt}, ${lightingAppend}`
+  let prompt = productDescription
+    ? `${productDescription}, as the clear hero and focal point of the scene. Lifestyle setting: ${nichePrompt}, ${lightingAppend}`
+    : `${nichePrompt}, ${lightingAppend}`
   if (customPrompt) prompt += `, ${customPrompt}`
-  if (productDescription) prompt += `, featuring ${productDescription} placed naturally in the scene`
   if (aspectRatio) prompt += `, ${aspectRatioToDescription(aspectRatio)}`
   return prompt
 }
