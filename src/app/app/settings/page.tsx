@@ -1265,9 +1265,13 @@ function DefaultsTab() {
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">Default Niche</Label>
           <Select value={defaultCategory} onValueChange={v => setDefaultCategory(v)}>
-            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="off" className="text-xs text-muted-foreground">Off (hides niche + style)</SelectItem>
+            <SelectTrigger className="h-8 text-xs">
+              <SelectValue placeholder="Select niche">
+                {defaultCategory === "off" ? "Off" : (NICHE_PRESETS[defaultCategory as keyof typeof NICHE_PRESETS]?.label ?? defaultCategory)}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent position="popper">
+              <SelectItem value="off" className="text-xs font-medium text-gray-500 dark:text-gray-400">— Off (hides niche + style)</SelectItem>
               {NICHE_KEYS.map(k => (
                 <SelectItem key={k} value={k} className="text-xs">
                   {NICHE_PRESETS[k].emoji} {NICHE_PRESETS[k].label}
@@ -1279,9 +1283,13 @@ function DefaultsTab() {
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">Default Lighting</Label>
           <Select value={defaultLighting} onValueChange={v => setDefaultLighting(v)}>
-            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="off" className="text-xs text-muted-foreground">Off (hidden)</SelectItem>
+            <SelectTrigger className="h-8 text-xs">
+              <SelectValue placeholder="Select lighting">
+                {defaultLighting === "off" ? "Off" : (LIGHTING_PRESETS[defaultLighting as keyof typeof LIGHTING_PRESETS]?.label ?? defaultLighting)}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent position="popper">
+              <SelectItem value="off" className="text-xs font-medium text-gray-500 dark:text-gray-400">— Off (hidden)</SelectItem>
               {LIGHTING_KEYS.map(k => (
                 <SelectItem key={k} value={k} className="text-xs">
                   {LIGHTING_PRESETS[k].emoji} {LIGHTING_PRESETS[k].label}
@@ -1355,9 +1363,12 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="keys">
-        <TabsList className="mb-6 h-9 grid w-full grid-cols-5">
+        <TabsList className="mb-6 h-9 grid w-full grid-cols-6">
           <TabsTrigger value="keys" className="text-xs gap-1">
             <Key className="w-3.5 h-3.5" /> Keys
+          </TabsTrigger>
+          <TabsTrigger value="defaults" className="text-xs gap-1">
+            <Sliders className="w-3.5 h-3.5" /> Defaults
           </TabsTrigger>
           <TabsTrigger value="prompts" className="text-xs gap-1">
             <BookMarked className="w-3.5 h-3.5" /> Prompts
@@ -1407,9 +1418,11 @@ export default function SettingsPage() {
               </div>
             )}
           </div>
-          <div className="mt-4">
-            <DefaultsTab />
-          </div>
+        </TabsContent>
+
+        {/* Defaults */}
+        <TabsContent value="defaults" className="mt-0">
+          <DefaultsTab />
         </TabsContent>
 
         {/* Prompts */}
