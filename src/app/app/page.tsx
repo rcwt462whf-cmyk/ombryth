@@ -494,7 +494,7 @@ export default function GeneratePage() {
     if (!b64) return
     const link = document.createElement("a")
     link.href = `data:image/jpeg;base64,${b64}`
-    link.download = `flowgen-${Date.now()}${batchMode ? `-v${index + 1}` : ""}.jpg`
+    link.download = `ombryth-${Date.now()}${batchMode ? `-v${index + 1}` : ""}.jpg`
     link.click()
   }
 
@@ -1090,10 +1090,41 @@ export default function GeneratePage() {
                 {result.textOutput.pinterest && platforms.includes("pinterest") && (
                   <TabsContent value="pinterest" className="space-y-3 mt-0">
                     <OutputField label="Title" value={result.textOutput.pinterest.title} />
-                    <OutputField label="Description" value={result.textOutput.pinterest.description} />
-                    <OutputField label="Caption" value={result.textOutput.pinterest.caption} />
+                    <OutputField
+                      label="Description"
+                      value={
+                        [result.textOutput.pinterest.description, result.textOutput.pinterest.caption]
+                          .filter(Boolean).join(" ") +
+                        (result.textOutput.pinterest.hashtags
+                          ? " " + (Array.isArray(result.textOutput.pinterest.hashtags)
+                              ? result.textOutput.pinterest.hashtags.map((h: string) => `#${h}`).join(" ")
+                              : result.textOutput.pinterest.hashtags)
+                          : "")
+                      }
+                    />
                     <OutputField label="Alt Text" value={result.textOutput.pinterest.altText} />
-                    <OutputField label="Hashtags (20)" value={result.textOutput.pinterest.hashtags} />
+                    {destinationUrl && (
+                      <OutputField label="Link" value={destinationUrl} />
+                    )}
+                    {result.imageUrls?.[selectedImageIndex] && (
+                      <a
+                        href={`https://www.pinterest.com/pin/create/button/?url=${encodeURIComponent(destinationUrl || "https://ombryth.com")}&media=${encodeURIComponent(result.imageUrls[selectedImageIndex])}&description=${encodeURIComponent(
+                          result.textOutput.pinterest.title + " " +
+                          [result.textOutput.pinterest.description, result.textOutput.pinterest.caption].filter(Boolean).join(" ") +
+                          (result.textOutput.pinterest.hashtags
+                            ? " " + (Array.isArray(result.textOutput.pinterest.hashtags)
+                                ? result.textOutput.pinterest.hashtags.map((h: string) => `#${h}`).join(" ")
+                                : result.textOutput.pinterest.hashtags)
+                            : "")
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 w-full py-2 rounded-lg bg-[#E60023] hover:bg-[#c1001f] text-white text-sm font-medium transition-colors"
+                      >
+                        <PinterestLogo className="w-4 h-4" />
+                        Pin it
+                      </a>
+                    )}
                   </TabsContent>
                 )}
 
