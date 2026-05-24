@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { decryptKey } from "@/lib/encryption"
-import { buildPrompt } from "@/lib/presets"
+import { buildPrompt, LIGHTING_PRESETS } from "@/lib/presets"
 import { uploadImageBuffer } from "@/lib/storage"
 import { checkRateLimit } from "@/lib/rate-limit"
 import { sendWelcomeEmail } from "@/lib/emails/welcome"
@@ -550,14 +550,29 @@ export async function POST(request: Request) {
       if (productDescription) finalPrompt += `. The scene features ${productDescription}`
       if (config.customPrompt) finalPrompt += `. ${config.customPrompt}`
     } else {
-      finalPrompt = buildPrompt(
-        config.niche ?? config.categoryPreset ?? "home-decor",
-        config.lightingPreset,
-        config.customPrompt,
-        productDescription,
-        config.aspectRatio,
-        config.stylePreset ?? "minimalist"
-      )
+      const hasNiche = !!(config.niche ?? config.categoryPreset)
+      const hasLighting = !!(config.lightingPreset)
+      const hasStyle = !!(config.stylePreset)
+
+      if (hasNiche) {
+        finalPrompt = buildPrompt(
+          config.niche ?? config.categoryPreset ?? "home-decor",
+          hasLighting ? config.lightingPreset! : "morning",
+          config.customPrompt,
+          productDescription,
+          config.aspectRatio,
+          hasStyle ? config.stylePreset : undefined
+        )
+      } else {
+        // Niche is off — build a minimal prompt from just custom text + product + lighting
+        const parts: string[] = []
+        if (config.customPrompt) parts.push(config.customPrompt)
+        if (productDescription) parts.push(`featuring ${productDescription}`)
+        if (hasLighting && LIGHTING_PRESETS[config.lightingPreset!]) parts.push(LIGHTING_PRESETS[config.lightingPreset!].append)
+        if (config.aspectRatio === "2:3") parts.push("portrait orientation")
+        if (config.aspectRatio === "16:9") parts.push("landscape widescreen")
+        finalPrompt = parts.length > 0 ? parts.join(", ") : "professional lifestyle product photography"
+      }
       if (styleDescription) finalPrompt += `. Lighting and atmosphere inspired by: ${styleDescription}`
     }
 

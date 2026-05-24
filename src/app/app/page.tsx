@@ -352,8 +352,8 @@ export default function GeneratePage() {
       const def = d.defaults ?? {}
       if (def.default_image_model) setImageModel(def.default_image_model as ImageModel)
       if (def.default_text_model) setTextModel(def.default_text_model as TextModel)
-      if (def.default_category_preset === "off") { setNicheOpen(false) }
-      else if (def.default_category_preset) { setNiche(def.default_category_preset); setNicheOpen(true) }
+      if (def.default_category_preset === "off") { setNicheOpen(false); setStyleOpen(false) }
+      else if (def.default_category_preset) { setNiche(def.default_category_preset); setNicheOpen(true); setStyleOpen(true) }
       if (def.default_lighting_preset === "off") { setLightingOpen(false) }
       else if (def.default_lighting_preset) { setLighting(def.default_lighting_preset as LightingPreset); setLightingOpen(true) }
       if (def.default_language) setLanguage(def.default_language as Language)
@@ -601,7 +601,7 @@ export default function GeneratePage() {
 
           {/* Niche selector */}
           <div className="bg-white dark:bg-card rounded-xl border border-gray-100 dark:border-border p-4 space-y-3">
-            <button onClick={() => setNicheOpen(o => !o)} className="flex items-center justify-between w-full">
+            <button onClick={() => { setNicheOpen(o => { const next = !o; if (!next) setStyleOpen(false); return next }) }} className="flex items-center justify-between w-full">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Niche</p>
               <ChevronDown className={cn("w-3.5 h-3.5 text-gray-400 transition-transform", nicheOpen && "rotate-180")} />
             </button>

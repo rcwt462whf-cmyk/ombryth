@@ -36,6 +36,9 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const ADMIN_EMAILS = ["sz.veres.tamas@gmail.com"]
+      const isAdmin = ADMIN_EMAILS.includes(user.email ?? "")
+
       const { data } = await supabase
         .from("users")
         .select("subscription_status, free_generations_used")
@@ -44,7 +47,7 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
 
       if (data) {
         setUserStatus({
-          subscriptionStatus: data.subscription_status ?? "free",
+          subscriptionStatus: isAdmin ? "active" : (data.subscription_status ?? "free"),
           freeUsed: data.free_generations_used ?? 0,
         })
       }

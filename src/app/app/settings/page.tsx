@@ -1267,7 +1267,7 @@ function DefaultsTab() {
           <Select value={defaultCategory} onValueChange={v => setDefaultCategory(v)}>
             <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="off" className="text-xs text-muted-foreground">Off (hidden)</SelectItem>
+              <SelectItem value="off" className="text-xs text-muted-foreground">Off (hides niche + style)</SelectItem>
               {NICHE_KEYS.map(k => (
                 <SelectItem key={k} value={k} className="text-xs">
                   {NICHE_PRESETS[k].emoji} {NICHE_PRESETS[k].label}
