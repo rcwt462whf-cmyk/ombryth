@@ -106,7 +106,7 @@ export const NICHE_PRESETS: Record<string, NichePreset> = {
     label: "Travel & Outdoor", emoji: "✈️",
     promptBase: "real travel lifestyle photograph, no people",
     styles: {
-      "adventure": { label: "Adventure", promptModifier: "rugged mountain or forest trail, backpack and hiking boots on rock, dramatic sky, epic wide landscape, golden hour side light, worn map or compass as prop" },
+      "adventure": { label: "Adventure", promptModifier: "rugged mountain or forest trail, backpack and hiking boots on rock, dramatic sky, epic wide vista, golden hour side light, worn map or compass as prop" },
       "resort": { label: "Luxury Resort", promptModifier: "private infinity pool overlooking tropical ocean, rattan sun lounger, white linen towel, tropical flowers in ceramic pot, late-afternoon golden light, aspirational calm" },
       "backpacker": { label: "Backpacker", promptModifier: "hostel dorm or local market street, worn canvas backpack open on bunk, passport and rail ticket visible, warm dusty light, authentic and unfiltered travel documentary feel" },
       "city": { label: "City Exploration", promptModifier: "European cobblestone street or metro station, travel items on iron café table, blurred city life in background, blue-hour or morning light, street photography aesthetic" },

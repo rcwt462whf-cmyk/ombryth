@@ -741,6 +741,13 @@ export async function POST(request: Request) {
         finalPrompt = styleDescription
         if (config.customPrompt) finalPrompt += `. ${config.customPrompt}`
       }
+    } else if (seedreamStyleOnly && styleBuffer && !styleDescription) {
+      // Style reference uploaded for Seedream but analysis produced nothing (no API key / failed).
+      // Use a safe neutral base — never fall back to niche which could generate wrong content.
+      const parts: string[] = ["professional lifestyle interior photograph, no people"]
+      if (config.customPrompt) parts.push(config.customPrompt)
+      if (hasLighting && LIGHTING_PRESETS[config.lightingPreset!]) parts.push(LIGHTING_PRESETS[config.lightingPreset!].append)
+      finalPrompt = parts.join(", ")
     } else {
       // No style reference, or low strength: niche/lighting drives the prompt
       if (hasNiche) {
