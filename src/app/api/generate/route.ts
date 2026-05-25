@@ -196,13 +196,15 @@ async function generateWithSeedream(
       `data:image/jpeg;base64,${styleBuffer.toString("base64")}`,
       `data:image/jpeg;base64,${productBuffer.toString("base64")}`,
     ]
+  } else if (styleBuffer) {
+    // Style reference only — pass image natively so Seedream uses it as img2img
+    body.image = `data:image/jpeg;base64,${styleBuffer.toString("base64")}`
+    body.image_weight = Math.round((styleStrength ?? 60) / 100 * 100) / 100
   } else if (productBuffer) {
-    // Product only — pass it as the sole image reference
+    // Product only — use it as the sole image reference
     body.image = `data:image/jpeg;base64,${productBuffer.toString("base64")}`
     body.image_weight = 0.85
   }
-  // Style-only: no image body — Claude has already described the style in the text
-  // prompt. Sending the style image makes Seedream copy it rather than be inspired by it.
 
   const resp = await fetch(
     "https://ark.ap-southeast.bytepluses.com/api/v3/images/generations",
