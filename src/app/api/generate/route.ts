@@ -748,13 +748,15 @@ export async function POST(request: Request) {
         if (config.aspectRatio === "16:9") parts.push("landscape widescreen")
         finalPrompt = parts.length > 0 ? parts.join(", ") : "professional lifestyle product photography"
       }
-      // For Seedream style-only: append only short atmosphere hint (not full reconstruction)
-      if (styleDescription && seedreamStyleOnly) {
-        const shortAtmosphere = styleDescription.split(".").slice(0, 2).join(".").slice(0, 200)
-        finalPrompt += `. Atmosphere: ${shortAtmosphere}`
-      } else if (styleDescription) {
-        finalPrompt += `. Lighting and atmosphere: ${styleDescription}`
+      // For Seedream style-only: append full style description (scene elements + atmosphere)
+      if (styleDescription) {
+        finalPrompt += `. ${styleDescription}`
       }
+    }
+
+    // Append photo realism suffix for Seedream — makes a significant quality difference
+    if (config.imageModel === "seedream") {
+      finalPrompt += ", photorealistic, Canon 5D, 35mm, f/2.8, natural light, no people"
     }
 
     // captionContext: always rich/human-readable — used for caption writing
