@@ -197,9 +197,13 @@ async function generateWithSeedream(
       `data:image/jpeg;base64,${productBuffer.toString("base64")}`,
     ]
   } else if (styleBuffer) {
-    // Style reference only — pass image natively so Seedream uses it as img2img
+    // Style reference only — pass image natively so Seedream uses it as img2img.
+    // Seedream's useful creative range is 0.05–0.35 — the full 0–1 linear mapping
+    // causes it to copy the source photo. Remap: slider 0–100 → weight 0.05–0.35.
+    const t = (styleStrength ?? 60) / 100
+    const seedreamWeight = Math.round((0.05 + t * 0.30) * 100) / 100  // 0%→0.05, 50%→0.20, 100%→0.35
     body.image = `data:image/jpeg;base64,${styleBuffer.toString("base64")}`
-    body.image_weight = Math.round((styleStrength ?? 60) / 100 * 100) / 100
+    body.image_weight = seedreamWeight
   } else if (productBuffer) {
     // Product only — use it as the sole image reference
     body.image = `data:image/jpeg;base64,${productBuffer.toString("base64")}`
