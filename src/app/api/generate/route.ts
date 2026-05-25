@@ -191,19 +191,15 @@ async function generateWithSeedream(
 
   if (styleBuffer && productBuffer) {
     // Multi-image: style ref (image 1) + product (image 2)
-    // Seedream can natively combine both — product placement is pixel-accurate
+    // image_weight is NOT sent for array — Seedream doesn't support it with arrays
     body.image = [
       `data:image/jpeg;base64,${styleBuffer.toString("base64")}`,
       `data:image/jpeg;base64,${productBuffer.toString("base64")}`,
     ]
-    // image_weight applies to all reference images
-    body.image_weight = Math.round((styleStrength ?? 60) / 100 * 100) / 100
   } else if (styleBuffer) {
-    // Style reference only
     body.image = `data:image/jpeg;base64,${styleBuffer.toString("base64")}`
     body.image_weight = Math.round((styleStrength ?? 60) / 100 * 100) / 100
   } else if (productBuffer) {
-    // Product only — use it as the sole image reference
     body.image = `data:image/jpeg;base64,${productBuffer.toString("base64")}`
     body.image_weight = 0.85
   }
