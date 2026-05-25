@@ -375,7 +375,8 @@ function buildTextSystemPrompt(
   customPersona?: string | null,
   destinationContext?: { title: string; description: string } | null,
   language?: string | null,
-  productDescription?: string
+  productDescription?: string,
+  hasImage?: boolean
 ): string {
   const persona = customPersona?.trim() || DEFAULT_SYSTEM_PERSONA
 
@@ -387,9 +388,13 @@ function buildTextSystemPrompt(
     ? `\nThe featured product is: ${productDescription}. Make sure the captions clearly reference this specific product — its look, style and use — rather than describing the scene generically.\n`
     : ""
 
+  const imageRef = hasImage
+    ? "Look at the image above carefully — write all captions based on exactly what you see in it."
+    : `The lifestyle image shows: "${prompt}".`
+
   return `${persona}
 
-Generate platform content for this lifestyle image: "${prompt}".
+${imageRef}
 ${productBlock}${destinationBlock}
 CAPTION RULES (apply to all platforms):
 - First sentence must be the hook — a bold statement, unexpected tip, or intriguing question. Make the reader stop scrolling.
@@ -474,12 +479,24 @@ async function generateTextWithOpenAI(
 
 async function generateTextWithClaude(
   anthropic: Anthropic,
-  systemPrompt: string
+  systemPrompt: string,
+  generatedImageBase64?: string  // Pass the actual generated image so Claude sees what it's writing about
 ): Promise<PlatformOutput> {
+  type ContentBlock = { type: "image"; source: { type: "base64"; media_type: "image/jpeg"; data: string } } | { type: "text"; text: string }
+  const content: ContentBlock[] = []
+
+  if (generatedImageBase64) {
+    content.push({
+      type: "image",
+      source: { type: "base64", media_type: "image/jpeg", data: generatedImageBase64 },
+    })
+  }
+  content.push({ type: "text", text: systemPrompt })
+
   const resp = await anthropic.messages.create({
     model: "claude-sonnet-4-5",
     max_tokens: 1400,
-    messages: [{ role: "user", content: systemPrompt }],
+    messages: [{ role: "user", content }],
   })
   const raw = resp.content[0]?.type === "text" ? resp.content[0].text : "{}"
   return sanitizeHashtags(JSON.parse(raw.replace(/```json\n?|\n?```/g, "").trim()))
@@ -667,8 +684,10 @@ export async function POST(request: Request) {
       product = await analyzeProductImage(openai, productBuffer, productFile?.type ?? "image/jpeg").catch(() => undefined)
     }
 
-    // Style analysis — use Claude if available, no OpenAI required
-    if (styleBuffer && (config.imageModel === "dalle3" || config.imageModel === "seedream")) {
+    // Style analysis — only for DALL-E (which has no native img2img).
+    // Seedream receives the image natively; running analysis creates a "recreate this"
+    // description that double-signals Seedream and causes it to copy the reference photo.
+    if (styleBuffer && config.imageModel === "dalle3") {
       if (keyMap.anthropic) {
         const anthropic = new Anthropic({ apiKey: keyMap.anthropic })
         styleDescription = await analyzeStyleReference(anthropic, styleBuffer, styleFile?.type ?? "image/jpeg", styleStrength).catch(() => undefined)
@@ -773,9 +792,18 @@ export async function POST(request: Request) {
     // Base64 for immediate display
     const imagesBase64 = cleanBuffers.map((buf) => buf.toString("base64"))
 
-    // Generate text content — use captionContext (rich scene+product description), not finalPrompt
-    // (finalPrompt may be a Seedream multi-image instruction that Claude can't write captions from)
-    const textSystemPrompt = buildTextSystemPrompt(captionContext, config.platforms, customSystemPrompt, config.destinationContext ?? null, config.language ?? null, product?.description)
+    // Use the first generated image for Claude vision captioning
+    const firstImageBase64 = imagesBase64[0]
+
+    // Generate text content
+    // When Claude is the text model, pass the actual generated image so it writes
+    // captions based on what it sees, not just the text prompt.
+    const textSystemPrompt = buildTextSystemPrompt(
+      captionContext, config.platforms, customSystemPrompt,
+      config.destinationContext ?? null, config.language ?? null,
+      product?.description,
+      config.textModel === "claude" // hasImage — only Claude gets vision input
+    )
     let textOutput: PlatformOutput = {}
     let textModelUsed: string = config.textModel
 
@@ -788,7 +816,7 @@ export async function POST(request: Request) {
       } else if (config.textModel === "claude") {
         if (!keyMap.anthropic) throw new Error("Anthropic API key not configured. Add it in Settings.")
         const anthropic = new Anthropic({ apiKey: keyMap.anthropic })
-        textOutput = await generateTextWithClaude(anthropic, textSystemPrompt)
+        textOutput = await generateTextWithClaude(anthropic, textSystemPrompt, firstImageBase64)
         textModelUsed = "claude-sonnet-4-5"
       } else if (config.textModel === "gemini") {
         if (!keyMap.gemini) throw new Error("Google Gemini API key not configured. Add it in Settings.")
