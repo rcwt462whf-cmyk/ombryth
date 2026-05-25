@@ -196,19 +196,14 @@ async function generateWithSeedream(
       `data:image/jpeg;base64,${styleBuffer.toString("base64")}`,
       `data:image/jpeg;base64,${productBuffer.toString("base64")}`,
     ]
-  } else if (styleBuffer) {
-    // Style reference only — pass image natively so Seedream uses it as img2img.
-    // Seedream's useful creative range is 0.05–0.35 — the full 0–1 linear mapping
-    // causes it to copy the source photo. Remap: slider 0–100 → weight 0.05–0.35.
-    const t = (styleStrength ?? 60) / 100
-    const seedreamWeight = Math.round((0.05 + t * 0.30) * 100) / 100  // 0%→0.05, 50%→0.20, 100%→0.35
-    body.image = `data:image/jpeg;base64,${styleBuffer.toString("base64")}`
-    body.image_weight = seedreamWeight
   } else if (productBuffer) {
     // Product only — use it as the sole image reference
     body.image = `data:image/jpeg;base64,${productBuffer.toString("base64")}`
     body.image_weight = 0.85
   }
+  // Style-only: no image sent to BytePlus.
+  // Claude has encoded the style as text in the prompt — text alone cannot recreate
+  // the same photo, guaranteeing a fresh generation.
 
   const resp = await fetch(
     "https://ark.ap-southeast.bytepluses.com/api/v3/images/generations",
@@ -688,10 +683,12 @@ export async function POST(request: Request) {
       product = await analyzeProductImage(openai, productBuffer, productFile?.type ?? "image/jpeg").catch(() => undefined)
     }
 
-    // Style analysis — only for DALL-E (which has no native img2img).
-    // Seedream receives the image natively; running analysis creates a "recreate this"
-    // description that double-signals Seedream and causes it to copy the reference photo.
-    if (styleBuffer && config.imageModel === "dalle3") {
+    // Style analysis — for DALL-E and Seedream style-only.
+    // For Seedream: we DON'T send the image to BytePlus. Instead Claude reads the style
+    // (lighting, colours, mood) and encodes it as text in the prompt. This guarantees a
+    // fresh image — a text prompt alone cannot recreate the same photo.
+    // The style image is only sent to BytePlus when doing product injection (multi-image).
+    if (styleBuffer && (config.imageModel === "dalle3" || (config.imageModel === "seedream" && !productBuffer))) {
       if (keyMap.anthropic) {
         const anthropic = new Anthropic({ apiKey: keyMap.anthropic })
         styleDescription = await analyzeStyleReference(anthropic, styleBuffer, styleFile?.type ?? "image/jpeg", styleStrength).catch(() => undefined)
