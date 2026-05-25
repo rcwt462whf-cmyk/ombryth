@@ -107,9 +107,17 @@ export async function POST(request: Request) {
     const description = ogDesc || articleContent || metaDesc
     const keywords = h2Keywords ? `Topics: ${h2Keywords}` : ""
 
+    // Strip control chars and anything that looks like prompt injection
+    // before this content enters an AI system prompt
+    const scrub = (s: string, max: number) =>
+      s.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
+       .replace(/\b(ignore|disregard|forget|override)\b.{0,80}(instruction|prompt|previous|above)/gi, "[…]")
+       .trim()
+       .slice(0, max)
+
     return NextResponse.json({
-      title,
-      description: [description, keywords].filter(Boolean).join(" | ").slice(0, 600),
+      title: scrub(title, 200),
+      description: scrub([description, keywords].filter(Boolean).join(" | "), 600),
       url,
     })
   } catch (err) {

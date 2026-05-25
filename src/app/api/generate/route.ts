@@ -607,6 +607,23 @@ export async function POST(request: Request) {
     }
 
     const config: GenerateRequest = JSON.parse(configRaw)
+
+    // Sanitise all free-text fields that enter AI prompts
+    // Strips control characters, null bytes, and enforces length caps
+    const sanitizeText = (val: unknown, maxLen: number): string | undefined => {
+      if (typeof val !== "string") return undefined
+      const cleaned = val.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "").trim()
+      return cleaned.slice(0, maxLen) || undefined
+    }
+    config.customPrompt = sanitizeText(config.customPrompt, 500)
+    if (config.destinationContext) {
+      config.destinationContext.title = sanitizeText(config.destinationContext.title, 200) ?? ""
+      config.destinationContext.description = sanitizeText(config.destinationContext.description, 600) ?? ""
+    }
+    // Validate platforms list against known values
+    const VALID_PLATFORMS = ["pinterest", "instagram", "facebook", "google-ads"]
+    config.platforms = (config.platforms ?? []).filter((p) => VALID_PLATFORMS.includes(p))
+
     const styleFile = formData.get("style_reference") as File | null
     const productFile = formData.get("product_reference") as File | null
 
