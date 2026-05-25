@@ -21,6 +21,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ title: "", description: "", url, error: "Invalid URL" }, { status: 400 })
     }
 
+    // SSRF protection: block private/internal IP ranges
+    try {
+      const parsed = new URL(url)
+      const hostname = parsed.hostname.toLowerCase()
+      const isPrivate =
+        hostname === "localhost" ||
+        hostname === "127.0.0.1" ||
+        hostname === "::1" ||
+        // IPv4 private ranges
+        /^10\./.test(hostname) ||
+        /^192\.168\./.test(hostname) ||
+        /^172\.(1[6-9]|2\d|3[01])\./.test(hostname) ||
+        // AWS/GCP/Azure metadata endpoints
+        hostname === "169.254.169.254" ||
+        hostname === "metadata.google.internal" ||
+        hostname.endsWith(".internal") ||
+        hostname.endsWith(".local")
+      if (isPrivate) {
+        return NextResponse.json({ title: "", description: "", url, error: "Invalid URL" }, { status: 400 })
+      }
+    } catch {
+      return NextResponse.json({ title: "", description: "", url, error: "Invalid URL" }, { status: 400 })
+    }
+
     let html: string
     try {
       const resp = await fetch(url, {

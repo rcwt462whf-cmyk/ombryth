@@ -29,12 +29,11 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  // PREVIEW BYPASS
-  // if (!user && pathname.startsWith("/app")) {
-  //   const url = request.nextUrl.clone()
-  //   url.pathname = "/login"
-  //   return NextResponse.redirect(url)
-  // }
+  if (!user && pathname.startsWith("/app")) {
+    const url = request.nextUrl.clone()
+    url.pathname = "/login"
+    return NextResponse.redirect(url)
+  }
 
   if (user && (pathname === "/login" || pathname === "/signup")) {
     const url = request.nextUrl.clone()

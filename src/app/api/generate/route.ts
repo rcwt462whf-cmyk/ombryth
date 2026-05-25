@@ -600,6 +600,18 @@ export async function POST(request: Request) {
     const styleFile = formData.get("style_reference") as File | null
     const productFile = formData.get("product_reference") as File | null
 
+    // File size guard — 10MB max per image
+    const MAX_FILE_BYTES = 10 * 1024 * 1024
+    const VALID_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+    if (styleFile) {
+      if (styleFile.size > MAX_FILE_BYTES) return NextResponse.json({ error: "Style reference image too large (max 10MB)." }, { status: 400 })
+      if (!VALID_IMAGE_TYPES.includes(styleFile.type)) return NextResponse.json({ error: "Style reference must be a JPEG, PNG, WebP, or GIF image." }, { status: 400 })
+    }
+    if (productFile) {
+      if (productFile.size > MAX_FILE_BYTES) return NextResponse.json({ error: "Product image too large (max 10MB)." }, { status: 400 })
+      if (!VALID_IMAGE_TYPES.includes(productFile.type)) return NextResponse.json({ error: "Product image must be a JPEG, PNG, WebP, or GIF image." }, { status: 400 })
+    }
+
     const { data: apiKeys } = await supabase
       .from("api_keys")
       .select("provider, encrypted_key")

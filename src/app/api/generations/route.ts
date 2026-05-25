@@ -3,8 +3,8 @@ import { NextResponse } from "next/server"
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
-  const limit = parseInt(searchParams.get("limit") ?? "20", 10)
-  const offset = parseInt(searchParams.get("offset") ?? "0", 10)
+  const limit = Math.min(Math.max(1, parseInt(searchParams.get("limit") ?? "20", 10)), 100)
+  const offset = Math.max(0, parseInt(searchParams.get("offset") ?? "0", 10))
   const model = searchParams.get("model")
   const platform = searchParams.get("platform")
   const category = searchParams.get("category")
