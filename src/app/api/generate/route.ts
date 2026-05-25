@@ -190,19 +190,19 @@ async function generateWithSeedream(
   }
 
   if (styleBuffer && productBuffer) {
-    // Multi-image: style ref (image 1) + product (image 2)
-    // image_weight is NOT sent for array — Seedream doesn't support it with arrays
+    // Multi-image: style scene (image 1) + product (image 2)
+    // image_weight is NOT supported by Seedream when image is an array
     body.image = [
       `data:image/jpeg;base64,${styleBuffer.toString("base64")}`,
       `data:image/jpeg;base64,${productBuffer.toString("base64")}`,
     ]
-  } else if (styleBuffer) {
-    body.image = `data:image/jpeg;base64,${styleBuffer.toString("base64")}`
-    body.image_weight = Math.round((styleStrength ?? 60) / 100 * 100) / 100
   } else if (productBuffer) {
+    // Product only — pass it as the sole image reference
     body.image = `data:image/jpeg;base64,${productBuffer.toString("base64")}`
     body.image_weight = 0.85
   }
+  // Style-only: no image body — Claude has already described the style in the text
+  // prompt. Sending the style image makes Seedream copy it rather than be inspired by it.
 
   const resp = await fetch(
     "https://ark.ap-southeast.bytepluses.com/api/v3/images/generations",
