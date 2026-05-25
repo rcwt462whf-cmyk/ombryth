@@ -717,7 +717,23 @@ export async function POST(request: Request) {
     const seedreamStyleOnly = config.imageModel === "seedream" && styleBuffer && !productBuffer
 
     let finalPrompt: string
-    if (styleDescription && styleStrength >= 70 && !seedreamStyleOnly) {
+    const hasNiche = !!(config.niche ?? config.categoryPreset)
+    const hasLighting = !!(config.lightingPreset)
+    const hasStyle = !!(config.stylePreset)
+
+    if (styleDescription && seedreamStyleOnly) {
+      // Seedream + style reference: style description LEADS the prompt.
+      // The niche preset only adds a light subject hint so Seedream knows the content
+      // category — it does NOT override the scene described by the reference image.
+      finalPrompt = styleDescription
+      if (productPhrase) finalPrompt = `${productPhrase}. ${finalPrompt}`
+      if (config.customPrompt) finalPrompt += `. ${config.customPrompt}`
+      // Append lighting preset as mood modifier (not scene override)
+      if (hasLighting && LIGHTING_PRESETS[config.lightingPreset!]) {
+        finalPrompt += `, ${LIGHTING_PRESETS[config.lightingPreset!].append}`
+      }
+    } else if (styleDescription && styleStrength >= 70) {
+      // DALL-E high strength: style description drives the full prompt
       if (productPhrase) {
         finalPrompt = `${productPhrase}. Setting and atmosphere: ${styleDescription}`
         if (config.customPrompt) finalPrompt += `. ${config.customPrompt}`
@@ -726,10 +742,7 @@ export async function POST(request: Request) {
         if (config.customPrompt) finalPrompt += `. ${config.customPrompt}`
       }
     } else {
-      const hasNiche = !!(config.niche ?? config.categoryPreset)
-      const hasLighting = !!(config.lightingPreset)
-      const hasStyle = !!(config.stylePreset)
-
+      // No style reference, or low strength: niche/lighting drives the prompt
       if (hasNiche) {
         finalPrompt = buildPrompt(
           config.niche ?? config.categoryPreset ?? "home-decor",
@@ -745,13 +758,10 @@ export async function POST(request: Request) {
         if (config.customPrompt) parts.push(config.customPrompt)
         if (hasLighting && LIGHTING_PRESETS[config.lightingPreset!]) parts.push(LIGHTING_PRESETS[config.lightingPreset!].append)
         if (config.aspectRatio === "2:3") parts.push("portrait orientation")
-        if (config.aspectRatio === "16:9") parts.push("landscape widescreen")
+        if (config.aspectRatio === "16:9") parts.push("wide horizontal composition")
         finalPrompt = parts.length > 0 ? parts.join(", ") : "professional lifestyle product photography"
       }
-      // For Seedream style-only: append full style description (scene elements + atmosphere)
-      if (styleDescription) {
-        finalPrompt += `. ${styleDescription}`
-      }
+      if (styleDescription) finalPrompt += `. ${styleDescription}`
     }
 
     // Append photo realism suffix for Seedream — makes a significant quality difference

@@ -222,7 +222,7 @@ function aspectRatioToDescription(ratio: string): string {
   switch (ratio) {
     case "2:3": return "portrait orientation"
     case "1:1": return "square format"
-    case "16:9": return "landscape widescreen"
+    case "16:9": return "wide horizontal composition"  // never use "landscape" — AI models treat it as a nature scene
     default: return ""
   }
 }
