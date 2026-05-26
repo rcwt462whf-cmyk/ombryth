@@ -575,7 +575,7 @@ export async function POST(request: Request) {
       .eq("id", user.id)
       .single()
 
-    const ADMIN_EMAILS = ["sz.veres.tamas@gmail.com"]
+    const ADMIN_EMAILS = (process.env.ADMIN_EMAILS ?? "").split(",").map(e => e.trim()).filter(Boolean)
     const isAdmin = ADMIN_EMAILS.includes(userData?.email ?? "")
     const isPro = isAdmin || userData?.subscription_status === "active"
     const freeUsed = userData?.free_generations_used ?? 0
