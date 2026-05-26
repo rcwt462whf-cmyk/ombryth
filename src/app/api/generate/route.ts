@@ -721,7 +721,14 @@ export async function POST(request: Request) {
     const hasLighting = !!(config.lightingPreset)
     const hasStyle = !!(config.stylePreset)
 
-    if (styleDescription && seedreamStyleOnly) {
+    // User-edited prompt override — skip all prompt building
+    const promptOverride = typeof config.promptOverride === "string"
+      ? config.promptOverride.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "").trim().slice(0, 2000)
+      : null
+
+    if (promptOverride) {
+      finalPrompt = promptOverride
+    } else if (styleDescription && seedreamStyleOnly) {
       // Seedream + style reference: style description LEADS the prompt.
       // The niche preset only adds a light subject hint so Seedream knows the content
       // category — it does NOT override the scene described by the reference image.

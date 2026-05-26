@@ -213,7 +213,9 @@ export default function LandingPage() {
 
             <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-8 border border-gray-100 dark:border-gray-800">
               <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center mb-5">
-                <span className="text-2xl leading-none" aria-hidden="true">🌍</span>
+                <svg aria-hidden="true" className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 21a9 9 0 100-18 9 9 0 000 18zm0 0c2.485 0 4-2.015 4-4.5S14.485 8 12 8s-4 2.015-4 4.5S9.515 21 12 21zM2.458 12H22M12 2.458v19.084" />
+                </svg>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">9 Languages</h3>
               <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
@@ -223,7 +225,9 @@ export default function LandingPage() {
 
             <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-8 border border-gray-100 dark:border-gray-800">
               <div className="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center mb-5">
-                <span className="text-2xl leading-none" aria-hidden="true">🔗</span>
+                <svg aria-hidden="true" className="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Destination-aware captions</h3>
               <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
@@ -233,7 +237,9 @@ export default function LandingPage() {
 
             <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-8 border border-gray-100 dark:border-gray-800">
               <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-5">
-                <span className="text-2xl leading-none" aria-hidden="true">🔒</span>
+                <svg aria-hidden="true" className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Your keys, your costs</h3>
               <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">

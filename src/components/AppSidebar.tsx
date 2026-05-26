@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Wand2, Clock, Settings, CreditCard, LogOut, Zap, HelpCircle } from "lucide-react"
+import { Wand2, Clock, Settings, CreditCard, LogOut, Zap, HelpCircle, Menu, X } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 import { useEffect, useState } from "react"
@@ -29,15 +29,28 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
   const router = useRouter()
   const [userStatus, setUserStatus] = useState<UserStatus | null>(null)
   const [helpOpen, setHelpOpen] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [pathname])
+
+  // Prevent body scroll when mobile sidebar is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = ""
+    }
+    return () => { document.body.style.overflow = "" }
+  }, [mobileOpen])
 
   useEffect(() => {
     async function loadStatus() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
-
-      const ADMIN_EMAILS = ["sz.veres.tamas@gmail.com"]
-      const isAdmin = ADMIN_EMAILS.includes(user.email ?? "")
 
       const { data } = await supabase
         .from("users")
@@ -47,7 +60,7 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
 
       if (data) {
         setUserStatus({
-          subscriptionStatus: isAdmin ? "active" : (data.subscription_status ?? "free"),
+          subscriptionStatus: data.subscription_status ?? "free",
           freeUsed: data.free_generations_used ?? 0,
         })
       }
@@ -65,10 +78,10 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
   const freeUsed = userStatus?.freeUsed ?? 0
   const freePercent = Math.min((freeUsed / 10) * 100, 100)
 
-  return (
-    <aside className="fixed left-0 top-0 h-screen w-60 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 flex flex-col z-30">
+  const sidebarContent = (
+    <>
       {/* Logo */}
-      <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+      <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
         <Link href="/app" className="flex items-center gap-2">
           <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
             Ombryth
@@ -79,6 +92,14 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
             </span>
           )}
         </Link>
+        {/* Close button — mobile only */}
+        <button
+          onClick={() => setMobileOpen(false)}
+          className="lg:hidden p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          aria-label="Close menu"
+        >
+          <X className="w-5 h-5" />
+        </button>
       </div>
 
       {/* Navigation */}
@@ -148,7 +169,6 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
         <button
           onClick={() => setHelpOpen(true)}
           className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-white transition-colors w-full text-left mb-1"
-          title="Help & API Guides"
         >
           <HelpCircle className="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0" />
           Help &amp; API Guides
@@ -162,6 +182,52 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
         </button>
       </div>
       <HelpDrawer open={helpOpen} onClose={() => setHelpOpen(false)} />
-    </aside>
+    </>
+  )
+
+  return (
+    <>
+      {/* ── Desktop sidebar (always visible ≥ lg) ───────────────────────────── */}
+      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-60 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 flex-col z-30">
+        {sidebarContent}
+      </aside>
+
+      {/* ── Mobile top bar ───────────────────────────────────────────────────── */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="p-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          aria-label="Open menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <Link href="/app" className="flex items-center gap-2">
+          <span className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+            Ombryth
+          </span>
+          {isPro && (
+            <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 dark:bg-blue-950 dark:text-blue-400 px-1.5 py-0.5 rounded-full">
+              PRO
+            </span>
+          )}
+        </Link>
+      </div>
+
+      {/* ── Mobile drawer + backdrop ─────────────────────────────────────────── */}
+      {mobileOpen && (
+        <>
+          {/* Backdrop — full screen, closes sidebar on tap */}
+          <div
+            className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+            onClick={() => setMobileOpen(false)}
+            aria-hidden="true"
+          />
+          {/* Drawer */}
+          <aside className="lg:hidden fixed left-0 top-0 h-screen w-72 max-w-[85vw] bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 flex flex-col z-50">
+            {sidebarContent}
+          </aside>
+        </>
+      )}
+    </>
   )
 }

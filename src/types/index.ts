@@ -39,6 +39,7 @@ export interface GenerateRequest {
   hasStyleReference?: boolean
   hasProductReference?: boolean
   destinationContext?: { title: string; description: string }
+  promptOverride?: string
 }
 
 export interface PlatformOutput {

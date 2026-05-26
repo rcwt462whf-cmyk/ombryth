@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react"
 import Image from "next/image"
-import { Upload, X, Download, Copy, Check, Wand2, Info, ChevronLeft, ChevronRight, ChevronDown, BookMarked, Link, ArrowRight, RotateCcw } from "lucide-react"
+import { Upload, X, Download, Copy, Check, Wand2, Info, ChevronLeft, ChevronRight, ChevronDown, BookMarked, Link, ArrowRight, RotateCcw, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Slider } from "@/components/ui/slider"
@@ -230,6 +230,141 @@ function PinterestLogo({ className }: { className?: string }) {
   )
 }
 
+// ─── Post to Pinterest component ───────────────────────────────────────────────
+
+interface PinterestBoard { id: string; name: string }
+
+function PostToPinterest({
+  imageUrl, title, description, altText, link,
+}: {
+  imageUrl: string; title?: string; description?: string; altText?: string; link?: string
+}) {
+  const { toast } = useToast()
+  const [connected, setConnected] = useState<boolean | null>(null)
+  const [boards, setBoards] = useState<PinterestBoard[]>([])
+  const [selectedBoard, setSelectedBoard] = useState("")
+  const [loadingBoards, setLoadingBoards] = useState(false)
+  const [posting, setPosting] = useState(false)
+  const [posted, setPosted] = useState(false)
+  const [open, setOpen] = useState(false)
+
+  // Check connection status once
+  useEffect(() => {
+    fetch("/api/pinterest/status")
+      .then(r => r.json())
+      .then(d => setConnected(d.connected))
+      .catch(() => setConnected(false))
+  }, [])
+
+  async function openPanel() {
+    setOpen(true)
+    setPosted(false)
+    if (boards.length === 0) {
+      setLoadingBoards(true)
+      try {
+        const res = await fetch("/api/pinterest/boards")
+        const data = await res.json()
+        setBoards(data.boards ?? [])
+        if (data.boards?.length > 0) setSelectedBoard(data.boards[0].id)
+      } catch {
+        toast({ variant: "destructive", title: "Failed to load boards" })
+      } finally {
+        setLoadingBoards(false)
+      }
+    }
+  }
+
+  async function postPin() {
+    if (!selectedBoard) return
+    setPosting(true)
+    try {
+      const res = await fetch("/api/pinterest/pin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ boardId: selectedBoard, imageUrl, title, description, altText, link }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? "Post failed")
+      setPosted(true)
+      toast({
+        title: "Posted to Pinterest!",
+        description: data.pinUrl ? (
+          <a href={data.pinUrl} target="_blank" rel="noopener noreferrer" className="underline">View pin →</a>
+        ) : "Your pin is live.",
+      })
+    } catch (err) {
+      toast({ variant: "destructive", title: "Failed to post", description: err instanceof Error ? err.message : undefined })
+    } finally {
+      setPosting(false)
+    }
+  }
+
+  if (connected === null) return null // still loading
+
+  if (!connected) {
+    return (
+      <a href="/app/settings?tab=keys" className="flex items-center justify-center gap-2 w-full py-2 rounded-lg border border-[#E60023]/40 text-[#E60023] text-sm font-medium hover:bg-[#E60023]/5 transition-colors">
+        <PinterestLogo className="w-4 h-4" />
+        Connect Pinterest to post directly
+      </a>
+    )
+  }
+
+  if (!open) {
+    return (
+      <button
+        onClick={openPanel}
+        className="flex items-center justify-center gap-2 w-full py-2 rounded-lg bg-[#E60023] hover:bg-[#c1001f] text-white text-sm font-medium transition-colors"
+      >
+        <PinterestLogo className="w-4 h-4" />
+        Post to Pinterest
+      </button>
+    )
+  }
+
+  return (
+    <div className="space-y-2 p-3 bg-muted/40 rounded-lg border border-border">
+      <p className="text-xs font-medium text-foreground">Select a board</p>
+      {loadingBoards ? (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+          Loading boards…
+        </div>
+      ) : boards.length === 0 ? (
+        <p className="text-xs text-muted-foreground">No boards found. Create a board on Pinterest first.</p>
+      ) : (
+        <Select value={selectedBoard} onValueChange={setSelectedBoard}>
+          <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Choose board…" /></SelectTrigger>
+          <SelectContent>
+            {boards.map(b => (
+              <SelectItem key={b.id} value={b.id} className="text-xs">{b.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+      <div className="flex gap-2">
+        <button
+          onClick={postPin}
+          disabled={posting || !selectedBoard || posted}
+          className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md bg-[#E60023] hover:bg-[#c1001f] disabled:opacity-50 text-white text-xs font-medium transition-colors"
+        >
+          {posting
+            ? <><svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>Posting…</>
+            : posted
+              ? <><Check className="w-3 h-3" /> Posted!</>
+              : <><Send className="w-3 h-3" /> Post pin</>}
+        </button>
+        <button
+          onClick={() => setOpen(false)}
+          className="px-3 py-1.5 rounded-md border border-border text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function InstagramLogo({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -374,6 +509,11 @@ export default function GeneratePage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const loadingMsgInterval = useRef<ReturnType<typeof setInterval> | null>(null)
 
+  // Prompt editing
+  const [editingPrompt, setEditingPrompt] = useState(false)
+  const [editedPrompt, setEditedPrompt] = useState("")
+  const overridePromptRef = useRef<string | null>(null)
+
   function handleStyleFile(file: File | null) {
     setStyleFile(file)
     setStylePreview(file ? URL.createObjectURL(file) : null)
@@ -444,6 +584,7 @@ export default function GeneratePage() {
     setLoading(true)
     setResult(null)
     setSelectedImageIndex(0)
+    setEditingPrompt(false)
     setLoadingMsg(LOADING_MESSAGES[0])
     startLoadingMessages()
 
@@ -471,8 +612,10 @@ export default function GeneratePage() {
           hasStyleReference: !!styleFile,
           hasProductReference: !!productFile,
           destinationContext: destinationContext ?? undefined,
+          promptOverride: overridePromptRef.current ?? undefined,
         })
       )
+      overridePromptRef.current = null
 
       const res = await fetch("/api/generate", { method: "POST", body: fd })
       const data = await res.json()
@@ -1099,9 +1242,53 @@ export default function GeneratePage() {
                     </span>
                   )}
                   <CopyButton text={result.prompt} />
+                  {!editingPrompt && (
+                    <button
+                      onClick={() => { setEditedPrompt(result.prompt); setEditingPrompt(true) }}
+                      className="text-[11px] text-muted-foreground hover:text-foreground transition-colors px-1.5 py-0.5 rounded border border-transparent hover:border-border"
+                    >
+                      Edit
+                    </button>
+                  )}
                 </div>
               </div>
-              <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{result.prompt}</p>
+
+              {editingPrompt ? (
+                <div className="space-y-2">
+                  <textarea
+                    value={editedPrompt}
+                    onChange={e => setEditedPrompt(e.target.value)}
+                    className="w-full text-xs text-gray-700 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-muted border border-gray-200 dark:border-border rounded-lg p-2.5 resize-none focus:outline-none focus:ring-1 focus:ring-primary"
+                    rows={5}
+                    autoFocus
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      className="h-7 text-xs gap-1.5"
+                      disabled={loading || !editedPrompt.trim()}
+                      onClick={() => {
+                        overridePromptRef.current = editedPrompt.trim()
+                        handleGenerate()
+                      }}
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      Retry with this prompt
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 text-xs text-muted-foreground"
+                      onClick={() => setEditingPrompt(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{result.prompt}</p>
+              )}
+
               {result.productDescription && (
                 <p className="text-xs text-blue-600 dark:text-blue-400 flex items-center gap-1 mt-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
