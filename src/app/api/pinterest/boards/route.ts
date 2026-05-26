@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-import { getPinterestToken } from "../callback/route"
+import { getPinterestToken } from "@/lib/pinterest"
 
 export async function GET() {
   const supabase = await createClient()
