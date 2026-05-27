@@ -171,25 +171,24 @@ async function generateWithSeedream(
   styleStrength?: number,
   productBuffer?: Buffer | null
 ): Promise<Buffer> {
-  // BytePlus Seedream: use "4K" for resolution + separate aspect_ratio param
-  // The pixel dimension strings shown in their UI are not valid API size values
-  const aspectRatioMap: Record<string, string> = {
-    "1:1":  "1:1",
-    "16:9": "16:9",
-    "2:3":  "2:3",
-    "9:16": "9:16",
-    "4:5":  "4:5",
+  // BytePlus Seedream 4K native pixel dimensions (confirmed from BytePlus UI).
+  // Using pixel strings so the model generates at the correct resolution and aspect ratio
+  // in one shot — no cropping, no rescaling, no quality loss.
+  const sizeMap: Record<string, string> = {
+    "1:1":  "4096x4096",   // ~16.8MP square
+    "2:3":  "3328x4992",   // confirmed from BytePlus UI — 4K portrait
+    "9:16": "3040x5440",   // proportional 4K portrait (9:16)
+    "16:9": "5504x3040",   // confirmed from BytePlus UI — 4K landscape
+    "4:5":  "3648x4560",   // proportional 4K portrait (4:5)
   }
-  const seedreamAspectRatio = aspectRatioMap[aspectRatio] ?? "1:1"
+  const seedreamSize = sizeMap[aspectRatio] ?? "4096x4096"
 
   const body: Record<string, unknown> = {
     model: "seedream-4-5-251128",
     prompt,
     response_format: "url",
-    size: "4K",
-    aspect_ratio: seedreamAspectRatio,
+    size: seedreamSize,
     watermark: false,
-    sequential_image_generation: "disabled",
   }
 
   if (styleBuffer && productBuffer) {
