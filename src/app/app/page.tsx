@@ -380,6 +380,9 @@ export default function GeneratePage() {
   const [editedPrompt, setEditedPrompt] = useState("")
   const overridePromptRef = useRef<string | null>(null)
 
+  // Download label (acts as filename prefix / folder grouping)
+  const [downloadLabel, setDownloadLabel] = useState("")
+
   function handleStyleFile(file: File | null) {
     setStyleFile(file)
     setStylePreview(file ? URL.createObjectURL(file) : null)
@@ -507,16 +510,24 @@ export default function GeneratePage() {
   function downloadImage(index: number) {
     const b64 = result?.imagesBase64?.[index]
     if (!b64) return
+    const prefix = downloadLabel.trim().replace(/[^a-zA-Z0-9_\-]/g, "-") || "ombryth"
+    const suffix = (result?.imagesBase64?.length ?? 1) > 1 ? `-v${index + 1}` : ""
+    const filename = `${prefix}${suffix}.jpg`
+    // Must append to DOM before click — browsers silently ignore detached-element clicks
     const link = document.createElement("a")
     link.href = `data:image/jpeg;base64,${b64}`
-    link.download = `ombryth-${Date.now()}${batchMode ? `-v${index + 1}` : ""}.jpg`
+    link.download = filename
+    document.body.appendChild(link)
     link.click()
+    document.body.removeChild(link)
   }
 
   function downloadAll() {
-    result?.imagesBase64?.forEach((_, i) => {
-      setTimeout(() => downloadImage(i), i * 300)
-    })
+    const total = result?.imagesBase64?.length ?? 0
+    for (let i = 0; i < total; i++) {
+      // 700ms gap — browsers block simultaneous data: URL downloads
+      setTimeout(() => downloadImage(i), i * 700)
+    }
   }
 
   const activePlatforms = platforms.filter((p) => result?.textOutput?.[p] !== undefined)
@@ -1026,31 +1037,41 @@ export default function GeneratePage() {
                   )}
                 </div>
 
-                {/* Download buttons */}
-                <div className="flex items-center justify-between p-3 border-t border-gray-50">
-                  <div className="flex items-center gap-1 text-xs text-gray-400">
-                    {hasMultipleImages && (
-                      <span>Variation {selectedImageIndex + 1} of {result?.imagesBase64?.length}</span>
-                    )}
-                    <span className="text-green-600 flex items-center gap-1">
+                {/* Download label + buttons */}
+                <div className="border-t border-gray-50 px-3 pt-2.5 pb-3 space-y-2">
+                  {/* Label/folder row */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-gray-400 shrink-0">📁 Label</span>
+                    <input
+                      type="text"
+                      value={downloadLabel}
+                      onChange={e => setDownloadLabel(e.target.value)}
+                      placeholder="e.g. kitchen-shoot (optional)"
+                      className="flex-1 h-6 px-2 text-[11px] rounded border border-gray-200 bg-gray-50 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-200 placeholder:text-gray-300"
+                    />
+                    <span className="text-[10px] text-gray-400 shrink-0 hidden sm:block">→ {(downloadLabel.trim().replace(/[^a-zA-Z0-9_\-]/g, "-") || "ombryth")}-v1.jpg</span>
+                  </div>
+                  {/* Action row */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-green-600 flex items-center gap-1 text-xs">
                       <Check className="w-3 h-3" /> Metadata stripped
                     </span>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={handleGenerate} disabled={loading} className="h-7 text-xs gap-1">
-                      <RotateCcw className="w-3 h-3" />
-                      Retry
-                    </Button>
-                    {hasMultipleImages && (
-                      <Button size="sm" variant="outline" onClick={downloadAll} className="h-7 text-xs gap-1">
-                        <Download className="w-3 h-3" />
-                        Download all
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" onClick={handleGenerate} disabled={loading} className="h-7 text-xs gap-1">
+                        <RotateCcw className="w-3 h-3" />
+                        Retry
                       </Button>
-                    )}
-                    <Button size="sm" onClick={() => downloadImage(selectedImageIndex)} className="h-7 text-xs gap-1">
-                      <Download className="w-3 h-3" />
-                      Download
-                    </Button>
+                      {hasMultipleImages && (
+                        <Button size="sm" variant="outline" onClick={downloadAll} className="h-7 text-xs gap-1">
+                          <Download className="w-3 h-3" />
+                          All {result?.imagesBase64?.length}
+                        </Button>
+                      )}
+                      <Button size="sm" onClick={() => downloadImage(selectedImageIndex)} className="h-7 text-xs gap-1">
+                        <Download className="w-3 h-3" />
+                        Download
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
