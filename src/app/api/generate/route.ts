@@ -171,9 +171,16 @@ async function generateWithSeedream(
   styleStrength?: number,
   productBuffer?: Buffer | null
 ): Promise<Buffer> {
-  // BytePlus only accepts named size strings — custom pixel dimensions are silently ignored.
-  // "4K" = 3840×2160 is the highest valid value. Aspect ratio is enforced via prompt.
-  const size = "4K"
+  // BytePlus size strings: "4K" = 3840×2160 (16:9). Portrait 4K = "2160x3240" (2:3).
+  // Other ratios fall back to standard HD to stay within API limits.
+  const sizeMap: Record<string, string> = {
+    "16:9": "4K",         // 3840×2160 — exact 16:9 4K
+    "2:3":  "2160x3240",  // 2160×3240 — exact 2:3 portrait 4K equivalent
+    "1:1":  "1024x1024",
+    "9:16": "1024x1792",
+    "4:5":  "1024x1280",
+  }
+  const size = sizeMap[aspectRatio] ?? "1024x1024"
 
   const body: Record<string, unknown> = {
     model: "seedream-4-5-251128",
