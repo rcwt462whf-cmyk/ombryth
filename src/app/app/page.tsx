@@ -441,11 +441,6 @@ export default function GeneratePage() {
   }
 
   async function handleGenerate() {
-    if (platforms.length === 0) {
-      toast({ variant: "destructive", title: "Select at least one platform." })
-      return
-    }
-
     setLoading(true)
     setResult(null)
     setSelectedImageIndex(0)

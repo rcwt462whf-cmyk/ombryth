@@ -835,7 +835,9 @@ export async function POST(request: Request) {
     let textModelUsed: string = config.textModel
 
     try {
-      if (config.textModel === "gpt4o") {
+      if (config.platforms.length === 0) {
+        textModelUsed = "none"
+      } else if (config.textModel === "gpt4o") {
         if (!keyMap.openai) throw new Error("OpenAI API key not configured. Add it in Settings.")
         const openai = new OpenAI({ apiKey: keyMap.openai })
         textOutput = await generateTextWithOpenAI(openai, textSystemPrompt)
