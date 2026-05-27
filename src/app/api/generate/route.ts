@@ -172,13 +172,13 @@ async function generateWithSeedream(
   productBuffer?: Buffer | null
 ): Promise<Buffer> {
   const sizeMap: Record<string, string> = {
-    "1:1":  "4K",          // 3840×3840
-    "16:9": "5504x3040",   // 4K 16:9
-    "2:3":  "3328x4992",   // 4K 2:3 portrait
+    "16:9": "5504x3040",   // 4K 16:9 (confirmed valid)
+    "2:3":  "3328x4992",   // 4K 2:3 portrait (confirmed valid)
     "9:16": "3040x5504",   // 4K 9:16
     "4:5":  "3040x3800",   // 4K 4:5
+    "1:1":  "1024x1024",   // square — no confirmed 4K square value for BytePlus
   }
-  const size = sizeMap[aspectRatio] ?? "4K"
+  const size = sizeMap[aspectRatio] ?? "1024x1024"
 
   const body: Record<string, unknown> = {
     model: "seedream-4-5-251128",
