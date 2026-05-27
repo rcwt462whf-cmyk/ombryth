@@ -382,6 +382,7 @@ export default function GeneratePage() {
 
   // Download label (acts as filename prefix / folder grouping)
   const [downloadLabel, setDownloadLabel] = useState("")
+  const [downloadingAll, setDownloadingAll] = useState(false)
 
   function handleStyleFile(file: File | null) {
     setStyleFile(file)
@@ -523,10 +524,17 @@ export default function GeneratePage() {
   }
 
   function downloadAll() {
+    if (downloadingAll) return
     const total = result?.imagesBase64?.length ?? 0
+    if (total === 0) return
+    setDownloadingAll(true)
+    // Start at 200ms so all downloads are async (0ms fires inside click handler and gets dropped).
+    // 800ms gap between each — browsers throttle rapid data: URL downloads.
     for (let i = 0; i < total; i++) {
-      // 700ms gap — browsers block simultaneous data: URL downloads
-      setTimeout(() => downloadImage(i), i * 700)
+      setTimeout(() => {
+        downloadImage(i)
+        if (i === total - 1) setDownloadingAll(false)
+      }, 200 + i * 800)
     }
   }
 
@@ -1062,8 +1070,10 @@ export default function GeneratePage() {
                         Retry
                       </Button>
                       {hasMultipleImages && (
-                        <Button size="sm" variant="outline" onClick={downloadAll} className="h-7 text-xs gap-1">
-                          <Download className="w-3 h-3" />
+                        <Button size="sm" variant="outline" onClick={downloadAll} disabled={downloadingAll} className="h-7 text-xs gap-1">
+                          {downloadingAll
+                            ? <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            : <Download className="w-3 h-3" />}
                           All {result?.imagesBase64?.length}
                         </Button>
                       )}
