@@ -782,9 +782,15 @@ export async function POST(request: Request) {
       if (styleDescription) finalPrompt += `. ${styleDescription}`
     }
 
-    // Append photo realism suffix for Seedream — makes a significant quality difference
+    // Append photo realism suffix for Seedream.
+    // Keep it minimal — Seedream is already trained for photorealism.
+    // Don't force "natural light" when the preset is warm/dark (evening, candlelight).
     if (config.imageModel === "seedream") {
-      finalPrompt += ", photorealistic, Canon 5D, 35mm, f/2.8, natural light, no people"
+      const warmPresets = ["evening", "candlelight", "film-grain", "candid"]
+      const isWarm = warmPresets.includes(config.lightingPreset ?? "")
+      finalPrompt += isWarm
+        ? ", photorealistic, 35mm, no people"
+        : ", photorealistic, 35mm, natural light, no people"
     }
 
     // AI tonedown: adds analog/imperfection modifiers to reduce the "generated" look
