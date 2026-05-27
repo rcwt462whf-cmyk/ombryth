@@ -809,6 +809,14 @@ export async function POST(request: Request) {
       )
     )
 
+    // Log actual dimensions returned by the model (visible in Vercel logs)
+    if (config.imageModel === "seedream") {
+      try {
+        const meta = await sharp(imageBuffers[0]).metadata()
+        console.log(`[seedream] returned dimensions: ${meta.width}x${meta.height} (requested: ${config.aspectRatio})`)
+      } catch { /* non-fatal */ }
+    }
+
     // Strip metadata and encode
     const cleanBuffers = await Promise.all(
       imageBuffers.map((buf) =>
