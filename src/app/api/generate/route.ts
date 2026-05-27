@@ -171,27 +171,25 @@ async function generateWithSeedream(
   styleStrength?: number,
   productBuffer?: Buffer | null
 ): Promise<Buffer> {
-  // BytePlus Seedream: aspect_ratio string for shape + width for scale.
-  // Hypothesis: aspect_ratio controls the output shape, width sets the base
-  // resolution, and BytePlus calculates height = width * (h/w ratio).
-  // e.g. aspect_ratio:"2:3" + width:2160 → 2160×3240 portrait
-  const aspectRatioMap: Record<string, string> = {
-    "1:1":  "1:1",
-    "2:3":  "2:3",
-    "9:16": "9:16",
-    "16:9": "16:9",
-    "4:5":  "4:5",
+  // BytePlus Seedream: size as a string encodes the aspect ratio.
+  // Integer width/height params are ignored for non-square — API falls back to 1:1.
+  // The size string (e.g. "3328x4992") signals 2:3 ratio; BytePlus generates at
+  // its internal resolution for that ratio. This was the original working approach.
+  const sizeMap: Record<string, string> = {
+    "1:1":  "4K",
+    "2:3":  "3328x4992",
+    "16:9": "5504x3040",
+    "9:16": "3040x5504",
+    "4:5":  "3040x3800",
   }
-  const seedreamAspectRatio = aspectRatioMap[aspectRatio] ?? "1:1"
+  const size = sizeMap[aspectRatio] ?? "4K"
 
   const body: Record<string, unknown> = {
     model: "seedream-4-5-251128",
     prompt,
     response_format: "url",
-    aspect_ratio: seedreamAspectRatio,
-    width: 2160,
+    size,
     sequential_image_generation: "disabled",
-    stream: false,
     watermark: false,
   }
 
