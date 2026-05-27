@@ -864,25 +864,30 @@ export async function POST(request: Request) {
       // Non-fatal — return image without text
     }
 
-    // Save generation records
-    await Promise.all(
-      imageUrls.map((imageUrl) =>
-        supabase.from("generations").insert({
-          user_id: user.id,
-          image_model: config.imageModel,
-          text_model: config.textModel,
-          category_preset: config.niche ?? config.categoryPreset ?? "home-decor",
-          lighting_preset: config.lightingPreset,
-          platforms: config.platforms,
-          prompt_used: finalPrompt,
-          status: "completed",
-          has_style_reference: !!styleFile,
-          has_product_reference: !!productFile,
-          product_description: product?.description ?? null,
-          image_url: imageUrl ?? null,
-        })
+    // Save generation records (non-fatal — never block the response on a DB write error)
+    try {
+      await Promise.all(
+        imageUrls.map((imageUrl) =>
+          supabase.from("generations").insert({
+            user_id: user.id,
+            image_model: config.imageModel,
+            text_model: config.textModel,
+            category_preset: config.niche ?? config.categoryPreset ?? null,
+            lighting_preset: config.lightingPreset ?? null,
+            platforms: config.platforms,
+            prompt_used: finalPrompt,
+            status: "completed",
+            has_style_reference: !!styleFile,
+            has_product_reference: !!productFile,
+            product_description: product?.description ?? null,
+            image_url: imageUrl ?? null,
+          })
+        )
       )
-    )
+    } catch (saveErr) {
+      console.error("[generate] history save failed:", saveErr)
+      // Non-fatal — image was generated successfully, just log the error
+    }
 
     if (!isPro) {
       await supabase
