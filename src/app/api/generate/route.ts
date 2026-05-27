@@ -171,23 +171,24 @@ async function generateWithSeedream(
   styleStrength?: number,
   productBuffer?: Buffer | null
 ): Promise<Buffer> {
-  // BytePlus Seedream: width + height as separate integers (official API format).
-  // All values are multiples of 2160 (standard 4K base unit) for maximum compatibility.
-  const dimensionMap: Record<string, { width: number; height: number }> = {
-    "1:1":  { width: 2160, height: 2160 },  // 4K square
-    "2:3":  { width: 2160, height: 3240 },  // 4K portrait 2:3
-    "9:16": { width: 2160, height: 3840 },  // 4K portrait 9:16
-    "16:9": { width: 3840, height: 2160 },  // 4K landscape UHD — confirmed from official docs
-    "4:5":  { width: 2160, height: 2700 },  // 4K portrait 4:5
+  // BytePlus Seedream: aspect_ratio string controls the shape.
+  // width/height integers are ignored by the model for non-square ratios —
+  // the API always falls back to 1:1 when given unsupported pixel dimensions.
+  // aspect_ratio is the only reliable way to get portrait/landscape output.
+  const aspectRatioMap: Record<string, string> = {
+    "1:1":  "1:1",
+    "2:3":  "2:3",
+    "9:16": "9:16",
+    "16:9": "16:9",
+    "4:5":  "4:5",
   }
-  const { width: seedreamW, height: seedreamH } = dimensionMap[aspectRatio] ?? { width: 2160, height: 2160 }
+  const seedreamAspectRatio = aspectRatioMap[aspectRatio] ?? "1:1"
 
   const body: Record<string, unknown> = {
     model: "seedream-4-5-251128",
     prompt,
     response_format: "url",
-    width: seedreamW,
-    height: seedreamH,
+    aspect_ratio: seedreamAspectRatio,
     sequential_image_generation: "disabled",
     stream: false,
     watermark: false,
