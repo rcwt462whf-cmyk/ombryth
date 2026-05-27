@@ -782,10 +782,10 @@ export async function POST(request: Request) {
       if (styleDescription) finalPrompt += `. ${styleDescription}`
     }
 
-    // Append photo realism suffix for Seedream.
-    // Keep it minimal — Seedream is already trained for photorealism.
-    // Don't force "natural light" when the preset is warm/dark (evening, candlelight).
-    if (config.imageModel === "seedream") {
+    // Append photo realism suffix for Seedream — only on fresh generations, not overrides.
+    // When promptOverride is set, the prompt already contains the suffix from the previous
+    // generation — appending again causes it to stack up on every retry.
+    if (config.imageModel === "seedream" && !promptOverride) {
       const warmPresets = ["evening", "candlelight", "film-grain", "candid"]
       const isWarm = warmPresets.includes(config.lightingPreset ?? "")
       finalPrompt += isWarm
