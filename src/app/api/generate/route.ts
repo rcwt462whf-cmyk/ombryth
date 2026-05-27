@@ -171,14 +171,9 @@ async function generateWithSeedream(
   styleStrength?: number,
   productBuffer?: Buffer | null
 ): Promise<Buffer> {
-  const sizeMap: Record<string, string> = {
-    "1:1": "4K",
-    "2:3": "3328x4992",
-    "16:9": "5504x3040",
-    "9:16": "3040x5504",
-    "4:5": "3040x3800",
-  }
-  const size = sizeMap[aspectRatio] ?? "4K"
+  // BytePlus only accepts named size strings — custom pixel dimensions are silently ignored.
+  // "4K" = 3840×2160 is the highest valid value. Aspect ratio is enforced via prompt.
+  const size = "4K"
 
   const body: Record<string, unknown> = {
     model: "seedream-4-5-251128",
