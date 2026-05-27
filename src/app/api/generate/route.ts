@@ -783,6 +783,11 @@ export async function POST(request: Request) {
       finalPrompt += ", photorealistic, Canon 5D, 35mm, f/2.8, natural light, no people"
     }
 
+    // AI tonedown: adds analog/imperfection modifiers to reduce the "generated" look
+    if (config.aiTonedown) {
+      finalPrompt += ", subtle film grain, slight lens imperfection, organic shadows, uneven ambient light, natural texture variation, slightly imperfect composition, analog feel, candid atmosphere"
+    }
+
     // captionContext: always rich/human-readable — used for caption writing
     // For Seedream multi-image, finalPrompt gets overridden with image-slot instructions
     const captionContext = finalPrompt

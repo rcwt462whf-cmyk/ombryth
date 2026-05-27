@@ -339,6 +339,7 @@ export default function GeneratePage() {
   const [platforms, setPlatforms] = useState<Platform[]>(["pinterest", "instagram"])
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>("2:3")
   const [batchMode, setBatchMode] = useState(false)
+  const [aiTonedown, setAiTonedown] = useState(false)
   const [language, setLanguage] = useState<Language>("en")
 
   // Destination URL
@@ -467,6 +468,7 @@ export default function GeneratePage() {
           aspectRatio,
           language,
           batchMode,
+          aiTonedown,
           styleReferenceStrength: styleFile ? styleStrength : undefined,
           productReferenceStrength: productFile ? productStrength : undefined,
           hasStyleReference: !!styleFile,
@@ -921,6 +923,14 @@ export default function GeneratePage() {
                 <p className="text-xs text-gray-400 mt-0.5">Generate 3 variations at once</p>
               </div>
               <Switch checked={batchMode} onCheckedChange={setBatchMode} />
+            </div>
+
+            <div className="flex items-center justify-between py-1">
+              <div>
+                <p className="text-xs font-medium text-gray-700 dark:text-gray-300">AI tonedown</p>
+                <p className="text-xs text-gray-400 mt-0.5">Adds film grain + imperfections for a more natural look</p>
+              </div>
+              <Switch checked={aiTonedown} onCheckedChange={setAiTonedown} />
             </div>
           </div>
 

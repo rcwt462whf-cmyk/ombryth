@@ -40,6 +40,7 @@ export interface GenerateRequest {
   hasProductReference?: boolean
   destinationContext?: { title: string; description: string }
   promptOverride?: string
+  aiTonedown?: boolean
 }
 
 export interface PlatformOutput {
