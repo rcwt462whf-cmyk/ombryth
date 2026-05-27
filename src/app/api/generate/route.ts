@@ -172,15 +172,15 @@ async function generateWithSeedream(
   productBuffer?: Buffer | null
 ): Promise<Buffer> {
   // BytePlus Seedream: width + height as separate integers (official API format).
-  // 4K dimensions per aspect ratio — confirmed from BytePlus docs & UI.
+  // All values are multiples of 2160 (standard 4K base unit) for maximum compatibility.
   const dimensionMap: Record<string, { width: number; height: number }> = {
-    "1:1":  { width: 2880, height: 2880 },  // ~8.3MP square 4K-class
-    "2:3":  { width: 3328, height: 4992 },  // confirmed from BytePlus UI — 4K portrait
-    "9:16": { width: 2160, height: 3840 },  // standard 4K portrait (9:16)
-    "16:9": { width: 3840, height: 2160 },  // standard 4K landscape (UHD) — per official docs example
-    "4:5":  { width: 3456, height: 4320 },  // proportional 4K portrait (4:5)
+    "1:1":  { width: 2160, height: 2160 },  // 4K square
+    "2:3":  { width: 2160, height: 3240 },  // 4K portrait 2:3
+    "9:16": { width: 2160, height: 3840 },  // 4K portrait 9:16
+    "16:9": { width: 3840, height: 2160 },  // 4K landscape UHD — confirmed from official docs
+    "4:5":  { width: 2160, height: 2700 },  // 4K portrait 4:5
   }
-  const { width: seedreamW, height: seedreamH } = dimensionMap[aspectRatio] ?? { width: 2880, height: 2880 }
+  const { width: seedreamW, height: seedreamH } = dimensionMap[aspectRatio] ?? { width: 2160, height: 2160 }
 
   const body: Record<string, unknown> = {
     model: "seedream-4-5-251128",
