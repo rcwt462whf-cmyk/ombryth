@@ -171,10 +171,10 @@ async function generateWithSeedream(
   styleStrength?: number,
   productBuffer?: Buffer | null
 ): Promise<Buffer> {
-  // BytePlus Seedream: aspect_ratio string controls the shape.
-  // width/height integers are ignored by the model for non-square ratios —
-  // the API always falls back to 1:1 when given unsupported pixel dimensions.
-  // aspect_ratio is the only reliable way to get portrait/landscape output.
+  // BytePlus Seedream: aspect_ratio string for shape + width for scale.
+  // Hypothesis: aspect_ratio controls the output shape, width sets the base
+  // resolution, and BytePlus calculates height = width * (h/w ratio).
+  // e.g. aspect_ratio:"2:3" + width:2160 → 2160×3240 portrait
   const aspectRatioMap: Record<string, string> = {
     "1:1":  "1:1",
     "2:3":  "2:3",
@@ -189,6 +189,7 @@ async function generateWithSeedream(
     prompt,
     response_format: "url",
     aspect_ratio: seedreamAspectRatio,
+    width: 2160,
     sequential_image_generation: "disabled",
     stream: false,
     watermark: false,
