@@ -200,12 +200,12 @@ function LoadingSpinner({ text }: { text?: string }) {
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
 const LIGHTING_KEYS = Object.keys(LIGHTING_PRESETS) as LightingPreset[]
-const ASPECT_RATIOS: { value: AspectRatio; label: string; hint: string }[] = [
-  { value: "2:3",  label: "2:3",  hint: "Pinterest"     },
-  { value: "4:5",  label: "4:5",  hint: "Instagram / FB" },
-  { value: "1:1",  label: "1:1",  hint: "Square"        },
-  { value: "9:16", label: "9:16", hint: "Stories/Reels" },
-  { value: "16:9", label: "16:9", hint: "Google Ads"    },
+const ASPECT_RATIOS: { value: AspectRatio; label: string; hint: string; w: number; h: number }[] = [
+  { value: "2:3",  label: "2:3",  hint: "Pinterest",      w: 10, h: 15 },
+  { value: "4:5",  label: "4:5",  hint: "Instagram",      w: 12, h: 15 },
+  { value: "1:1",  label: "1:1",  hint: "Square",         w: 14, h: 14 },
+  { value: "9:16", label: "9:16", hint: "Stories",        w: 9,  h: 16 },
+  { value: "16:9", label: "16:9", hint: "Google Ads",     w: 16, h: 9  },
 ]
 
 const IMAGE_MODELS: { value: ImageModel; label: string; badge?: string }[] = [
@@ -254,11 +254,11 @@ function GoogleAdsLogo({ className }: { className?: string }) {
   )
 }
 
-const PLATFORMS: { value: Platform; label: string; Logo: React.FC<{ className?: string }>; defaultRatio: AspectRatio }[] = [
-  { value: "pinterest",  label: "Pinterest",  Logo: PinterestLogo,  defaultRatio: "2:3"  },
-  { value: "instagram",  label: "Instagram",  Logo: InstagramLogo,  defaultRatio: "4:5"  },
-  { value: "facebook",   label: "Facebook",   Logo: FacebookLogo,   defaultRatio: "1:1"  },
-  { value: "google-ads", label: "Google Ads", Logo: GoogleAdsLogo,  defaultRatio: "16:9" },
+const PLATFORMS: { value: Platform; label: string; Logo: React.FC<{ className?: string }>; defaultRatio: AspectRatio; activeClass: string }[] = [
+  { value: "pinterest",  label: "Pinterest",  Logo: PinterestLogo,  defaultRatio: "2:3",  activeClass: "border-[#E60023]/30 bg-[#E60023]/8 text-[#E60023]"  },
+  { value: "instagram",  label: "Instagram",  Logo: InstagramLogo,  defaultRatio: "4:5",  activeClass: "border-pink-300 bg-gradient-to-b from-pink-50 to-orange-50 text-pink-600" },
+  { value: "facebook",   label: "Facebook",   Logo: FacebookLogo,   defaultRatio: "1:1",  activeClass: "border-blue-300 bg-blue-50 text-blue-600"  },
+  { value: "google-ads", label: "Google Ads", Logo: GoogleAdsLogo,  defaultRatio: "16:9", activeClass: "border-green-300 bg-green-50 text-green-700" },
 ]
 
 const LANGUAGES: { value: Language; label: string; flag: string }[] = [
@@ -552,8 +552,8 @@ export default function GeneratePage() {
         {/* ── Left panel ───────────────────────────────────────────────────────── */}
         <div className="w-full lg:w-[420px] lg:shrink-0 space-y-4">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Generate</h1>
-            <p className="text-sm text-gray-500 mt-0.5">Lifestyle images + platform captions in one click</p>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-blue-600 bg-clip-text text-transparent">Generate</h1>
+            <p className="text-sm text-gray-400 mt-0.5">Lifestyle images + platform captions in one click</p>
           </div>
 
           {/* Reference images */}
@@ -875,43 +875,53 @@ export default function GeneratePage() {
             <div className="space-y-2">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Output Platforms</p>
               <div className="flex gap-2">
-                {PLATFORMS.map(({ value, label, Logo }) => (
-                  <button
-                    key={value}
-                    onClick={() => togglePlatform(value)}
-                    aria-pressed={platforms.includes(value)}
-                    className={cn(
-                      "flex-1 py-2 rounded-lg text-xs font-medium border transition-colors flex flex-col items-center gap-1",
-                      platforms.includes(value)
-                        ? "border-blue-200 bg-blue-50 text-blue-700"
-                        : "border-gray-100 dark:border-gray-700 text-gray-500 hover:border-gray-200 dark:hover:border-gray-600"
-                    )}
-                  >
-                    <Logo className="w-4 h-4" />
-                    <span>{label}</span>
-                  </button>
-                ))}
+                {PLATFORMS.map(({ value, label, Logo, activeClass }) => {
+                  const active = platforms.includes(value)
+                  return (
+                    <button
+                      key={value}
+                      onClick={() => togglePlatform(value)}
+                      aria-pressed={active}
+                      className={cn(
+                        "flex-1 py-2 rounded-lg text-xs font-medium border transition-all flex flex-col items-center gap-1 relative",
+                        active ? activeClass : "border-gray-100 dark:border-gray-700 text-gray-400 hover:border-gray-200 dark:hover:border-gray-600 hover:text-gray-600"
+                      )}
+                    >
+                      {active && <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-current opacity-70" />}
+                      <Logo className="w-4 h-4" />
+                      <span>{label}</span>
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
             <div className="space-y-2">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Aspect Ratio</p>
               <div className="grid grid-cols-5 gap-1.5">
-                {ASPECT_RATIOS.map(({ value, label, hint }) => (
-                  <button
-                    key={value}
-                    onClick={() => setAspectRatio(value)}
-                    className={cn(
-                      "py-2 rounded-lg text-xs font-medium border transition-colors flex flex-col items-center gap-0.5",
-                      aspectRatio === value
-                        ? "border-blue-200 bg-blue-50 text-blue-700"
-                        : "border-gray-100 text-gray-500 hover:border-gray-200"
-                    )}
-                  >
-                    <span>{label}</span>
-                    <span className="text-[10px] font-normal opacity-60">{hint}</span>
-                  </button>
-                ))}
+                {ASPECT_RATIOS.map(({ value, label, hint, w, h }) => {
+                  const active = aspectRatio === value
+                  // Scale shape to max 16px in longest dimension
+                  const scale = 16 / Math.max(w, h)
+                  const pw = Math.round(w * scale)
+                  const ph = Math.round(h * scale)
+                  return (
+                    <button
+                      key={value}
+                      onClick={() => setAspectRatio(value)}
+                      className={cn(
+                        "py-2 rounded-lg text-xs font-medium border transition-all flex flex-col items-center gap-1.5",
+                        active ? "border-blue-200 bg-blue-50 text-blue-700" : "border-gray-100 text-gray-500 hover:border-gray-200"
+                      )}
+                    >
+                      <span
+                        className={cn("rounded-[2px] border-[1.5px] transition-colors", active ? "border-blue-400 bg-blue-100" : "border-gray-300 bg-gray-100")}
+                        style={{ width: pw, height: ph }}
+                      />
+                      <span className="leading-none">{label}</span>
+                    </button>
+                  )
+                })}
               </div>
               {(aspectRatio === "9:16" || aspectRatio === "4:5") && imageModel === "dalle3" && (
                 <p className="text-[11px] text-amber-600 flex items-center gap-1">
@@ -955,10 +965,15 @@ export default function GeneratePage() {
 
           {/* Generate button */}
           <div className="space-y-2 pb-4">
-            <Button
-              className="w-full h-11 text-sm font-semibold gap-2"
+            <button
               onClick={handleGenerate}
               disabled={loading}
+              className={cn(
+                "w-full h-11 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all",
+                loading
+                  ? "bg-blue-400 cursor-not-allowed text-white"
+                  : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md shadow-blue-200 hover:shadow-lg hover:shadow-blue-300 hover:-translate-y-px active:translate-y-0"
+              )}
             >
               {loading ? (
                 <>
@@ -974,7 +989,7 @@ export default function GeneratePage() {
                   {batchMode ? "Generate 3 Variations" : "Generate"}
                 </>
               )}
-            </Button>
+            </button>
             {freeUsedCount !== null && (
               <p className={cn(
                 "text-center text-xs",
@@ -1110,13 +1125,20 @@ export default function GeneratePage() {
                 )}
               </div>
             ) : (
-              <div className={cn("flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-800/60 gap-3", ASPECT_RATIO_CLASS[aspectRatio])}>
-                <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                  <Wand2 className="w-8 h-8 text-gray-300 dark:text-gray-600" />
-                </div>
-                <div className="text-center">
-                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Your image will appear here</p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Configure settings and click Generate</p>
+              <div className={cn("relative flex flex-col items-center justify-center gap-3 overflow-hidden", ASPECT_RATIO_CLASS[aspectRatio])}>
+                {/* Animated gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/60 dark:from-gray-800 dark:via-blue-950/20 dark:to-indigo-950/30" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(99,102,241,0.07),transparent_60%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_80%,rgba(59,130,246,0.07),transparent_60%)]" />
+                {/* Content */}
+                <div className="relative z-10 flex flex-col items-center gap-3">
+                  <div className="w-14 h-14 rounded-2xl bg-white/80 dark:bg-gray-700/80 shadow-sm border border-white dark:border-gray-600 flex items-center justify-center backdrop-blur-sm">
+                    <Wand2 className="w-7 h-7 text-blue-400 dark:text-blue-500" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Your image will appear here</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Configure settings and click Generate</p>
+                  </div>
                 </div>
               </div>
             )}
