@@ -172,29 +172,39 @@ async function generateWithSeedream(
   productBuffer?: Buffer | null,
   modelVariant: "seedream" | "seedream-5-lite" = "seedream"
 ): Promise<Buffer> {
-  // BytePlus Seedream: size as a string encodes the aspect ratio.
-  // Integer width/height params are ignored for non-square — API falls back to 1:1.
-  // The size string (e.g. "3328x4992") signals 2:3 ratio; BytePlus generates at
-  // its internal resolution for that ratio. This was the original working approach.
-  const sizeMap: Record<string, string> = {
+  // Seedream 4.5: pixel dimension strings encode aspect ratio (working approach)
+  // Seedream 5: uses "2K" size string + separate aspect_ratio param (per official docs)
+  const isSeedream5 = modelVariant === "seedream-5-lite"
+
+  const size45Map: Record<string, string> = {
     "1:1":  "4K",
     "2:3":  "3328x4992",
     "16:9": "5504x3040",
     "9:16": "3040x5504",
     "4:5":  "3040x3800",
   }
-  const size = sizeMap[aspectRatio] ?? "4K"
+  const aspectRatioMap: Record<string, string> = {
+    "1:1": "1:1", "2:3": "2:3", "16:9": "16:9", "9:16": "9:16", "4:5": "4:5",
+  }
 
-  // seedream-5-lite = lighter/faster; seedream = original high-quality 4.5
-  const modelId = modelVariant === "seedream-5-lite" ? "seedream-3-250611" : "seedream-4-5-251128"
+  const modelId = isSeedream5 ? "seedream-5-0-260128" : "seedream-4-5-251128"
 
   const body: Record<string, unknown> = {
     model: modelId,
     prompt,
     response_format: "url",
-    size,
     sequential_image_generation: "disabled",
+    stream: false,
     watermark: false,
+  }
+
+  if (isSeedream5) {
+    // Seedream 5: "2K" size + aspect_ratio string (per official BytePlus example)
+    body.size = "2K"
+    body.aspect_ratio = aspectRatioMap[aspectRatio] ?? "1:1"
+  } else {
+    // Seedream 4.5: pixel dimension string encodes the ratio
+    body.size = size45Map[aspectRatio] ?? "4K"
   }
 
   if (styleBuffer && productBuffer) {
