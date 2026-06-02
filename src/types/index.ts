@@ -1,4 +1,4 @@
-export type ImageModel = "dalle3" | "seedream" | "flux-schnell" | "flux-dev" | "stability"
+export type ImageModel = "dalle3" | "seedream" | "seedream-5-lite" | "flux-schnell" | "flux-dev" | "stability"
 export type TextModel = "gpt4o" | "claude" | "gemini"
 export type Platform = "pinterest" | "instagram" | "facebook" | "google-ads"
 export type AspectRatio = "2:3" | "1:1" | "16:9" | "9:16" | "4:5"

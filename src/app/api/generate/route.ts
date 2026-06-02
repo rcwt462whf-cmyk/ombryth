@@ -169,7 +169,8 @@ async function generateWithSeedream(
   aspectRatio: string,
   styleBuffer?: Buffer | null,
   styleStrength?: number,
-  productBuffer?: Buffer | null
+  productBuffer?: Buffer | null,
+  modelVariant: "seedream" | "seedream-5-lite" = "seedream"
 ): Promise<Buffer> {
   // BytePlus Seedream: size as a string encodes the aspect ratio.
   // Integer width/height params are ignored for non-square — API falls back to 1:1.
@@ -184,8 +185,11 @@ async function generateWithSeedream(
   }
   const size = sizeMap[aspectRatio] ?? "4K"
 
+  // seedream-5-lite = lighter/faster; seedream = original high-quality 4.5
+  const modelId = modelVariant === "seedream-5-lite" ? "seedream-3-250611" : "seedream-4-5-251128"
+
   const body: Record<string, unknown> = {
-    model: "seedream-4-5-251128",
+    model: modelId,
     prompt,
     response_format: "url",
     size,
@@ -544,10 +548,10 @@ async function generateOneImage(
       if (!keyMap.stability) throw new Error("Stability AI API key not configured. Add it in Settings.")
       return generateWithStability(keyMap.stability, prompt, config.aspectRatio, styleBuffer, config.styleReferenceStrength ?? 40)
     }
-    case "seedream": {
+    case "seedream":
+    case "seedream-5-lite": {
       if (!keyMap.byteplus) throw new Error("BytePlus API key not configured. Add it in Settings.")
-      // Seedream supports native multi-image: pass both style + product directly
-      return generateWithSeedream(keyMap.byteplus, prompt, config.aspectRatio, styleBuffer, config.styleReferenceStrength ?? 60, productBuffer)
+      return generateWithSeedream(keyMap.byteplus, prompt, config.aspectRatio, styleBuffer, config.styleReferenceStrength ?? 60, productBuffer, imageModel)
     }
     default:
       throw new Error(`Unknown image model: ${imageModel}`)
@@ -692,7 +696,8 @@ export async function POST(request: Request) {
     // (lighting, colours, mood) and encodes it as text in the prompt. This guarantees a
     // fresh image — a text prompt alone cannot recreate the same photo.
     // The style image is only sent to BytePlus when doing product injection (multi-image).
-    if (styleBuffer && (config.imageModel === "dalle3" || (config.imageModel === "seedream" && !productBuffer))) {
+    const isSeedream = config.imageModel === "seedream" || config.imageModel === "seedream-5-lite"
+    if (styleBuffer && (config.imageModel === "dalle3" || (isSeedream && !productBuffer))) {
       if (keyMap.anthropic) {
         const anthropic = new Anthropic({ apiKey: keyMap.anthropic })
         styleDescription = await analyzeStyleReference(anthropic, styleBuffer, styleFile?.type ?? "image/jpeg", styleStrength).catch(() => undefined)
@@ -718,7 +723,7 @@ export async function POST(request: Request) {
     // For Seedream + style-only (no product): ALWAYS build from niche/custom base —
     // never use styleDescription as the full prompt, because the style image is also
     // sent natively and that double-signals Seedream to copy the original photo.
-    const seedreamStyleOnly = config.imageModel === "seedream" && styleBuffer && !productBuffer
+    const seedreamStyleOnly = isSeedream && styleBuffer && !productBuffer
 
     let finalPrompt: string
     const hasNiche = !!(config.niche ?? config.categoryPreset)
@@ -785,7 +790,7 @@ export async function POST(request: Request) {
     // Append photo realism suffix for Seedream — only on fresh generations, not overrides.
     // When promptOverride is set, the prompt already contains the suffix from the previous
     // generation — appending again causes it to stack up on every retry.
-    if (config.imageModel === "seedream" && !promptOverride) {
+    if (isSeedream && !promptOverride) {
       const warmPresets = ["evening", "candlelight", "film-grain", "candid"]
       const isWarm = warmPresets.includes(config.lightingPreset ?? "")
       finalPrompt += isWarm
@@ -803,10 +808,10 @@ export async function POST(request: Request) {
     const captionContext = finalPrompt
 
     // Seedream multi-image: override finalPrompt to use image array slots with explicit scale
-    if (config.imageModel === "seedream" && styleBuffer && productBuffer && product) {
+    if (isSeedream && styleBuffer && productBuffer && product) {
       const customAddition = config.customPrompt ? ` ${config.customPrompt}.` : ""
       finalPrompt = `Take the ${product.objectType} from image 2 and ${product.placement} in the interior scene from image 1. The ${product.objectType} must appear at its true real-world size (approximately ${product.realWorldHeight}) — do NOT scale it up beyond realistic proportions. Keep the ${product.objectType}'s colours and design exactly as shown. ${prominenceStrengthToInstruction(productStrength)}${customAddition} Professional lifestyle interior photography.`
-    } else if (config.imageModel === "seedream" && productBuffer && product && !styleBuffer) {
+    } else if (isSeedream && productBuffer && product && !styleBuffer) {
       finalPrompt = `${productPhrase ?? product.description}. ${product.objectType} shown at realistic scale. The product colours and design must match the reference exactly.`
     }
 
@@ -820,10 +825,10 @@ export async function POST(request: Request) {
     )
 
     // Log actual dimensions returned by the model (visible in Vercel logs)
-    if (config.imageModel === "seedream") {
+    if (isSeedream) {
       try {
         const meta = await sharp(imageBuffers[0]).metadata()
-        console.log(`[seedream] returned dimensions: ${meta.width}x${meta.height} (requested: ${config.aspectRatio})`)
+        console.log(`[seedream] returned dimensions: ${meta.width}x${meta.height} (model: ${config.imageModel}, ratio: ${config.aspectRatio})`)
       } catch { /* non-fatal */ }
     }
 

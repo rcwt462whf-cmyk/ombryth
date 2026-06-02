@@ -213,7 +213,8 @@ const IMAGE_MODELS: { value: ImageModel; label: string; badge?: string }[] = [
   { value: "flux-schnell", label: "Flux Schnell", badge: "Replicate" },
   { value: "flux-dev", label: "Flux Dev + img2img", badge: "Replicate" },
   { value: "stability", label: "Stable Diffusion 3", badge: "Stability" },
-  { value: "seedream", label: "Seedream", badge: "BytePlus" },
+  { value: "seedream", label: "Seedream 4.5", badge: "BytePlus" },
+  { value: "seedream-5-lite", label: "Seedream 5 Lite", badge: "BytePlus" },
 ]
 
 const TEXT_MODELS: { value: TextModel; label: string }[] = [
