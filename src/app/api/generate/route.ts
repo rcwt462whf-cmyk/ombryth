@@ -199,8 +199,8 @@ async function generateWithSeedream(
   }
 
   if (isSeedream5) {
-    // Seedream 5: "2K" size + aspect_ratio string (per official BytePlus example)
-    body.size = "2K"
+    // Seedream 5: "4K" size + aspect_ratio string for shape
+    body.size = "4K"
     body.aspect_ratio = aspectRatioMap[aspectRatio] ?? "1:1"
   } else {
     // Seedream 4.5: pixel dimension string encodes the ratio
