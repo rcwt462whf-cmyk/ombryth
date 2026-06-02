@@ -176,15 +176,14 @@ async function generateWithSeedream(
   // Seedream 5: uses "2K" size string + separate aspect_ratio param (per official docs)
   const isSeedream5 = modelVariant === "seedream-5-lite"
 
-  const size45Map: Record<string, string> = {
+  // Both Seedream 4.5 and 5 use pixel dimension strings to encode aspect ratio.
+  // The size:"4K" + aspect_ratio combo consistently returns 1:1 — pixel strings are reliable.
+  const sizeMap: Record<string, string> = {
     "1:1":  "4K",
     "2:3":  "3328x4992",
     "16:9": "5504x3040",
     "9:16": "3040x5504",
     "4:5":  "3040x3800",
-  }
-  const aspectRatioMap: Record<string, string> = {
-    "1:1": "1:1", "2:3": "2:3", "16:9": "16:9", "9:16": "9:16", "4:5": "4:5",
   }
 
   const modelId = isSeedream5 ? "seedream-5-0-260128" : "seedream-4-5-251128"
@@ -193,18 +192,9 @@ async function generateWithSeedream(
     model: modelId,
     prompt,
     response_format: "url",
+    size: sizeMap[aspectRatio] ?? "4K",
     sequential_image_generation: "disabled",
-    stream: false,
     watermark: false,
-  }
-
-  if (isSeedream5) {
-    // Seedream 5: "4K" size + aspect_ratio string for shape
-    body.size = "4K"
-    body.aspect_ratio = aspectRatioMap[aspectRatio] ?? "1:1"
-  } else {
-    // Seedream 4.5: pixel dimension string encodes the ratio
-    body.size = size45Map[aspectRatio] ?? "4K"
   }
 
   if (styleBuffer && productBuffer) {
