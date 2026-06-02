@@ -900,7 +900,7 @@ export default function GeneratePage() {
             <div className="space-y-2">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Aspect Ratio</p>
               <div className="grid grid-cols-5 gap-1.5">
-                {ASPECT_RATIOS.map(({ value, label, hint, w, h }) => {
+                {ASPECT_RATIOS.map(({ value, label, w, h }) => {
                   const active = aspectRatio === value
                   // Scale shape to max 16px in longest dimension
                   const scale = 16 / Math.max(w, h)
