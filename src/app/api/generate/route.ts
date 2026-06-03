@@ -442,7 +442,7 @@ Title: max 100 chars. Use the hook formula. No hashtags. No banned openers. Shor
 Good: "The living room lighting rule that changes everything after dark"
 Bad: "Discover 5 Amazing Ways to Transform Your Living Room"
 
-Description: 2 sentences max. State what the content covers specifically. End with "Full guide on the blog." — nothing else.
+Description: 2-3 sentences. State specifically what the reader will learn — be concrete, not vague. End with "Full guide on the blog." — nothing else. No hype words.
 
 Alt text: One sentence describing exactly what's visible — materials, colours, objects, setting. End with the topic + "guide 2026."
 Example: "Warm bathroom with oak vanity, terracotta zellige tiles and brass fixtures. Bathroom tile guide 2026."

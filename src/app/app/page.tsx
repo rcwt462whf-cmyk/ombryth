@@ -1439,8 +1439,15 @@ export default function GeneratePage() {
                 {activeTextOutput.pinterest && platforms.includes("pinterest") && (
                   <TabsContent value="pinterest" className="space-y-3 mt-0">
                     <OutputField label="Title" value={activeTextOutput.pinterest.title} />
-                    <OutputField label="Description" value={activeTextOutput.pinterest.description} />
-                    <OutputField label="Hashtags" value={activeTextOutput.pinterest.hashtags} />
+                    <OutputField
+                      label="Description + Hashtags"
+                      value={
+                        activeTextOutput.pinterest.description +
+                        (activeTextOutput.pinterest.hashtags?.length
+                          ? "\n\n" + activeTextOutput.pinterest.hashtags.map((h: string) => `#${h}`).join(" ")
+                          : "")
+                      }
+                    />
                     <OutputField label="Alt Text" value={activeTextOutput.pinterest.altText} />
                     {destinationUrl && <OutputField label="Link" value={destinationUrl} />}
                     {result.imageUrls?.[selectedImageIndex] && (
