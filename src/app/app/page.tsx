@@ -529,9 +529,10 @@ export default function GeneratePage() {
         return
       }
 
-      setResult(data)
+      setResult(data as unknown as GenerationResult)
       // Keep free usage counter in sync
-      if (data.freeUsed !== null && data.freeUsed !== undefined) setFreeUsedCount(data.freeUsed)
+      const freeUsed = data.freeUsed as number | null | undefined
+      if (freeUsed !== null && freeUsed !== undefined) setFreeUsedCount(freeUsed)
     } catch (err) {
       console.error("[handleGenerate] unexpected:", err)
       toast({ variant: "destructive", title: "Unexpected error", description: err instanceof Error ? err.message : "Please try again." })
