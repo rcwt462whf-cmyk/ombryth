@@ -510,7 +510,13 @@ export default function GeneratePage() {
         clearTimeout(timeout)
       }
 
-      const data = await res.json()
+      let data: Record<string, unknown> = {}
+      try {
+        data = await res.json()
+      } catch {
+        toast({ variant: "destructive", title: "Server error", description: `Status ${res.status} — please try again.` })
+        return
+      }
 
       if (!res.ok) {
         toast({
@@ -518,7 +524,7 @@ export default function GeneratePage() {
           title: res.status === 402 ? "Free trial exhausted"
                 : res.status === 429 ? "Slow down!"
                 : "Generation failed",
-          description: data.error ?? "Something went wrong.",
+          description: String(data.error ?? "Something went wrong."),
         })
         return
       }
@@ -526,8 +532,9 @@ export default function GeneratePage() {
       setResult(data)
       // Keep free usage counter in sync
       if (data.freeUsed !== null && data.freeUsed !== undefined) setFreeUsedCount(data.freeUsed)
-    } catch {
-      toast({ variant: "destructive", title: "Unexpected error", description: "Please try again." })
+    } catch (err) {
+      console.error("[handleGenerate] unexpected:", err)
+      toast({ variant: "destructive", title: "Unexpected error", description: err instanceof Error ? err.message : "Please try again." })
     } finally {
       setLoading(false)
       stopLoadingMessages()
