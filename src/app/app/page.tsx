@@ -1165,10 +1165,6 @@ export default function GeneratePage() {
                       <Check className="w-3 h-3" /> Metadata stripped
                     </span>
                     <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={handleGenerate} disabled={loading} className="h-7 text-xs gap-1">
-                        <RotateCcw className="w-3 h-3" />
-                        Retry
-                      </Button>
                       {hasMultipleImages && (
                         <Button size="sm" variant="outline" onClick={downloadAll} disabled={downloadingAll} className="h-7 text-xs gap-1">
                           {downloadingAll
@@ -1311,15 +1307,30 @@ export default function GeneratePage() {
             <div className="bg-white dark:bg-card rounded-xl border border-gray-100 dark:border-border p-4">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Platform Content</p>
-                <button
-                  onClick={rewriteCaptions}
-                  disabled={rewritingCaptions}
-                  className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 disabled:opacity-50 transition-colors font-medium"
-                >
-                  {rewritingCaptions
-                    ? <><svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>Rewriting…</>
-                    : <><RotateCcw className="w-3 h-3" />New captions</>}
-                </button>
+                <div className="flex gap-2">
+                  {/* New captions — text only, image stays */}
+                  <button
+                    onClick={rewriteCaptions}
+                    disabled={rewritingCaptions || loading}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 disabled:opacity-40 transition-colors"
+                  >
+                    {rewritingCaptions
+                      ? <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                      : <RotateCcw className="w-3 h-3" />}
+                    New captions
+                  </button>
+                  {/* Regenerate all — new image + new captions */}
+                  <button
+                    onClick={handleGenerate}
+                    disabled={loading || rewritingCaptions}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-40 transition-colors"
+                  >
+                    {loading
+                      ? <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                      : <Wand2 className="w-3 h-3" />}
+                    Regenerate all
+                  </button>
+                </div>
               </div>
               <Tabs defaultValue={activePlatforms[0]}>
                 <TabsList className="mb-4 h-8">
