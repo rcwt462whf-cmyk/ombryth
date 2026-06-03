@@ -42,7 +42,8 @@ export async function POST(request: Request) {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
     const body = await request.json()
-    const { prompt, imageBase64, platforms, language, textModel, destinationContext, productDescription } = body
+    const { prompt, imageBase64, platforms, language, textModel, destinationContext, productDescription, scope } = body
+    const captionsOnly = scope === "captions"
 
     if (!prompt || !platforms?.length) {
       return NextResponse.json({ error: "Missing prompt or platforms" }, { status: 400 })
@@ -75,12 +76,18 @@ export async function POST(request: Request) {
       ? `\n\nWrite ALL output in ${LANGUAGE_NAMES[language] ?? language} as a native speaker.`
       : ""
 
+    const scopeInstruction = captionsOnly
+      ? `SCOPE: Rewrite ONLY the caption and hashtags fields. Keep title and altText exactly as they were — do not change them.`
+      : `SCOPE: Rewrite ALL fields — title, caption, altText, hashtags, headlines. Full fresh rewrite.`
+
     const systemPrompt = `${persona}
 
 ${imageRef}
 ${productBlock}${destBlock}
-HOOK STYLE (mandatory for opening line on every platform):
+HOOK STYLE (mandatory for opening line):
 ${hookStyle}
+
+${scopeInstruction}
 
 BANNED OPENERS: "Discover", "Transform", "Elevate", "Game changer", "The secret to", "Nobody tells you", "Say hello to"
 
