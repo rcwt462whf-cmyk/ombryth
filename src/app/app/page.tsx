@@ -388,6 +388,9 @@ export default function GeneratePage() {
   const [downloadLabel, setDownloadLabel] = useState("")
   const [downloadingAll, setDownloadingAll] = useState(false)
 
+  // Caption rewrite state
+  const [rewritingCaptions, setRewritingCaptions] = useState(false)
+
   function handleStyleFile(file: File | null) {
     setStyleFile(file)
     setStylePreview(file ? URL.createObjectURL(file) : null)
@@ -528,6 +531,33 @@ export default function GeneratePage() {
     } finally {
       setLoading(false)
       stopLoadingMessages()
+    }
+  }
+
+  async function rewriteCaptions() {
+    if (!result || rewritingCaptions || platforms.length === 0) return
+    setRewritingCaptions(true)
+    try {
+      const res = await fetch("/api/rewrite-captions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: result.prompt,
+          imageBase64: result.imagesBase64?.[selectedImageIndex] ?? null,
+          platforms,
+          language,
+          textModel,
+          destinationContext: destinationContext ?? undefined,
+          productDescription: result.productDescription ?? undefined,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? "Failed")
+      setResult(prev => prev ? { ...prev, textOutput: data.textOutput, textModelUsed: data.textModelUsed } : prev)
+    } catch {
+      toast({ variant: "destructive", title: "Caption rewrite failed", description: "Please try again." })
+    } finally {
+      setRewritingCaptions(false)
     }
   }
 
@@ -1279,7 +1309,18 @@ export default function GeneratePage() {
           {/* Platform text output */}
           {result?.textOutput && activePlatforms.length > 0 && (
             <div className="bg-white dark:bg-card rounded-xl border border-gray-100 dark:border-border p-4">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Platform Content</p>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Platform Content</p>
+                <button
+                  onClick={rewriteCaptions}
+                  disabled={rewritingCaptions}
+                  className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 disabled:opacity-50 transition-colors font-medium"
+                >
+                  {rewritingCaptions
+                    ? <><svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>Rewriting…</>
+                    : <><RotateCcw className="w-3 h-3" />New captions</>}
+                </button>
+              </div>
               <Tabs defaultValue={activePlatforms[0]}>
                 <TabsList className="mb-4 h-8">
                   {activePlatforms.map((p) => {
