@@ -1444,7 +1444,7 @@ export default function GeneratePage() {
                       value={
                         activeTextOutput.pinterest.description +
                         (activeTextOutput.pinterest.hashtags?.length
-                          ? "\n\n" + activeTextOutput.pinterest.hashtags.map((h: string) => `#${h}`).join(" ")
+                          ? "\n" + activeTextOutput.pinterest.hashtags.map((h: string) => `#${h}`).join(" ")
                           : "")
                       }
                     />
