@@ -1426,6 +1426,106 @@ function PinterestOAuthToast() {
   return null
 }
 
+// ─── Vynthr API Key card ───────────────────────────────────────────────────────
+
+function VynthrApiKeyCard() {
+  const { toast } = useToast()
+  const [keys, setKeys] = useState<{ id: string; key_prefix: string; label: string; last_used_at: string | null }[]>([])
+  const [loading, setLoading] = useState(true)
+  const [generating, setGenerating] = useState(false)
+  const [newKey, setNewKey] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    fetch("/api/personal-key").then(r => r.json()).then(d => {
+      setKeys(d.keys ?? [])
+      setLoading(false)
+    }).catch(() => setLoading(false))
+  }, [])
+
+  async function generateKey() {
+    setGenerating(true)
+    try {
+      const res = await fetch("/api/personal-key", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ label: "Vynthr" }),
+      })
+      const d = await res.json()
+      if (!res.ok) throw new Error(d.error)
+      setNewKey(d.key)
+      setKeys(prev => [{ id: crypto.randomUUID(), key_prefix: d.prefix, label: d.label, last_used_at: null }, ...prev])
+    } catch (e) {
+      toast({ variant: "destructive", title: "Failed to generate key", description: String(e) })
+    } finally {
+      setGenerating(false)
+    }
+  }
+
+  async function revokeKey(id: string) {
+    await fetch("/api/personal-key", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) })
+    setKeys(prev => prev.filter(k => k.id !== id))
+  }
+
+  async function copyKey() {
+    if (!newKey) return
+    await navigator.clipboard.writeText(newKey)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Vynthr Integration</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">Personal API keys for connecting Vynthr to your Ombryth account</p>
+        </div>
+        <button
+          onClick={generateKey}
+          disabled={generating}
+          className="h-8 px-3 text-xs font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 transition-colors"
+        >
+          {generating ? "Generating…" : "+ New key"}
+        </button>
+      </div>
+
+      {/* Show new key once — never visible again */}
+      {newKey && (
+        <div className="px-5 py-3 bg-amber-50 border-b border-amber-100 flex items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-medium text-amber-800 mb-1">Copy this key now — it won&apos;t be shown again</p>
+            <code className="text-xs text-amber-900 font-mono break-all">{newKey}</code>
+          </div>
+          <button onClick={copyKey} className="shrink-0 h-7 px-2.5 text-xs rounded border border-amber-300 text-amber-700 hover:bg-amber-100 transition-colors">
+            {copied ? "✓ Copied" : "Copy"}
+          </button>
+        </div>
+      )}
+
+      <div className="divide-y divide-border">
+        {loading ? (
+          <div className="px-5 py-4 text-xs text-muted-foreground">Loading…</div>
+        ) : keys.length === 0 ? (
+          <div className="px-5 py-4 text-xs text-muted-foreground">No keys yet. Generate one to connect Vynthr.</div>
+        ) : (
+          keys.map(k => (
+            <div key={k.id} className="px-5 py-3 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-foreground font-mono">{k.key_prefix}••••••••</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  {k.label} · {k.last_used_at ? `Last used ${new Date(k.last_used_at).toLocaleDateString()}` : "Never used"}
+                </p>
+              </div>
+              <button onClick={() => revokeKey(k.id)} className="text-xs text-red-500 hover:text-red-700 transition-colors">Revoke</button>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─── Main settings page ────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
@@ -1533,6 +1633,9 @@ export default function SettingsPage() {
             </div>
             <PinterestCard />
           </div>
+
+          {/* Vynthr / Personal API Keys */}
+          <VynthrApiKeyCard />
         </TabsContent>
 
         {/* Defaults */}

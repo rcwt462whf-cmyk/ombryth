@@ -579,11 +579,20 @@ export async function POST(request: Request) {
     }
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    // Support server-to-server calls from generate-pin (Vynthr integration)
+    // The x-vynthr-user-id header carries a pre-authenticated user ID
+    const vynthrUserId = request.headers.get("x-vynthr-user-id")
+    let userId: string
+    if (vynthrUserId) {
+      userId = vynthrUserId
+    } else {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      userId = user.id
     }
+    // Alias so the rest of the route works unchanged
+    const user = { id: userId }
 
     const { data: userData } = await supabase
       .from("users")
@@ -929,7 +938,7 @@ export async function POST(request: Request) {
       // Send welcome email on the very first generation (freeUsed was 0 before this)
       if (freeUsed === 0) {
         try {
-          const userEmail = userData?.email ?? user.email
+          const userEmail = userData?.email
           if (userEmail) {
             await sendWelcomeEmail(userEmail, userData?.referral_code ?? undefined)
           }
