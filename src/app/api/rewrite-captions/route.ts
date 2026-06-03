@@ -13,14 +13,14 @@ const LANGUAGE_NAMES: Record<string, string> = {
 }
 
 const HOOK_STYLES = [
-  "Open with a curiosity gap — tease something without revealing it. e.g. 'The detail nobody mentions when they redo their bathroom'",
-  "Open with a confident, surprising claim stated as fact. e.g. 'Warm lighting does more for a bathroom than any renovation'",
-  "Open with a direct provocative question. e.g. 'Still using cool-white bulbs in your bathroom?'",
-  "Open by challenging a popular assumption. e.g. 'The marble trend is over — here's what's replacing it'",
-  "Open with a micro-scene or personal moment. e.g. 'Walked into a hotel room last month and couldn't stop staring at the wall'",
-  "Open with a specific number that teases a list. e.g. '3 things this bathroom does that yours probably doesn't'",
-  "Open with social proof or trend urgency. e.g. 'Every designer studio in Copenhagen is using this combination right now'",
-  "Open by promising a specific transformation. e.g. 'How to make a rental bathroom look like a boutique hotel'",
+  `Contradiction: "[Thing] looks [positive]. But [negative truth]." e.g. "Cold grey bedroom walls look fine in photos. At night they feel like a waiting room."`,
+  `Reframe: "[Common assumption]. [Correction]." e.g. "Most plants don't die from neglect. They die from being put in the wrong room."`,
+  `Number: "[Number]. [Number]. [Result]." e.g. "Three lamps. Two hours. Completely different room."`,
+  `Single truth: "[Thing] is the [one decision/mistake] that [consequence]." e.g. "The headboard is the most important decision in a bedroom."`,
+  `Challenge: "Most [things] [negative]." e.g. "Most bedrooms are designed by accident." or "Most kitchens age badly."`,
+  `Trend subversion: "[Trend] will date. [Timeless thing] won't." e.g. "Trends change. Terracotta zellige doesn't."`,
+  `Curiosity gap: State what's at stake without the answer. e.g. "Zellige is the most saved tile on Pinterest. Most people buying it don't know what they're getting."`,
+  `Strong opinion: Confident, specific, mildly controversial. e.g. "Open shelving in kitchens is almost always a mistake."`,
 ]
 
 function sanitizeHashtags(output: PlatformOutput): PlatformOutput {
@@ -84,20 +84,20 @@ export async function POST(request: Request) {
 
 ${imageRef}
 ${productBlock}${destBlock}
-HOOK STYLE (mandatory for opening line):
+HOOK (mandatory — use on every platform):
 ${hookStyle}
+Write original copy using this structure. Do not copy the formula literally.
 
 ${scopeInstruction}
 
-BANNED OPENERS: "Discover", "Transform", "Elevate", "Game changer", "The secret to", "Nobody tells you", "Say hello to"
+BANNED: stunning, gorgeous, amazing, game-changing, transform your space, nobody tells you, the secret to, discover, say hello to
 
-CAPTION RULES:
-- Opening line MUST use the hook style above.
-- Short sentences. Line breaks between ideas.
-- End with a specific CTA.
-- 1-2 emojis max.
-
-HASHTAG RULES: No spaces inside tags. No # prefix. Mix niche + broad.
+RULES: One emoji max after hook line only. No bullet points. No first person. Short, direct sentences.
+Pinterest CTA: end caption with exactly "Full guide in the link. 👇"
+Pinterest hashtags (20): 8-10 niche-specific, 6-8 topic-level, 2-3 intent. No vanity tags (#home #design).
+Instagram hashtags (30): mix niche + topic + broad + intent.
+Facebook hashtags (5): broad only.
+No # prefix in arrays. No spaces inside tags.
 
 Return ONLY valid JSON for platforms: ${platforms.join(", ")}.${langRule}`
 

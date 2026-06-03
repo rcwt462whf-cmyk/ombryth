@@ -337,18 +337,18 @@ Return ONLY the JSON, no markdown.`,
 // ─── Text generation ──────────────────────────────────────────────────────────
 
 const DEFAULT_SYSTEM_PERSONA =
-  "You are a top-performing social media content creator for lifestyle and home decor affiliate marketing. Your copy style is punchy, hook-first, and conversational — never corporate. Write like a real person with a distinct voice, not a brand. Short sentences. Use line breaks or numbered steps for tips. 1-2 relevant emojis placed naturally. End every caption with a concrete CTA. Never repeat the same idea twice in one caption."
+  "You are a Pinterest content specialist for home decor, interior design, bathroom, kitchen, wellness and indoor plants niches. Write like a knowledgeable friend — direct, honest, specific. Never use filler or hype words. One emoji max, placed after the hook line only."
 
-// Rotating hook styles — one is injected per generation to prevent repetition
+// Rotating hook formulas — one injected per generation for genuine variety
 const HOOK_STYLES = [
-  { name: "curiosity-gap",   instruction: "Open with a curiosity gap — tease something without revealing it. e.g. 'The detail nobody mentions when they redo their bathroom' or 'What separates a €3,000 room from a €30,000 one (it's not the budget)'" },
-  { name: "bold-claim",      instruction: "Open with a confident, slightly surprising claim stated as fact. e.g. 'Warm lighting does more for a bathroom than any renovation' or 'This tile pattern adds 10 years of style life to any room'" },
-  { name: "question",        instruction: "Open with a direct provocative question the reader asks themselves. e.g. 'Still using cool-white bulbs in your bathroom?' or 'When did every kitchen start looking the same?'" },
-  { name: "contrarian",      instruction: "Open by challenging a popular assumption. e.g. 'The marble trend is over — here's what's replacing it' or 'Stop buying matching sets. Mismatched textures photograph better'" },
-  { name: "story",           instruction: "Open with a micro-scene or personal moment. e.g. 'Walked into a hotel room last month and couldn't stop staring at the wall' or 'Took me three attempts to get this lighting right — here's what finally worked'" },
-  { name: "number-list",     instruction: "Open with a specific number that teases a list. e.g. '3 things this bathroom does that yours probably doesn't' or '5-minute change that makes morning routines feel like a spa'" },
-  { name: "fomo-social",     instruction: "Open with social proof or trend urgency. e.g. 'Every designer studio in Copenhagen is using this combination right now' or 'This was on every mood board at Maison&Objet — now it's accessible'" },
-  { name: "transformation",  instruction: "Open by promising a specific before/after or upgrade. e.g. 'How to make a rental bathroom look like a boutique hotel' or 'The exact switch that makes small spaces feel twice as big'" },
+  { name: "contradiction",  instruction: `HOOK — Contradiction: "[Thing] looks [positive]. But [negative truth]." e.g. "Cold grey bedroom walls look fine in photos. At night they feel like a waiting room." or "The worktop that looks perfect in the showroom isn't always the one you want after three years."` },
+  { name: "reframe",        instruction: `HOOK — Reframe: "[Common assumption]. [Correction]." e.g. "Most plants don't die from neglect. They die from being put in the wrong room." or "The ceiling light is why your living room feels clinical after dark."` },
+  { name: "number",         instruction: `HOOK — Number: "[Number]. [Number]. [Result]." e.g. "Three lamps. Two hours. Completely different room." or "One tile change. One shelf. It doesn't look like a rental anymore."` },
+  { name: "single-truth",   instruction: `HOOK — Single truth: "[Thing] is the [one decision/mistake] that [consequence]." e.g. "The headboard is the most important decision in a bedroom." or "The ceiling light is why your living room feels wrong after dark."` },
+  { name: "challenge",      instruction: `HOOK — Challenge: "Most [things] [negative]. [Subject] doesn't have to be." e.g. "Most bedrooms are designed by accident." or "Most kitchens age badly. This one won't."` },
+  { name: "trend-subvert",  instruction: `HOOK — Trend subversion: "[Trend] will date. [Timeless thing] won't." e.g. "Trends change. Terracotta zellige doesn't." or "Maximalism will cycle out. Good bones won't."` },
+  { name: "curiosity",      instruction: `HOOK — Curiosity gap: State what's at stake without giving the answer. e.g. "Zellige is the most saved bathroom tile on Pinterest. Most people buying it don't know what they're getting." or "There's one lighting mistake that makes every room feel smaller."` },
+  { name: "opinion",        instruction: `HOOK — Strong opinion: Confident, specific, mildly controversial. e.g. "Open shelving in kitchens is almost always a mistake." or "A rug does more for a living room than any sofa upgrade."` },
 ]
 
 /** Short instruction for Seedream's explicit image-slot prompt */
@@ -418,63 +418,72 @@ function buildTextSystemPrompt(
 
 ${imageRef}
 ${productBlock}${destinationBlock}
-HOOK STYLE FOR THIS GENERATION — you MUST use this style for the opening line on every platform:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HOOK FOR THIS GENERATION (mandatory — use on every platform):
 ${hookStyle.instruction}
-Do not use any other hook style. No "The X that nobody tells you" unless the hook style above specifically calls for it.
+The hook is the first sentence. It must stop a scroll. Do NOT copy the hook formula literally — write original copy using its structure.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-BANNED OPENERS (never use these words/phrases to start any sentence):
-"Discover", "Transform", "Elevate", "Explore", "Find the perfect", "Introducing", "Meet the",
-"The curtain trick", "nobody tells you", "The secret to", "Game changer", "Level up",
-"This is the", "Say hello to", "The ultimate guide", "Everything you need"
+BANNED WORDS/PHRASES (never use anywhere):
+stunning, gorgeous, amazing, incredible, game-changing, transform your space, elevate, discover,
+"nobody tells you", "the secret to", "say hello to", "find the perfect", "introducing", "game changer",
+"the ultimate guide", "everything you need", "level up"
 
-CAPTION RULES (apply to all platforms):
-- Opening line MUST follow the hook style above — this is non-negotiable.
-- Short sentences. Line breaks between ideas. Numbered lists for tips (1. 2. 3.).
-- Never repeat the same idea twice in one caption.
-- End with a concrete, specific CTA — vary it: "Link in bio", "Save for tonight", "Tell me in the comments", "Tap the link", "Try this weekend".
-- 1-2 relevant emojis max, placed naturally — not at the start of every line.
+GLOBAL RULES:
+- ONE emoji max in the entire output — place it after the hook line only. Choose from: 🌿 🪨 💡 🚿 🛏️ 🏺 🌱 🪵 🏡
+- Never use bullet points
+- Never use "I" or first person
+- Short sentences. Direct. Specific.
 
-HASHTAG RULES (critical):
-- NEVER include spaces inside a hashtag. Multi-word tags must be one word (e.g. "homedecor" not "home decor").
-- Mix niche-specific and broad tags. Include at least 3 tags specific to what's visible in the image.
-- Do NOT prefix with # — return only the word/words joined together.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PINTEREST RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Title: max 100 chars. Use the hook formula. No hashtags. No banned openers. Short, direct, human.
+Good: "The living room lighting rule that changes everything after dark"
+Bad: "Discover 5 Amazing Ways to Transform Your Living Room"
 
-Return ONLY a valid JSON object. Include ONLY the platforms listed: ${platforms.join(", ")}.
+Description: 2 sentences max. State what the content covers specifically. End with "Full guide on the blog." — nothing else.
 
+Alt text: One sentence describing exactly what's visible — materials, colours, objects, setting. End with the topic + "guide 2026."
+Example: "Warm bathroom with oak vanity, terracotta zellige tiles and brass fixtures. Bathroom tile guide 2026."
+
+Caption: Hook (from formula above) → 2 sentences expanding on it conversationally → end with exactly "Full guide in the link. 👇"
+Put hashtags on a new line after the CTA.
+
+Pinterest hashtags (20 total — FOCUSED and NICHE, not generic):
+- 8-10 highly specific: exact material, style, object (#zelligetile #bouclesofa #arcfloorlamp #travertinebathroom)
+- 6-8 topic-level: room + design category (#bathroomdesign #kitchenrenovation #bedroominterior)
+- 2-3 intent: what the reader wants to do (#bathroominspo #interiordesigntips #homedecordiy)
+- NEVER use pure vanity tags: #home #design #beautiful #inspo — these add nothing
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INSTAGRAM RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Caption: Hook → 2-3 short sentences → CTA ("Link in bio" or "Save this"). 150-250 chars total.
+
+Instagram hashtags (30 total — mixed for discovery):
+- 8-10 niche-specific (#zelligetile #boucle #travertine)
+- 10-12 topic-broad (#interiordesign #bathroomdesign #homedecor)
+- 6-8 audience-broad (#homedesign #homeideas #interiordecor)
+- 2-3 intent (#renovationadvice #lightingtips #plantcare)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FACEBOOK RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Caption: Hook → 1-2 conversational sentences → soft CTA. Max 150 chars.
+Facebook hashtags: 3-5 broad only (#homedecor #interiordesign #bathroom)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Return ONLY a valid JSON object for platforms: ${platforms.join(", ")}.
 JSON structure:
 {
-  "pinterest": {
-    "title": "max 100 chars — MUST use the hook style specified above. No keyword stuffing. No hashtags. Banned openers strictly forbidden. Write it as a real human would say it out loud.",
-    "description": "MAX 2 sentences. Hook first. Weave in 1-2 keywords naturally. End with ONE CTA only (e.g. 'Link in bio' — do NOT add another CTA elsewhere).",
-    "altText": "Concise visual description of the image for accessibility. Max 125 chars.",
-    "caption": "Same as description — copy it exactly.",
-    "hashtags": ["array", "of", "20", "singleword", "or", "joinedwords", "strings", "NO", "hash", "symbol"]
-  },
-  "instagram": {
-    "caption": "Hook first line using the specified style. Short sentences or numbered tip list. Ends with CTA. 150-300 chars total.",
-    "altText": "Concise visual description of the image for accessibility",
-    "hashtags": ["array", "of", "30", "singleword", "or", "joinedwords", "strings", "NO", "hash", "symbol"]
-  },
-  "facebook": {
-    "caption": "Hook first using specified style. Conversational. 1-3 short sentences. Soft CTA at end. 100-200 chars.",
-    "altText": "Concise visual description of the image for accessibility",
-    "hashtags": ["array", "of", "5", "broad", "singleword", "strings", "NO", "hash", "symbol"]
-  },
-  "google-ads": {
-    "headline1": "max 30 chars, benefit or product",
-    "headline2": "max 30 chars, supporting benefit",
-    "headline3": "max 30 chars, CTA",
-    "description1": "max 90 chars, feature-focused with keyword",
-    "description2": "max 90 chars, benefit-focused, ends with CTA",
-    "altText": "Concise visual description of the image for accessibility"
-  }
+  "pinterest": { "title": "...", "description": "...", "altText": "...", "caption": "...\n\n#hashtag1 #hashtag2...", "hashtags": ["20", "strings", "no", "hash", "symbol"] },
+  "instagram": { "caption": "...", "altText": "...", "hashtags": ["30", "strings"] },
+  "facebook":  { "caption": "...", "altText": "...", "hashtags": ["5", "strings"] },
+  "google-ads": { "headline1": "max 30 chars", "headline2": "max 30 chars", "headline3": "max 30 chars CTA", "description1": "max 90 chars", "description2": "max 90 chars", "altText": "..." }
 }
-
-Return ONLY the JSON. No markdown fences, no explanation.${language && language !== "en" ? `\n\nLANGUAGE RULES (critical):
-- Write ALL output in ${LANGUAGE_NAMES[language] ?? language}. Do not mix languages.
-- Write as a NATIVE SPEAKER who thinks in ${LANGUAGE_NAMES[language] ?? language} — NOT as someone translating from English. Use natural idioms, rhythm and phrasing that a local would actually use on social media.
-- The hook/first line must feel like something a real ${LANGUAGE_NAMES[language] ?? language}-speaking creator would write — punchy, colloquial, not formal.
-- Hashtags: join multi-word concepts into one word, no spaces, no hyphens (e.g. "lakásdekor" not "lakás dekor").` : ""}`
+Return ONLY the JSON. No markdown, no explanation.${language && language !== "en" ? `\n\nLANGUAGE: Write ALL output in ${LANGUAGE_NAMES[language] ?? language} as a native speaker. Natural idioms, not translated English. Hashtags: joinedwords, no spaces (e.g. "lakásdekor").` : ""}`
 }
 
 /** Strip spaces from hashtag strings so "#belső tér" → "belsőtér" */
