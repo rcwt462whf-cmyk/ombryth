@@ -173,14 +173,16 @@ function CopyButton({ text }: { text: string }) {
 
 function OutputField({ label, value }: { label: string; value: string | string[] }) {
   const text = Array.isArray(value) ? value.map((h) => `#${h}`).join(" ") : value
+  // Normalise escaped \n sequences into real newlines for display
+  const displayText = text.replace(/\\n/g, "\n")
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</span>
-        <CopyButton text={text} />
+        <CopyButton text={displayText} />
       </div>
       <p className="text-sm text-gray-800 bg-gray-50 rounded-lg px-3 py-2 leading-relaxed whitespace-pre-wrap">
-        {text}
+        {displayText}
       </p>
     </div>
   )
@@ -570,7 +572,29 @@ export default function GeneratePage() {
       setResult(prev => {
         if (!prev) return prev
         const newOutputs = [...(prev.textOutputs ?? [prev.textOutput])]
-        newOutputs[selectedVariation] = data.textOutput
+        const existing = newOutputs[selectedVariation] ?? {}
+
+        let merged: PlatformOutput
+        if (scope === "captions") {
+          // Only update caption + hashtags — preserve title, description, altText
+          merged = { ...existing }
+          for (const platform of Object.keys(data.textOutput) as Array<keyof PlatformOutput>) {
+            const newP = data.textOutput[platform] as Record<string, unknown>
+            const exP = (existing[platform] ?? {}) as Record<string, unknown>
+            if (newP) {
+              merged[platform] = {
+                ...exP,
+                caption: newP.caption ?? exP.caption,
+                hashtags: newP.hashtags ?? exP.hashtags,
+              } as never
+            }
+          }
+        } else {
+          // "all" scope — replace everything
+          merged = data.textOutput
+        }
+
+        newOutputs[selectedVariation] = merged
         return { ...prev, textOutput: newOutputs[0], textOutputs: newOutputs, textModelUsed: data.textModelUsed }
       })
     } catch {
