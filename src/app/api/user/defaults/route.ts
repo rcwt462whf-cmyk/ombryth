@@ -8,9 +8,9 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await request.json()
-  const { imageModel, textModel, categoryPreset, lightingPreset, customSystemPrompt } = body
+  const { imageModel, textModel, categoryPreset, lightingPreset, customSystemPrompt, defaultPlatforms } = body
 
-  const updateData: Record<string, string | null> = {
+  const updateData: Record<string, unknown> = {
     default_image_model: imageModel ?? null,
     default_text_model: textModel ?? null,
     default_category_preset: categoryPreset ?? null,
@@ -23,7 +23,12 @@ export async function POST(request: Request) {
   }
 
   if (body.defaultLanguage !== undefined) {
-    updateData.default_language = body.defaultLanguage ?? 'en'
+    updateData.default_language = body.defaultLanguage ?? "en"
+  }
+
+  if (Array.isArray(defaultPlatforms)) {
+    const valid = ["pinterest", "instagram", "facebook", "google-ads"]
+    updateData.default_platforms = defaultPlatforms.filter((p: string) => valid.includes(p))
   }
 
   const { error } = await supabase
@@ -44,7 +49,7 @@ export async function GET() {
 
   const { data } = await supabase
     .from("users")
-    .select("default_image_model, default_text_model, default_category_preset, default_lighting_preset, custom_system_prompt, default_language, free_generations_used")
+    .select("default_image_model, default_text_model, default_category_preset, default_lighting_preset, custom_system_prompt, default_language, default_platforms, free_generations_used")
     .eq("id", user.id)
     .single()
 

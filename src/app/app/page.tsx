@@ -367,6 +367,7 @@ export default function GeneratePage() {
       if (def.default_lighting_preset === "off") { setLightingOpen(false) }
       else if (def.default_lighting_preset) { setLighting(def.default_lighting_preset as LightingPreset); setLightingOpen(true) }
       if (def.default_language) setLanguage(def.default_language as Language)
+      if (Array.isArray(def.default_platforms) && def.default_platforms.length > 0) setPlatforms(def.default_platforms as Platform[])
     })
     fetch("/api/niches").then(r => r.ok ? r.json() : { niches: [] }).then(d => setCustomNiches(d.niches ?? []))
   }, [])

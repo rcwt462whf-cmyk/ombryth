@@ -1201,6 +1201,7 @@ function DefaultsTab() {
   const [defaultCategory, setDefaultCategory] = useState<string>("home-decor")
   const [defaultLighting, setDefaultLighting] = useState<string>("morning")
   const [defaultLanguage, setDefaultLanguage] = useState<Language>("en")
+  const [defaultPlatforms, setDefaultPlatforms] = useState<string[]>(["pinterest", "instagram"])
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -1213,8 +1214,13 @@ function DefaultsTab() {
         if (def.default_category_preset) setDefaultCategory(def.default_category_preset as string)
         if (def.default_lighting_preset) setDefaultLighting(def.default_lighting_preset as string)
         if (def.default_language) setDefaultLanguage(def.default_language as Language)
+        if (Array.isArray(def.default_platforms)) setDefaultPlatforms(def.default_platforms)
       })
   }, [])
+
+  function togglePlatform(p: string) {
+    setDefaultPlatforms(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p])
+  }
 
   async function save() {
     setSaving(true)
@@ -1228,6 +1234,7 @@ function DefaultsTab() {
           categoryPreset: defaultCategory,
           lightingPreset: defaultLighting,
           defaultLanguage,
+          defaultPlatforms,
         }),
       })
       if (!res.ok) throw new Error()
@@ -1312,6 +1319,30 @@ function DefaultsTab() {
             ))}
           </SelectContent>
         </Select>
+      </div>
+      {/* Default platforms */}
+      <div className="space-y-2">
+        <Label className="text-xs text-muted-foreground">Default Output Platforms</Label>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { value: "pinterest",  label: "Pinterest",  color: "border-[#E60023]/30 bg-[#E60023]/5 text-[#E60023]" },
+            { value: "instagram",  label: "Instagram",  color: "border-pink-300 bg-pink-50 text-pink-600" },
+            { value: "facebook",   label: "Facebook",   color: "border-blue-300 bg-blue-50 text-blue-600" },
+            { value: "google-ads", label: "Google Ads", color: "border-green-300 bg-green-50 text-green-700" },
+          ].map(p => (
+            <button
+              key={p.value}
+              onClick={() => togglePlatform(p.value)}
+              className={cn(
+                "px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors",
+                defaultPlatforms.includes(p.value) ? p.color : "border-border text-muted-foreground hover:border-foreground/20"
+              )}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+        <p className="text-[11px] text-muted-foreground">These platforms will be pre-selected every time you open the generate page.</p>
       </div>
       <Separator />
       <Button onClick={save} disabled={saving} size="sm" className="gap-2">
