@@ -41,6 +41,7 @@ interface GenerationResult {
   imagesBase64: string[]
   imageUrls: string[]
   textOutput: PlatformOutput
+  textOutputs?: PlatformOutput[]
   prompt: string
   productDescription?: string
   textModelUsed?: string
@@ -341,6 +342,8 @@ export default function GeneratePage() {
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>("2:3")
   const [batchMode, setBatchMode] = useState(false)
   const [aiTonedown, setAiTonedown] = useState(false)
+  const [captionVariations, setCaptionVariations] = useState(1)
+  const [selectedVariation, setSelectedVariation] = useState(0)
   const [language, setLanguage] = useState<Language>("en")
 
   // Destination URL
@@ -456,6 +459,7 @@ export default function GeneratePage() {
     setLoading(true)
     setResult(null)
     setSelectedImageIndex(0)
+    setSelectedVariation(0)
     setEditingPrompt(false)
     setLoadingMsg(LOADING_MESSAGES[0])
     startLoadingMessages()
@@ -480,6 +484,7 @@ export default function GeneratePage() {
           language,
           batchMode,
           aiTonedown,
+          captionVariations,
           styleReferenceStrength: styleFile ? styleStrength : undefined,
           productReferenceStrength: productFile ? productStrength : undefined,
           hasStyleReference: !!styleFile,
@@ -562,7 +567,12 @@ export default function GeneratePage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? "Failed")
-      setResult(prev => prev ? { ...prev, textOutput: data.textOutput, textModelUsed: data.textModelUsed } : prev)
+      setResult(prev => {
+        if (!prev) return prev
+        const newOutputs = [...(prev.textOutputs ?? [prev.textOutput])]
+        newOutputs[selectedVariation] = data.textOutput
+        return { ...prev, textOutput: newOutputs[0], textOutputs: newOutputs, textModelUsed: data.textModelUsed }
+      })
     } catch {
       toast({ variant: "destructive", title: "Rewrite failed", description: "Please try again." })
     } finally {
@@ -600,8 +610,11 @@ export default function GeneratePage() {
     }
   }
 
-  const activePlatforms = platforms.filter((p) => result?.textOutput?.[p] !== undefined)
+  // Use selected variation's textOutput for display
+  const activeTextOutput = result?.textOutputs?.[selectedVariation] ?? result?.textOutput ?? {}
+  const activePlatforms = platforms.filter((p) => activeTextOutput[p as keyof typeof activeTextOutput] !== undefined)
   const hasMultipleImages = (result?.imagesBase64?.length ?? 0) > 1
+  const hasMultipleVariations = (result?.textOutputs?.length ?? 0) > 1
   const currentImage = result?.imagesBase64?.[selectedImageIndex]
 
   return (
@@ -1055,6 +1068,27 @@ export default function GeneratePage() {
               </div>
               <Switch checked={aiTonedown} onCheckedChange={setAiTonedown} />
             </div>
+
+            <div className="flex items-center justify-between py-1">
+              <div>
+                <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Caption variations</p>
+                <p className="text-xs text-gray-400 mt-0.5">Generate multiple caption sets to pick from</p>
+              </div>
+              <div className="flex gap-1">
+                {[1, 2, 3].map(n => (
+                  <button
+                    key={n}
+                    onClick={() => setCaptionVariations(n)}
+                    className={cn(
+                      "w-7 h-7 rounded-lg text-xs font-semibold border transition-colors",
+                      captionVariations === n
+                        ? "bg-blue-600 border-blue-600 text-white"
+                        : "border-gray-200 text-gray-500 hover:border-gray-300"
+                    )}
+                  >{n}</button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Generate button */}
@@ -1319,7 +1353,27 @@ export default function GeneratePage() {
           {result?.textOutput && activePlatforms.length > 0 && (
             <div className="bg-white dark:bg-card rounded-xl border border-gray-100 dark:border-border p-4">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Platform Content</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Platform Content</p>
+                  {hasMultipleVariations && (
+                    <div className="flex gap-1">
+                      {result?.textOutputs?.map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setSelectedVariation(i)}
+                          className={cn(
+                            "px-2 py-0.5 rounded text-[11px] font-semibold border transition-colors",
+                            selectedVariation === i
+                              ? "bg-blue-600 border-blue-600 text-white"
+                              : "border-gray-200 text-gray-500 hover:border-gray-300"
+                          )}
+                        >
+                          {String.fromCharCode(65 + i)}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <div className="flex gap-2">
                   {/* New captions — caption + hashtags only */}
                   <button
@@ -1358,71 +1412,61 @@ export default function GeneratePage() {
                   })}
                 </TabsList>
 
-                {result.textOutput.pinterest && platforms.includes("pinterest") && (
+                {activeTextOutput.pinterest && platforms.includes("pinterest") && (
                   <TabsContent value="pinterest" className="space-y-3 mt-0">
-                    <OutputField label="Title" value={result.textOutput.pinterest.title} />
+                    <OutputField label="Title" value={activeTextOutput.pinterest.title} />
                     <OutputField
                       label="Description"
                       value={
-                        [result.textOutput.pinterest.description, result.textOutput.pinterest.caption]
+                        [activeTextOutput.pinterest.description, activeTextOutput.pinterest.caption]
                           .filter(Boolean).join(" ") +
-                        (result.textOutput.pinterest.hashtags
-                          ? " " + (Array.isArray(result.textOutput.pinterest.hashtags)
-                              ? result.textOutput.pinterest.hashtags.map((h: string) => `#${h}`).join(" ")
-                              : result.textOutput.pinterest.hashtags)
+                        (activeTextOutput.pinterest.hashtags
+                          ? " " + activeTextOutput.pinterest.hashtags.map((h: string) => `#${h}`).join(" ")
                           : "")
                       }
                     />
-                    <OutputField label="Alt Text" value={result.textOutput.pinterest.altText} />
-                    {destinationUrl && (
-                      <OutputField label="Link" value={destinationUrl} />
-                    )}
+                    <OutputField label="Alt Text" value={activeTextOutput.pinterest.altText} />
+                    {destinationUrl && <OutputField label="Link" value={destinationUrl} />}
                     {result.imageUrls?.[selectedImageIndex] && (
                       <a
                         href={`https://www.pinterest.com/pin/create/button/?url=${encodeURIComponent(destinationUrl || "https://ombryth.com")}&media=${encodeURIComponent(result.imageUrls[selectedImageIndex])}&description=${encodeURIComponent(
-                          result.textOutput.pinterest.title + " " +
-                          [result.textOutput.pinterest.description, result.textOutput.pinterest.caption].filter(Boolean).join(" ") +
-                          (result.textOutput.pinterest.hashtags
-                            ? " " + (Array.isArray(result.textOutput.pinterest.hashtags)
-                                ? result.textOutput.pinterest.hashtags.map((h: string) => `#${h}`).join(" ")
-                                : result.textOutput.pinterest.hashtags)
-                            : "")
+                          activeTextOutput.pinterest.title + " " +
+                          [activeTextOutput.pinterest.description, activeTextOutput.pinterest.caption].filter(Boolean).join(" ") +
+                          (activeTextOutput.pinterest.hashtags ? " " + activeTextOutput.pinterest.hashtags.map((h: string) => `#${h}`).join(" ") : "")
                         )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        target="_blank" rel="noopener noreferrer"
                         className="flex items-center justify-center gap-2 w-full py-2 rounded-lg bg-[#E60023] hover:bg-[#c1001f] text-white text-sm font-medium transition-colors"
                       >
-                        <PinterestLogo className="w-4 h-4" />
-                        Pin it
+                        <PinterestLogo className="w-4 h-4" /> Pin it
                       </a>
                     )}
                   </TabsContent>
                 )}
 
-                {result.textOutput.instagram && platforms.includes("instagram") && (
+                {activeTextOutput.instagram && platforms.includes("instagram") && (
                   <TabsContent value="instagram" className="space-y-3 mt-0">
-                    <OutputField label="Caption" value={result.textOutput.instagram.caption} />
-                    <OutputField label="Alt Text" value={result.textOutput.instagram.altText} />
-                    <OutputField label="Hashtags (30)" value={result.textOutput.instagram.hashtags} />
+                    <OutputField label="Caption" value={activeTextOutput.instagram.caption} />
+                    <OutputField label="Alt Text" value={activeTextOutput.instagram.altText} />
+                    <OutputField label="Hashtags (30)" value={activeTextOutput.instagram.hashtags} />
                   </TabsContent>
                 )}
 
-                {result.textOutput.facebook && platforms.includes("facebook") && (
+                {activeTextOutput.facebook && platforms.includes("facebook") && (
                   <TabsContent value="facebook" className="space-y-3 mt-0">
-                    <OutputField label="Caption" value={result.textOutput.facebook.caption} />
-                    <OutputField label="Alt Text" value={result.textOutput.facebook.altText} />
-                    <OutputField label="Hashtags" value={result.textOutput.facebook.hashtags} />
+                    <OutputField label="Caption" value={activeTextOutput.facebook.caption} />
+                    <OutputField label="Alt Text" value={activeTextOutput.facebook.altText} />
+                    <OutputField label="Hashtags" value={activeTextOutput.facebook.hashtags} />
                   </TabsContent>
                 )}
 
-                {result.textOutput["google-ads"] && platforms.includes("google-ads") && (
+                {activeTextOutput["google-ads"] && platforms.includes("google-ads") && (
                   <TabsContent value="google-ads" className="space-y-3 mt-0">
-                    <OutputField label="Headline 1" value={result.textOutput["google-ads"].headline1} />
-                    <OutputField label="Headline 2" value={result.textOutput["google-ads"].headline2} />
-                    <OutputField label="Headline 3" value={result.textOutput["google-ads"].headline3} />
-                    <OutputField label="Description 1" value={result.textOutput["google-ads"].description1} />
-                    <OutputField label="Description 2" value={result.textOutput["google-ads"].description2} />
-                    <OutputField label="Alt Text" value={result.textOutput["google-ads"].altText} />
+                    <OutputField label="Headline 1" value={activeTextOutput["google-ads"].headline1} />
+                    <OutputField label="Headline 2" value={activeTextOutput["google-ads"].headline2} />
+                    <OutputField label="Headline 3" value={activeTextOutput["google-ads"].headline3} />
+                    <OutputField label="Description 1" value={activeTextOutput["google-ads"].description1} />
+                    <OutputField label="Description 2" value={activeTextOutput["google-ads"].description2} />
+                    <OutputField label="Alt Text" value={activeTextOutput["google-ads"].altText} />
                   </TabsContent>
                 )}
               </Tabs>

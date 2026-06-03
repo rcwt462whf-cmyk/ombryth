@@ -882,41 +882,54 @@ export async function POST(request: Request) {
     // Use the first generated image for Claude vision captioning
     const firstImageBase64 = imagesBase64[0]
 
-    // Generate text content
-    // When Claude is the text model, pass the actual generated image so it writes
-    // captions based on what it sees, not just the text prompt.
-    const textSystemPrompt = buildTextSystemPrompt(
-      captionContext, config.platforms, customSystemPrompt,
-      config.destinationContext ?? null, config.language ?? null,
-      product?.description,
-      config.textModel === "claude" // hasImage — only Claude gets vision input
-    )
+    // Generate text content — N variations in parallel (each gets a fresh random hook style)
+    const captionVariations = Math.min(Math.max(1, config.captionVariations ?? 1), 3)
+    let textOutputs: PlatformOutput[] = []
     let textOutput: PlatformOutput = {}
     let textModelUsed: string = config.textModel
+
+    const runOneTextGeneration = async (): Promise<PlatformOutput> => {
+      // buildTextSystemPrompt picks a new random hook each call
+      const textSystemPrompt = buildTextSystemPrompt(
+        captionContext, config.platforms, customSystemPrompt,
+        config.destinationContext ?? null, config.language ?? null,
+        product?.description,
+        config.textModel === "claude"
+      )
+      if (config.textModel === "gpt4o") {
+        if (!keyMap.openai) throw new Error("OpenAI API key not configured. Add it in Settings.")
+        const openai = new OpenAI({ apiKey: keyMap.openai })
+        textModelUsed = "gpt-4o"
+        return generateTextWithOpenAI(openai, textSystemPrompt)
+      } else if (config.textModel === "claude") {
+        if (!keyMap.anthropic) throw new Error("Anthropic API key not configured. Add it in Settings.")
+        const anthropic = new Anthropic({ apiKey: keyMap.anthropic })
+        textModelUsed = "claude-sonnet-4-5"
+        return generateTextWithClaude(anthropic, textSystemPrompt, firstImageBase64)
+      } else if (config.textModel === "gemini") {
+        if (!keyMap.gemini) throw new Error("Google Gemini API key not configured. Add it in Settings.")
+        const genAI = new GoogleGenerativeAI(keyMap.gemini)
+        textModelUsed = "gemini-1.5-flash"
+        return generateTextWithGemini(genAI, textSystemPrompt)
+      }
+      return {}
+    }
 
     try {
       if (config.platforms.length === 0) {
         textModelUsed = "none"
-      } else if (config.textModel === "gpt4o") {
-        if (!keyMap.openai) throw new Error("OpenAI API key not configured. Add it in Settings.")
-        const openai = new OpenAI({ apiKey: keyMap.openai })
-        textOutput = await generateTextWithOpenAI(openai, textSystemPrompt)
-        textModelUsed = "gpt-4o"
-      } else if (config.textModel === "claude") {
-        if (!keyMap.anthropic) throw new Error("Anthropic API key not configured. Add it in Settings.")
-        const anthropic = new Anthropic({ apiKey: keyMap.anthropic })
-        textOutput = await generateTextWithClaude(anthropic, textSystemPrompt, firstImageBase64)
-        textModelUsed = "claude-sonnet-4-5"
-      } else if (config.textModel === "gemini") {
-        if (!keyMap.gemini) throw new Error("Google Gemini API key not configured. Add it in Settings.")
-        const genAI = new GoogleGenerativeAI(keyMap.gemini)
-        textOutput = await generateTextWithGemini(genAI, textSystemPrompt)
-        textModelUsed = "gemini-1.5-flash"
+        textOutputs = [{}]
+      } else {
+        // Run all variations in parallel — each gets a different hook style
+        textOutputs = await Promise.all(
+          Array.from({ length: captionVariations }).map(() => runOneTextGeneration())
+        )
       }
+      textOutput = textOutputs[0] ?? {}
     } catch (textErr) {
       console.error("[generate] text generation failed:", textErr)
       textModelUsed = "failed"
-      // Non-fatal — return image without text
+      textOutputs = [{}]
     }
 
     // Save generation records (non-fatal — never block the response on a DB write error)
@@ -966,7 +979,8 @@ export async function POST(request: Request) {
     return NextResponse.json({
       imagesBase64,
       imageUrls: imageUrls.filter(Boolean),
-      textOutput,
+      textOutput,         // first variation (backward compat)
+      textOutputs,        // all variations array
       prompt: finalPrompt,
       productDescription: product?.description,
       textModelUsed,

@@ -41,6 +41,7 @@ export interface GenerateRequest {
   destinationContext?: { title: string; description: string }
   promptOverride?: string
   aiTonedown?: boolean
+  captionVariations?: number  // 1 | 2 | 3 — generate N caption sets in parallel
 }
 
 export interface PlatformOutput {
