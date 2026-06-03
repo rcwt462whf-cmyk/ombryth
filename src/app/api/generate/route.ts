@@ -445,9 +445,9 @@ JSON structure:
 {
   "pinterest": {
     "title": "max 100 chars — MUST use the hook style specified above. No keyword stuffing. No hashtags. Banned openers strictly forbidden. Write it as a real human would say it out loud.",
-    "description": "2-4 punchy sentences. Hook first. Relevant keywords woven in naturally. Ends with CTA.",
-    "altText": "Concise visual description of the image for accessibility",
-    "caption": "2-4 punchy sentences. Hook first. Ends with CTA.",
+    "description": "MAX 2 sentences. Hook first. Weave in 1-2 keywords naturally. End with ONE CTA only (e.g. 'Link in bio' — do NOT add another CTA elsewhere).",
+    "altText": "Concise visual description of the image for accessibility. Max 125 chars.",
+    "caption": "Same as description — copy it exactly.",
     "hashtags": ["array", "of", "20", "singleword", "or", "joinedwords", "strings", "NO", "hash", "symbol"]
   },
   "instagram": {

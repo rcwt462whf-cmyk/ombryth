@@ -1415,24 +1415,15 @@ export default function GeneratePage() {
                 {activeTextOutput.pinterest && platforms.includes("pinterest") && (
                   <TabsContent value="pinterest" className="space-y-3 mt-0">
                     <OutputField label="Title" value={activeTextOutput.pinterest.title} />
-                    <OutputField
-                      label="Description"
-                      value={
-                        [activeTextOutput.pinterest.description, activeTextOutput.pinterest.caption]
-                          .filter(Boolean).join(" ") +
-                        (activeTextOutput.pinterest.hashtags
-                          ? " " + activeTextOutput.pinterest.hashtags.map((h: string) => `#${h}`).join(" ")
-                          : "")
-                      }
-                    />
+                    <OutputField label="Description" value={activeTextOutput.pinterest.description} />
+                    <OutputField label="Hashtags" value={activeTextOutput.pinterest.hashtags} />
                     <OutputField label="Alt Text" value={activeTextOutput.pinterest.altText} />
                     {destinationUrl && <OutputField label="Link" value={destinationUrl} />}
                     {result.imageUrls?.[selectedImageIndex] && (
                       <a
                         href={`https://www.pinterest.com/pin/create/button/?url=${encodeURIComponent(destinationUrl || "https://ombryth.com")}&media=${encodeURIComponent(result.imageUrls[selectedImageIndex])}&description=${encodeURIComponent(
-                          activeTextOutput.pinterest.title + " " +
-                          [activeTextOutput.pinterest.description, activeTextOutput.pinterest.caption].filter(Boolean).join(" ") +
-                          (activeTextOutput.pinterest.hashtags ? " " + activeTextOutput.pinterest.hashtags.map((h: string) => `#${h}`).join(" ") : "")
+                          activeTextOutput.pinterest.description +
+                          (activeTextOutput.pinterest.hashtags?.length ? " " + activeTextOutput.pinterest.hashtags.map((h: string) => `#${h}`).join(" ") : "")
                         )}`}
                         target="_blank" rel="noopener noreferrer"
                         className="flex items-center justify-center gap-2 w-full py-2 rounded-lg bg-[#E60023] hover:bg-[#c1001f] text-white text-sm font-medium transition-colors"

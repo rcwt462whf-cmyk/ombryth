@@ -344,6 +344,26 @@ export default function HistoryPage() {
                         {gen.status}
                       </Badge>
                       <button
+                        onClick={async () => {
+                          try {
+                            const res = await fetch(gen.image_url!)
+                            const blob = await res.blob()
+                            const url = URL.createObjectURL(blob)
+                            const a = document.createElement("a")
+                            a.href = url
+                            a.download = `ombryth-${gen.id.slice(0, 8)}.jpg`
+                            document.body.appendChild(a)
+                            a.click()
+                            document.body.removeChild(a)
+                            URL.revokeObjectURL(url)
+                          } catch { /* non-fatal */ }
+                        }}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center w-6 h-6 rounded-md bg-white/80 hover:bg-blue-50 text-gray-400 hover:text-blue-500 backdrop-blur-sm"
+                        title="Download image"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                      </button>
+                      <button
                         onClick={() => handleDelete(gen)}
                         disabled={deletingId === gen.id}
                         className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center w-6 h-6 rounded-md bg-white/80 hover:bg-red-50 text-gray-400 hover:text-red-500 backdrop-blur-sm disabled:opacity-50"
