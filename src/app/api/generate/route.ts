@@ -176,9 +176,8 @@ async function generateWithSeedream(
   // Seedream 5: uses "2K" size string + separate aspect_ratio param (per official docs)
   const isSeedream5 = modelVariant === "seedream-5-lite"
 
-  // Seedream 4.5: pixel dimension strings encode aspect ratio reliably
-  // Seedream 5: only supports named size strings ("4K") — pixel strings cause API errors
-  //             aspect_ratio as separate param is under investigation
+  // Seedream 4.5: pixel dimension strings encode aspect ratio (e.g. "3328x4992" for 2:3)
+  // Seedream 5:  size:"4K" + aspect_ratio string — confirmed working for all ratios
   const size45Map: Record<string, string> = {
     "1:1":  "4K",
     "2:3":  "3328x4992",
