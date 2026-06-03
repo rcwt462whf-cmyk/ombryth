@@ -92,8 +92,8 @@ ${scopeInstruction}
 
 BANNED: stunning, gorgeous, amazing, game-changing, transform your space, nobody tells you, the secret to, discover, say hello to
 
-RULES: One emoji max after hook line only. No bullet points. No first person. Short, direct sentences.
-Pinterest CTA: end caption with exactly "Full guide in the link. 👇"
+RULES: 1-2 emojis per caption placed naturally. No bullet points. No first person. Short, direct sentences.
+Pinterest CTA: vary naturally — "Link in bio 👇", "Save this for later", "Full guide on the blog 🌿", "Tap the link", "Save it before you renovate".
 Pinterest hashtags (20): 8-10 niche-specific, 6-8 topic-level, 2-3 intent. No vanity tags (#home #design).
 Instagram hashtags (30): mix niche + topic + broad + intent.
 Facebook hashtags (5): broad only.

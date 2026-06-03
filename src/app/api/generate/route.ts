@@ -430,7 +430,7 @@ stunning, gorgeous, amazing, incredible, game-changing, transform your space, el
 "the ultimate guide", "everything you need", "level up"
 
 GLOBAL RULES:
-- ONE emoji max in the entire output — place it after the hook line only. Choose from: 🌿 🪨 💡 🚿 🛏️ 🏺 🌱 🪵 🏡
+- 1-2 emojis per caption, placed naturally where they add personality. Choose from: 🌿 🪨 💡 🚿 🛏️ 🏺 🌱 🪵 🏡 ✨ 🫶 👇
 - Never use bullet points
 - Never use "I" or first person
 - Short sentences. Direct. Specific.
@@ -447,8 +447,7 @@ Description: 2-3 sentences. State specifically what the reader will learn — be
 Alt text: One sentence describing exactly what's visible — materials, colours, objects, setting. End with the topic + "guide 2026."
 Example: "Warm bathroom with oak vanity, terracotta zellige tiles and brass fixtures. Bathroom tile guide 2026."
 
-Caption: Hook (from formula above) → 2 sentences expanding on it conversationally → end with exactly "Full guide in the link. 👇"
-Put hashtags on a new line after the CTA.
+Caption: Hook (from formula above) → 2 sentences expanding on it conversationally → end with a CTA. Vary the CTA naturally: "Link in bio 👇", "Save this for later", "Full guide on the blog 🌿", "Tap the link", "Save it before you renovate". Put hashtags on a new line after the CTA.
 
 Pinterest hashtags (20 total — FOCUSED and NICHE, not generic):
 - 8-10 highly specific: exact material, style, object (#zelligetile #bouclesofa #arcfloorlamp #travertinebathroom)
