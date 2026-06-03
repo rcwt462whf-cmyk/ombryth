@@ -498,7 +498,7 @@ export default function GeneratePage() {
       overridePromptRef.current = null
 
       const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 95_000) // 95s client timeout
+      const timeout = setTimeout(() => controller.abort(), 290_000) // 290s client timeout
 
       let res: Response
       try {
