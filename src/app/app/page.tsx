@@ -487,7 +487,26 @@ export default function GeneratePage() {
       )
       overridePromptRef.current = null
 
-      const res = await fetch("/api/generate", { method: "POST", body: fd })
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 95_000) // 95s client timeout
+
+      let res: Response
+      try {
+        res = await fetch("/api/generate", { method: "POST", body: fd, signal: controller.signal })
+      } catch (fetchErr) {
+        const isTimeout = fetchErr instanceof Error && fetchErr.name === "AbortError"
+        toast({
+          variant: "destructive",
+          title: isTimeout ? "Generation timed out" : "Connection lost",
+          description: isTimeout
+            ? "The image took too long. Try a simpler prompt or a different model."
+            : "Check your internet connection and try again.",
+        })
+        return
+      } finally {
+        clearTimeout(timeout)
+      }
+
       const data = await res.json()
 
       if (!res.ok) {
@@ -505,7 +524,7 @@ export default function GeneratePage() {
       // Keep free usage counter in sync
       if (data.freeUsed !== null && data.freeUsed !== undefined) setFreeUsedCount(data.freeUsed)
     } catch {
-      toast({ variant: "destructive", title: "Network error", description: "Please try again." })
+      toast({ variant: "destructive", title: "Unexpected error", description: "Please try again." })
     } finally {
       setLoading(false)
       stopLoadingMessages()

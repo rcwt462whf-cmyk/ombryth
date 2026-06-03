@@ -1,7 +1,10 @@
 {
   "functions": {
     "src/app/api/generate/route.ts": {
-      "maxDuration": 60
+      "maxDuration": 90
+    },
+    "src/app/api/generate-pin/route.ts": {
+      "maxDuration": 120
     }
   }
 }
