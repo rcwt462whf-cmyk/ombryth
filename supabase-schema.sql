@@ -107,6 +107,22 @@ alter table public.saved_prompts enable row level security;
 create policy "Users can manage own saved prompts"
   on public.saved_prompts for all using (auth.uid() = user_id);
 
+-- ── Saved links table ────────────────────────────────────────────────────────
+create table if not exists public.saved_links (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.users(id) on delete cascade not null,
+  label text not null,
+  url text not null,
+  title text,
+  description text,
+  created_at timestamptz default now() not null
+);
+
+alter table public.saved_links enable row level security;
+
+create policy "Users can manage own saved links"
+  on public.saved_links for all using (auth.uid() = user_id);
+
 -- ── Storage bucket ────────────────────────────────────────────────────────────
 -- Run in the SQL editor OR create manually in Dashboard → Storage
 

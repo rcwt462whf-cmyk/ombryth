@@ -345,7 +345,19 @@ Return ONLY the JSON, no markdown.`,
 // ─── Text generation ──────────────────────────────────────────────────────────
 
 const DEFAULT_SYSTEM_PERSONA =
-  "You are a top-performing social media content creator for lifestyle and home decor affiliate marketing. Your copy style is punchy, hook-first, and conversational — never corporate or repetitive. Every caption opens with a scroll-stopping first line (a bold claim, a question, or an unexpected tip). Use short sentences. Use numbered lists or line breaks for tips. Add 1-2 relevant emojis naturally. End with a clear CTA ('Link in bio', 'Save this', 'Try it tonight' etc.). Never repeat the same idea twice in one caption. Write like a real person, not a brand."
+  "You are a top-performing social media content creator for lifestyle and home decor affiliate marketing. Your copy style is punchy, hook-first, and conversational — never corporate. Write like a real person with a distinct voice, not a brand. Short sentences. Use line breaks or numbered steps for tips. 1-2 relevant emojis placed naturally. End every caption with a concrete CTA. Never repeat the same idea twice in one caption."
+
+// Rotating hook styles — one is injected per generation to prevent repetition
+const HOOK_STYLES = [
+  { name: "curiosity-gap",   instruction: "Open with a curiosity gap — tease something without revealing it. e.g. 'The detail nobody mentions when they redo their bathroom' or 'What separates a €3,000 room from a €30,000 one (it's not the budget)'" },
+  { name: "bold-claim",      instruction: "Open with a confident, slightly surprising claim stated as fact. e.g. 'Warm lighting does more for a bathroom than any renovation' or 'This tile pattern adds 10 years of style life to any room'" },
+  { name: "question",        instruction: "Open with a direct provocative question the reader asks themselves. e.g. 'Still using cool-white bulbs in your bathroom?' or 'When did every kitchen start looking the same?'" },
+  { name: "contrarian",      instruction: "Open by challenging a popular assumption. e.g. 'The marble trend is over — here's what's replacing it' or 'Stop buying matching sets. Mismatched textures photograph better'" },
+  { name: "story",           instruction: "Open with a micro-scene or personal moment. e.g. 'Walked into a hotel room last month and couldn't stop staring at the wall' or 'Took me three attempts to get this lighting right — here's what finally worked'" },
+  { name: "number-list",     instruction: "Open with a specific number that teases a list. e.g. '3 things this bathroom does that yours probably doesn't' or '5-minute change that makes morning routines feel like a spa'" },
+  { name: "fomo-social",     instruction: "Open with social proof or trend urgency. e.g. 'Every designer studio in Copenhagen is using this combination right now' or 'This was on every mood board at Maison&Objet — now it's accessible'" },
+  { name: "transformation",  instruction: "Open by promising a specific before/after or upgrade. e.g. 'How to make a rental bathroom look like a boutique hotel' or 'The exact switch that makes small spaces feel twice as big'" },
+]
 
 /** Short instruction for Seedream's explicit image-slot prompt */
 function prominenceStrengthToInstruction(strength: number): string {
@@ -395,6 +407,9 @@ function buildTextSystemPrompt(
 ): string {
   const persona = customPersona?.trim() || DEFAULT_SYSTEM_PERSONA
 
+  // Pick a random hook style — forces genuine variety across generations
+  const hookStyle = HOOK_STYLES[Math.floor(Math.random() * HOOK_STYLES.length)]
+
   const destinationBlock = destinationContext?.title || destinationContext?.description
     ? `\nThe content being promoted links to a page titled "${destinationContext.title}" described as: "${destinationContext.description}". Naturally weave relevant keywords from this context into your captions and descriptions to align with the destination. Do not mention the URL directly.\n`
     : ""
@@ -411,17 +426,25 @@ function buildTextSystemPrompt(
 
 ${imageRef}
 ${productBlock}${destinationBlock}
+HOOK STYLE FOR THIS GENERATION — you MUST use this style for the opening line on every platform:
+${hookStyle.instruction}
+Do not use any other hook style. No "The X that nobody tells you" unless the hook style above specifically calls for it.
+
+BANNED OPENERS (never use these words/phrases to start any sentence):
+"Discover", "Transform", "Elevate", "Explore", "Find the perfect", "Introducing", "Meet the",
+"The curtain trick", "nobody tells you", "The secret to", "Game changer", "Level up",
+"This is the", "Say hello to", "The ultimate guide", "Everything you need"
+
 CAPTION RULES (apply to all platforms):
-- First sentence must be the hook — a bold statement, unexpected tip, or intriguing question. Make the reader stop scrolling.
-- Short sentences. Use line breaks or numbered steps for tips (e.g. "1. ... 2. ... 3. ...").
-- No filler phrases like "Discover", "Transform your space", "Find the perfect" — these are banned.
+- Opening line MUST follow the hook style above — this is non-negotiable.
+- Short sentences. Line breaks between ideas. Numbered lists for tips (1. 2. 3.).
 - Never repeat the same idea twice in one caption.
-- End with a concrete CTA: "Link in bio", "Save for later", "Try it tonight", etc.
-- 1-2 relevant emojis max, placed naturally.
+- End with a concrete, specific CTA — vary it: "Link in bio", "Save for tonight", "Tell me in the comments", "Tap the link", "Try this weekend".
+- 1-2 relevant emojis max, placed naturally — not at the start of every line.
 
 HASHTAG RULES (critical):
-- NEVER include spaces inside a hashtag. Multi-word tags must be written as one word (e.g. "lakásvilágítás" not "lakás világítás", "homedecor" not "home decor").
-- Mix niche-specific and broad tags.
+- NEVER include spaces inside a hashtag. Multi-word tags must be one word (e.g. "homedecor" not "home decor").
+- Mix niche-specific and broad tags. Include at least 3 tags specific to what's visible in the image.
 - Do NOT prefix with # — return only the word/words joined together.
 
 Return ONLY a valid JSON object. Include ONLY the platforms listed: ${platforms.join(", ")}.
@@ -429,19 +452,19 @@ Return ONLY a valid JSON object. Include ONLY the platforms listed: ${platforms.
 JSON structure:
 {
   "pinterest": {
-    "title": "max 100 chars — must be a curiosity gap or benefit hook (e.g. 'The curtain trick nobody tells you — try it tonight'). NOT a keyword list. No hashtags. No generic openers like 'Discover' or 'Explore'.",
+    "title": "max 100 chars — MUST use the hook style specified above. No keyword stuffing. No hashtags. Banned openers strictly forbidden. Write it as a real human would say it out loud.",
     "description": "2-4 punchy sentences. Hook first. Relevant keywords woven in naturally. Ends with CTA.",
     "altText": "Concise visual description of the image for accessibility",
     "caption": "2-4 punchy sentences. Hook first. Ends with CTA.",
     "hashtags": ["array", "of", "20", "singleword", "or", "joinedwords", "strings", "NO", "hash", "symbol"]
   },
   "instagram": {
-    "caption": "Hook first line. Short sentences or numbered tip list. Ends with CTA. 150-300 chars total.",
+    "caption": "Hook first line using the specified style. Short sentences or numbered tip list. Ends with CTA. 150-300 chars total.",
     "altText": "Concise visual description of the image for accessibility",
     "hashtags": ["array", "of", "30", "singleword", "or", "joinedwords", "strings", "NO", "hash", "symbol"]
   },
   "facebook": {
-    "caption": "Hook first. Conversational. 1-3 short sentences. Soft CTA at end. 100-200 chars.",
+    "caption": "Hook first using specified style. Conversational. 1-3 short sentences. Soft CTA at end. 100-200 chars.",
     "altText": "Concise visual description of the image for accessibility",
     "hashtags": ["array", "of", "5", "broad", "singleword", "strings", "NO", "hash", "symbol"]
   },
