@@ -198,6 +198,14 @@ async function generateWithSeedream(
     watermark: false,
   }
 
+  // Seedream 5: size:"4K" defaults to 16:9 — add aspect_ratio for other shapes
+  if (isSeedream5 && aspectRatio !== "16:9") {
+    const ar5Map: Record<string, string> = {
+      "1:1": "1:1", "2:3": "2:3", "9:16": "9:16", "4:5": "4:5",
+    }
+    if (ar5Map[aspectRatio]) body.aspect_ratio = ar5Map[aspectRatio]
+  }
+
   if (styleBuffer && productBuffer) {
     // Multi-image: style scene (image 1) + product (image 2)
     // image_weight is NOT supported by Seedream when image is an array
