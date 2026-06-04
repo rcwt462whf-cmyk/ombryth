@@ -442,12 +442,14 @@ Title: max 100 chars. Use the hook formula. No hashtags. No banned openers. Shor
 Good: "The living room lighting rule that changes everything after dark"
 Bad: "Discover 5 Amazing Ways to Transform Your Living Room"
 
-Description: 2-3 sentences. State specifically what the reader will learn — be concrete, not vague. End with "Full guide on the blog." — nothing else. No hype words.
+Description: USE THE HOOK FORMULA. Short punchy sentences — like the caption, not like a product listing. Do NOT list the objects in the image. Write what the reader will understand or change after reading the blog. End with "Full guide on the blog." — nothing else.
+Good: "Light is not optional for a plant. It is everything. Match the light level first and almost any plant becomes easy to keep. Full guide on the blog."
+Bad: "This bathroom features matte black fittings, a rain shower and warm lighting. Full guide on the blog."
 
 Alt text: One sentence describing exactly what's visible — materials, colours, objects, setting. End with the topic + "guide 2026."
 Example: "Warm bathroom with oak vanity, terracotta zellige tiles and brass fixtures. Bathroom tile guide 2026."
 
-Caption: Hook (from formula above) → 2 sentences expanding on it conversationally → end with a CTA. Vary the CTA naturally: "Link in bio 👇", "Save this for later", "Full guide on the blog 🌿", "Tap the link", "Save it before you renovate". Put hashtags on a new line after the CTA.
+Caption: Same hook-first approach as description but slightly different wording — not a copy-paste. End with a varied CTA: "Link in bio 👇", "Save this for later", "Full guide on the blog 🌿", "Tap the link". Put hashtags on a new line after the CTA.
 
 Pinterest hashtags (20 total — FOCUSED and NICHE, not generic):
 - 8-10 highly specific: exact material, style, object (#zelligetile #bouclesofa #arcfloorlamp #travertinebathroom)
