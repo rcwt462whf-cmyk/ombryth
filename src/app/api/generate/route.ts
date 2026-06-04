@@ -418,73 +418,38 @@ function buildTextSystemPrompt(
 
 ${imageRef}
 ${productBlock}${destinationBlock}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-HOOK FOR THIS GENERATION (mandatory — use on every platform):
+HOOK FORMULA FOR THIS GENERATION:
 ${hookStyle.instruction}
-The hook is the first sentence. It must stop a scroll. Do NOT copy the hook formula literally — write original copy using its structure.
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Write original copy using this structure — do not copy the example literally.
 
-BANNED WORDS/PHRASES (never use anywhere):
-stunning, gorgeous, amazing, incredible, game-changing, transform your space, elevate, discover,
-"nobody tells you", "the secret to", "say hello to", "find the perfect", "introducing", "game changer",
-"the ultimate guide", "everything you need", "level up"
+⚠️ MANDATORY NON-NEGOTIABLES — failure on any of these is unacceptable:
+1. EMOJIS: You MUST include 1-2 emojis in every caption/description. Place them where they feel natural mid-sentence or at end of a line. Pick from: 🌿 💡 🚿 🛏️ 🏺 🌱 🪵 🏡 ✨ 👇 🪴 🧼
+2. CTA: Always end with "Full guide in the link. 👇" — never "on the blog", never anything else
+3. HOOK: First sentence must use the formula above — short, punchy, stops scrolling
+4. TONE: Warm, conversational, like a knowledgeable friend. Not dry, not clinical, not a product listing
 
-GLOBAL RULES:
-- 1-2 emojis per caption, placed naturally where they add personality. Choose from: 🌿 🪨 💡 🚿 🛏️ 🏺 🌱 🪵 🏡 ✨ 🫶 👇
-- Never use bullet points
-- Never use "I" or first person
-- Short sentences. Direct. Specific.
+BANNED: stunning, gorgeous, amazing, game-changing, transform, elevate, discover, nobody tells you, the secret to, say hello to, find the perfect, level up, bullet points, first person "I"
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-PINTEREST RULES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Title: max 100 chars. Use the hook formula. No hashtags. No banned openers. Short, direct, human.
-Good: "The living room lighting rule that changes everything after dark"
-Bad: "Discover 5 Amazing Ways to Transform Your Living Room"
+PINTEREST:
+- Title: max 100 chars, hook formula, no hashtags. e.g. "The living room lighting rule that changes everything after dark"
+- Description: 2-3 short punchy sentences using the hook. Warm and engaging. MUST have 1 emoji. End with "Full guide in the link. 👇"
+  GOOD: "Light is not optional for a plant. It is everything. 🌿 Match the light level first and almost any plant becomes easy to keep. Full guide in the link. 👇"
+  BAD: "This bathroom has matte black fittings and a rain shower. Full guide on the blog."
+- Alt text: describe what's visible (materials, colours, objects). End with topic + "guide 2026."
+- Caption: same vibe as description, slightly different angle
+- Hashtags (20): 8-10 niche-specific exact terms (#zelligetile #arcfloorlamp), 6-8 topic (#bathroomdesign #kitchenrenovation), 2-3 intent (#renovationtips #plantguide). No vanity tags (#home #design)
 
-Description: USE THE HOOK FORMULA. Short punchy sentences — like the caption, not like a product listing. Do NOT list the objects in the image. Write what the reader will understand or change after reading the blog. End with "Full guide on the blog." — nothing else.
-Good: "Light is not optional for a plant. It is everything. Match the light level first and almost any plant becomes easy to keep. Full guide on the blog."
-Bad: "This bathroom features matte black fittings, a rain shower and warm lighting. Full guide on the blog."
+INSTAGRAM:
+- Caption: hook → 2-3 warm sentences → "Link in bio 👇". 150-250 chars
+- Hashtags (30): mix niche + topic + broad + intent
 
-Alt text: One sentence describing exactly what's visible — materials, colours, objects, setting. End with the topic + "guide 2026."
-Example: "Warm bathroom with oak vanity, terracotta zellige tiles and brass fixtures. Bathroom tile guide 2026."
+FACEBOOK:
+- Caption: hook → 1-2 warm sentences → soft CTA. Max 150 chars
+- Hashtags: 3-5 broad only
 
-Caption: Same hook-first approach as description but slightly different wording — not a copy-paste. End with a varied CTA: "Link in bio 👇", "Save this for later", "Full guide on the blog 🌿", "Tap the link". Put hashtags on a new line after the CTA.
-
-Pinterest hashtags (20 total — FOCUSED and NICHE, not generic):
-- 8-10 highly specific: exact material, style, object (#zelligetile #bouclesofa #arcfloorlamp #travertinebathroom)
-- 6-8 topic-level: room + design category (#bathroomdesign #kitchenrenovation #bedroominterior)
-- 2-3 intent: what the reader wants to do (#bathroominspo #interiordesigntips #homedecordiy)
-- NEVER use pure vanity tags: #home #design #beautiful #inspo — these add nothing
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-INSTAGRAM RULES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Caption: Hook → 2-3 short sentences → CTA ("Link in bio" or "Save this"). 150-250 chars total.
-
-Instagram hashtags (30 total — mixed for discovery):
-- 8-10 niche-specific (#zelligetile #boucle #travertine)
-- 10-12 topic-broad (#interiordesign #bathroomdesign #homedecor)
-- 6-8 audience-broad (#homedesign #homeideas #interiordecor)
-- 2-3 intent (#renovationadvice #lightingtips #plantcare)
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-FACEBOOK RULES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Caption: Hook → 1-2 conversational sentences → soft CTA. Max 150 chars.
-Facebook hashtags: 3-5 broad only (#homedecor #interiordesign #bathroom)
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Return ONLY a valid JSON object for platforms: ${platforms.join(", ")}.
-JSON structure:
-{
-  "pinterest": { "title": "...", "description": "...", "altText": "...", "caption": "...\n\n#hashtag1 #hashtag2...", "hashtags": ["20", "strings", "no", "hash", "symbol"] },
-  "instagram": { "caption": "...", "altText": "...", "hashtags": ["30", "strings"] },
-  "facebook":  { "caption": "...", "altText": "...", "hashtags": ["5", "strings"] },
-  "google-ads": { "headline1": "max 30 chars", "headline2": "max 30 chars", "headline3": "max 30 chars CTA", "description1": "max 90 chars", "description2": "max 90 chars", "altText": "..." }
-}
-Return ONLY the JSON. No markdown, no explanation.${language && language !== "en" ? `\n\nLANGUAGE: Write ALL output in ${LANGUAGE_NAMES[language] ?? language} as a native speaker. Natural idioms, not translated English. Hashtags: joinedwords, no spaces (e.g. "lakásdekor").` : ""}`
+Return ONLY valid JSON for platforms: ${platforms.join(", ")}.
+{ "pinterest": { "title": "...", "description": "...", "altText": "...", "caption": "...", "hashtags": ["no","hash","prefix"] }, "instagram": { "caption": "...", "altText": "...", "hashtags": ["30","tags"] }, "facebook": { "caption": "...", "altText": "...", "hashtags": ["5","tags"] }, "google-ads": { "headline1": "30 chars", "headline2": "30 chars", "headline3": "30 chars", "description1": "90 chars", "description2": "90 chars", "altText": "..." } }
+Return ONLY the JSON. No markdown.${language && language !== "en" ? `\n\nLANGUAGE: Write ALL output in ${LANGUAGE_NAMES[language] ?? language} as a native speaker. Hashtags: joinedwords, no spaces.` : ""}`
 }
 
 /** Strip spaces from hashtag strings so "#belső tér" → "belsőtér" */

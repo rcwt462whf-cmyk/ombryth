@@ -92,13 +92,11 @@ ${scopeInstruction}
 
 BANNED: stunning, gorgeous, amazing, game-changing, transform your space, nobody tells you, the secret to, discover, say hello to
 
-RULES: 1-2 emojis per caption placed naturally. No bullet points. No first person. Short punchy sentences.
-Pinterest description: HOOK-FIRST. Do NOT list image objects. Write what the reader will understand or change. End "Full guide on the blog."
-Pinterest caption: same hook-first approach, slightly different wording. End with varied CTA: "Link in bio 👇", "Save this", "Full guide on the blog 🌿", "Tap the link".
-Pinterest hashtags (20): 8-10 niche-specific, 6-8 topic-level, 2-3 intent. No vanity tags (#home #design).
+⚠️ MANDATORY: 1-2 emojis per caption placed naturally (🌿 💡 🚿 🛏️ 🏺 🌱 🪵 🏡 ✨ 👇 🪴). CTA always "Full guide in the link. 👇" — never "on the blog". Warm, friendly tone — not dry or clinical.
+Pinterest description: hook-first, 2-3 punchy sentences, 1 emoji, end "Full guide in the link. 👇". No listing of image objects.
+Pinterest hashtags (20): 8-10 niche-specific, 6-8 topic, 2-3 intent. No vanity tags.
 Instagram hashtags (30): mix niche + topic + broad + intent.
-Facebook hashtags (5): broad only.
-No # prefix in arrays. No spaces inside tags.
+Facebook hashtags (5): broad only. No # prefix. No spaces inside tags.
 
 Return ONLY valid JSON for platforms: ${platforms.join(", ")}.${langRule}`
 
