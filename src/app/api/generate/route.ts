@@ -227,6 +227,19 @@ async function generateWithSeedream(
 
   if (!resp.ok) {
     const text = await resp.text()
+    // Parse BytePlus error code for a friendly message
+    try {
+      const errJson = JSON.parse(text)
+      const code = errJson?.error?.code ?? ""
+      if (code === "OutputImageSensitiveContentDetected") {
+        throw new Error("BytePlus flagged this image as sensitive content. Try a different style, lighting preset, or rephrase your custom prompt.")
+      }
+      if (code === "InputSensitiveContentDetected") {
+        throw new Error("BytePlus flagged your prompt as sensitive. Try rephrasing your custom prompt or switching to a different niche.")
+      }
+    } catch (parseErr) {
+      if (parseErr instanceof Error && parseErr.message.includes("BytePlus")) throw parseErr
+    }
     throw new Error(`Seedream API error ${resp.status}: ${text}`)
   }
 
