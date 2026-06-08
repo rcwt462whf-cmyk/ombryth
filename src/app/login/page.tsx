@@ -94,12 +94,12 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
 
           {/* Mobile logo */}
-          <Link href="/" className="lg:hidden block mb-8 text-2xl font-black tracking-tight text-white">
+          <Link href="/" className="lg:hidden block mb-8 text-2xl font-black tracking-tight text-white text-center">
             Ombryth
           </Link>
 
           {/* Heading */}
-          <div className="mb-8">
+          <div className="mb-8 text-center">
             <h1 className="text-2xl font-black tracking-tight text-white mb-1">Welcome back</h1>
             <p className="text-sm text-slate-500">Sign in to your account to continue</p>
           </div>
