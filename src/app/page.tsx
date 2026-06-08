@@ -2,6 +2,58 @@
 
 import Link from "next/link"
 import { useState, useId } from "react"
+import { ArrowRight, Sparkles, ShieldCheck, LayoutGrid, Globe, Link2, KeyRound, Check, ChevronDown } from "lucide-react"
+
+const FEATURES = [
+  {
+    icon: Sparkles,
+    color: "text-violet-400",
+    bg: "bg-violet-500/10",
+    glow: "group-hover:shadow-[0_0_0_1px_rgba(139,92,246,0.2)]",
+    title: "AI Image Generation",
+    desc: "Use DALL-E 3, Stable Diffusion, Flux, or Seedream with your own keys. Upload a style reference and product photo — Ombryth does the rest.",
+  },
+  {
+    icon: ShieldCheck,
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/10",
+    glow: "group-hover:shadow-[0_0_0_1px_rgba(52,211,153,0.2)]",
+    title: "Metadata Stripped",
+    desc: "Every generated image is automatically processed to remove EXIF and metadata — keeping your workflow and AI usage private.",
+  },
+  {
+    icon: LayoutGrid,
+    color: "text-orange-400",
+    bg: "bg-orange-500/10",
+    glow: "group-hover:shadow-[0_0_0_1px_rgba(251,146,60,0.2)]",
+    title: "Multi-Platform Captions",
+    desc: "Get Pinterest titles, Instagram captions, Facebook posts, and Google Ads headlines — all generated simultaneously from one prompt.",
+  },
+  {
+    icon: Globe,
+    color: "text-blue-400",
+    bg: "bg-blue-500/10",
+    glow: "group-hover:shadow-[0_0_0_1px_rgba(96,165,250,0.2)]",
+    title: "9 Languages",
+    desc: "Generate captions in English, Spanish, French, German, Portuguese, Italian, Dutch, Polish, or Hungarian. One click.",
+  },
+  {
+    icon: Link2,
+    color: "text-cyan-400",
+    bg: "bg-cyan-500/10",
+    glow: "group-hover:shadow-[0_0_0_1px_rgba(34,211,238,0.2)]",
+    title: "Destination-Aware Captions",
+    desc: "Paste your affiliate link. Ombryth reads the page and weaves the relevant keywords into your captions automatically.",
+  },
+  {
+    icon: KeyRound,
+    color: "text-slate-400",
+    bg: "bg-slate-500/10",
+    glow: "group-hover:shadow-[0_0_0_1px_rgba(148,163,184,0.15)]",
+    title: "Your Keys, Your Costs",
+    desc: "Connect OpenAI, Anthropic, Replicate, Stability AI, or BytePlus. Pay providers directly at their rates. Zero markup.",
+  },
+]
 
 const FAQ_ITEMS = [
   {
@@ -26,11 +78,11 @@ const FAQ_ITEMS = [
   },
   {
     q: "What's the difference between the image models?",
-    a: "DALL-E 3 is the most reliable and easiest to use. Flux Dev supports native style-reference blending (img2img). Stable Diffusion 3 is great for photorealistic results. Seedream is BytePlus's model, good for product shots.",
+    a: "DALL-E 3 is the most reliable and easiest to use. Flux Dev supports native style-reference blending. Stable Diffusion 3 is great for photorealistic results. Seedream is BytePlus's model, good for product shots.",
   },
   {
-    q: "Connect your OpenAI account — isn't that limiting?",
-    a: "You can connect keys from OpenAI, Anthropic, Google, Replicate, Stability AI, or BytePlus — whichever you already have. BYOK means you control the costs and there's no hidden markup.",
+    q: "Isn't bringing your own API keys limiting?",
+    a: "You can connect keys from OpenAI, Anthropic, Google, Replicate, Stability AI, or BytePlus — whichever you already have. BYOK means you control costs and there's no hidden markup.",
   },
 ]
 
@@ -38,28 +90,23 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false)
   const panelId = useId()
   return (
-    <div className="border-b border-gray-100 dark:border-gray-800 last:border-0">
+    <div className="border-b border-white/[0.06] last:border-0">
       <button
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls={panelId}
         className="w-full text-left py-4 flex items-center justify-between gap-4 group"
       >
-        <span className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+        <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">
           {q}
         </span>
-        <svg
+        <ChevronDown
           aria-hidden="true"
-          className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+          className={`w-4 h-4 text-slate-600 shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
       </button>
       {open && (
-        <p id={panelId} role="region" className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed pb-4 -mt-1">
+        <p id={panelId} role="region" className="text-sm text-slate-500 leading-relaxed pb-4 -mt-1">
           {a}
         </p>
       )}
@@ -67,23 +114,47 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   )
 }
 
+const PROVIDERS = ["DALL-E 3", "Claude", "Flux", "Gemini", "Stability AI", "Seedream"]
+
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
-      {/* Navigation */}
-      <nav className="border-b border-gray-100 dark:border-gray-800 bg-white/90 dark:bg-gray-950/90 backdrop-blur-sm sticky top-0 z-10">
+    <div className="min-h-screen bg-[#060a0f] text-white">
+
+      {/* Top accent line */}
+      <div className="fixed top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-blue-500 to-transparent z-50" />
+
+      {/* Dot grid */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.028) 1px, transparent 1px)", backgroundSize: "28px 28px" }}
+      />
+
+      {/* Ambient glows */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-40 left-1/4 w-[700px] h-[700px] bg-blue-600/[0.07] rounded-full blur-[140px]" />
+        <div className="absolute top-1/2 right-0 w-[400px] h-[400px] bg-blue-400/[0.04] rounded-full blur-[100px]" />
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-600/[0.04] rounded-full blur-[100px]" />
+      </div>
+
+      {/* All content above fixed backgrounds */}
+      <div className="relative">
+
+      {/* Nav */}
+      <nav className="relative z-50 border-b border-white/[0.06] bg-[#060a0f]/80 backdrop-blur-md sticky top-[2px]">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-blue-500 to-blue-700 bg-clip-text text-transparent">Ombryth</span>
+          <span className="text-xl font-black tracking-tight">Ombryth</span>
+          <div className="hidden sm:flex items-center gap-7 text-sm text-slate-500">
+            <a href="#features" className="hover:text-white transition-colors">Features</a>
+            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
+            <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
+          </div>
           <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-4 py-2 rounded-md transition-colors"
-            >
+            <Link href="/login" className="text-sm text-slate-400 hover:text-white px-4 py-2 transition-colors">
               Log in
             </Link>
             <Link
               href="/signup"
-              className="text-sm text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md transition-colors font-medium"
+              className="text-sm text-white bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded-lg transition-all font-semibold shadow-lg shadow-blue-600/25"
             >
               Try free
             </Link>
@@ -91,319 +162,334 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="max-w-6xl mx-auto px-6 pt-20 pb-24 text-center">
-        <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-xs font-medium px-3 py-1.5 rounded-full mb-6">
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-500" aria-hidden="true"></span>
-          10 free generations — no credit card required
-        </div>
-        <h1 className="text-5xl sm:text-6xl font-bold text-gray-900 dark:text-white leading-tight mb-5 tracking-tight">
-          Turn any product into<br />
-          <span className="text-blue-600 dark:text-blue-400">scroll-stopping content.</span>
-        </h1>
-        <p className="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-          Bring your own AI keys. Generate lifestyle images and platform-ready captions for Pinterest, Instagram, Facebook and Google Ads — in seconds, not hours.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link
-            href="/signup"
-            className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3.5 rounded-lg transition-colors text-base"
-          >
-            Generate your first image free
-            <svg aria-hidden="true" className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
-          </Link>
-          <Link
-            href="/login"
-            className="inline-flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-700 dark:text-gray-300 font-medium px-8 py-3.5 rounded-lg transition-colors text-base"
-          >
-            Sign in
-          </Link>
-        </div>
-        <p className="mt-4 text-sm text-gray-400 dark:text-gray-500">No credit card needed · Cancel anytime · Your keys, your costs</p>
-
-        {/* Powered-by badges */}
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-          {["DALL-E 3", "Claude", "Flux", "Gemini", "Stability AI", "Seedream"].map((name) => (
-            <span
-              key={name}
-              className="text-xs text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 px-3 py-1 rounded-full font-medium"
-            >
-              {name}
-            </span>
-          ))}
-        </div>
-
-        {/* Hero visual placeholder */}
-        <div className="mt-16 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gradient-to-br from-gray-50 dark:from-gray-900 to-blue-50 dark:to-blue-950 h-72 sm:h-96 flex items-center justify-center shadow-sm">
-          <div className="text-center">
-            <div className="w-16 h-16 rounded-2xl bg-blue-100 dark:bg-blue-900/60 flex items-center justify-center mx-auto mb-3">
-              <svg aria-hidden="true" className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">AI-generated lifestyle image</p>
-            <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">with platform-ready captions</p>
+      {/* Hero */}
+      <section className="relative max-w-6xl mx-auto px-6 pt-20 pb-12">
+        <div className="text-center mb-14">
+          <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-full px-4 py-1.5 mb-8">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+            <span className="text-blue-300 text-sm font-medium">10 free generations — no credit card required</span>
           </div>
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.04] mb-6">
+            Turn any product into<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
+              scroll-stopping content.
+            </span>
+          </h1>
+          <p className="text-lg text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+            Bring your own AI keys. Generate lifestyle images and platform-ready captions for Pinterest, Instagram, Facebook, and Google Ads — in seconds, not hours.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-5">
+            <Link
+              href="/signup"
+              className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 py-3.5 rounded-xl transition-all text-base shadow-xl shadow-blue-600/20 group"
+            >
+              Generate your first image free
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center border border-white/10 hover:border-white/20 text-slate-300 hover:text-white font-medium px-8 py-3.5 rounded-xl transition-colors text-base"
+            >
+              Sign in
+            </Link>
+          </div>
+          <p className="text-sm text-slate-700">No credit card needed · Cancel anytime · Your keys, your costs</p>
+
+          {/* Powered-by badges */}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+            {PROVIDERS.map((name) => (
+              <span
+                key={name}
+                className="text-xs text-slate-600 bg-white/[0.03] border border-white/[0.07] hover:border-white/[0.14] hover:text-slate-400 transition-colors px-3 py-1.5 rounded-full font-medium cursor-default"
+              >
+                {name}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Mock app UI */}
+        <div className="relative mx-auto max-w-4xl">
+          <div className="relative bg-[#0c1018] rounded-2xl overflow-hidden shadow-[0_0_0_1px_rgba(255,255,255,0.07),0_40px_100px_rgba(0,0,0,0.7)]">
+
+            {/* Window chrome */}
+            <div className="flex items-center gap-3 px-5 py-3 border-b border-white/[0.06] bg-black/20">
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-white/10" />
+                <div className="w-3 h-3 rounded-full bg-white/10" />
+                <div className="w-3 h-3 rounded-full bg-white/10" />
+              </div>
+              <div className="flex-1 h-5 bg-white/[0.04] rounded-md max-w-xs mx-auto" />
+              <div className="flex gap-2">
+                <div className="w-16 h-5 bg-white/[0.04] rounded-md" />
+                <div className="w-16 h-5 bg-blue-600/20 border border-blue-500/30 rounded-md" />
+              </div>
+            </div>
+
+            {/* App layout */}
+            <div className="flex">
+              {/* Sidebar stub */}
+              <div className="hidden sm:flex w-14 border-r border-white/[0.05] flex-col items-center py-5 gap-4 bg-black/20 shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-blue-600/20 border border-blue-500/30" />
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="w-5 h-5 rounded-md bg-white/[0.04]" />
+                ))}
+              </div>
+
+              {/* Main content */}
+              <div className="flex-1 grid md:grid-cols-5 min-h-[320px]">
+
+                {/* Controls panel */}
+                <div className="md:col-span-2 p-5 border-r border-white/[0.05] space-y-4">
+                  <div className="space-y-1.5">
+                    <div className="h-2 bg-white/[0.07] rounded-full w-20" />
+                    <div className="h-9 bg-white/[0.04] border border-white/[0.07] rounded-lg" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="h-2 bg-white/[0.07] rounded-full w-24" />
+                    <div className="flex gap-2">
+                      <div className="flex-1 h-9 bg-white/[0.04] border border-white/[0.07] rounded-lg" />
+                      <div className="flex-1 h-9 bg-white/[0.04] border border-white/[0.07] rounded-lg" />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="h-2 bg-white/[0.07] rounded-full w-28" />
+                    <div className="h-20 bg-white/[0.02] border border-white/[0.07] border-dashed rounded-lg flex items-center justify-center">
+                      <div className="space-y-1.5 text-center">
+                        <div className="h-2 bg-white/[0.09] rounded-full w-20 mx-auto" />
+                        <div className="h-1.5 bg-white/[0.05] rounded-full w-14 mx-auto" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="h-9 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2">
+                    <div className="w-3.5 h-3.5 rounded-full bg-white/30" />
+                    <div className="h-2 bg-white/50 rounded-full w-14" />
+                  </div>
+                </div>
+
+                {/* Output panel */}
+                <div className="md:col-span-3 p-5 space-y-4">
+                  {/* Generated image placeholder */}
+                  <div className="aspect-video rounded-xl bg-gradient-to-br from-blue-950/60 via-indigo-950/40 to-violet-950/60 border border-white/[0.06] relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                    <div className="absolute top-1/3 left-1/4 w-1/2 h-1/3 bg-white/[0.04] rounded-xl blur-sm" />
+                    <div className="absolute top-1/4 right-1/4 w-1/3 h-1/4 bg-blue-400/[0.08] rounded-full blur-lg" />
+                    <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-emerald-500/90 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                      <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                      Generated in 4.2s
+                    </div>
+                    <div className="absolute bottom-3 left-3 right-3 flex gap-2">
+                      <div className="flex-1 h-7 bg-white/10 backdrop-blur-sm rounded-lg border border-white/10" />
+                      <div className="w-20 h-7 bg-blue-600/80 rounded-lg" />
+                    </div>
+                  </div>
+
+                  {/* Caption output */}
+                  <div>
+                    <div className="flex gap-1 p-1 bg-white/[0.03] border border-white/[0.06] rounded-lg mb-3">
+                      {["Pinterest", "Instagram", "Facebook", "Ads"].map((tab, i) => (
+                        <div
+                          key={tab}
+                          className={`flex-1 text-center py-1 rounded-md text-xs font-medium ${
+                            i === 0 ? "bg-blue-600 text-white shadow-sm" : "text-slate-600"
+                          }`}
+                        >
+                          {tab}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-3 space-y-1.5 mb-2">
+                      <div className="h-2 bg-white/20 rounded-full w-3/4" />
+                      <div className="h-2 bg-white/10 rounded-full w-full" />
+                      <div className="h-2 bg-white/10 rounded-full w-5/6" />
+                    </div>
+                    <div className="flex gap-1.5 flex-wrap">
+                      {[40, 32, 50, 36, 44].map((w, i) => (
+                        <div key={i} className="h-5 bg-blue-500/10 border border-blue-500/20 rounded-full" style={{ width: `${w}px` }} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Glow under card */}
+          <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-2/3 h-24 bg-blue-600/[0.08] blur-3xl rounded-full pointer-events-none" />
         </div>
       </section>
 
-      {/* Social proof strip */}
-      <div className="bg-gray-50 dark:bg-gray-900 border-y border-gray-100 dark:border-gray-800 py-4">
-        <div className="max-w-6xl mx-auto px-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-            Built for affiliate marketers who want to move fast — not wait on agencies
-          </p>
-          <div className="flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500">
-            <span>✓ AES-256 encrypted keys</span>
-            <span>✓ No watermarks</span>
-            <span>✓ EXIF metadata stripped</span>
-          </div>
+      {/* Stats strip */}
+      <div className="border-y border-white/[0.06] bg-white/[0.015] py-6 mt-10">
+        <div className="max-w-4xl mx-auto px-6 grid grid-cols-3 gap-6 text-center">
+          {[
+            { value: "6", label: "AI providers" },
+            { value: "4", label: "Platforms in one click" },
+            { value: "€0", label: "Hidden markup" },
+          ].map(({ value, label }) => (
+            <div key={label}>
+              <p className="text-3xl font-black tracking-tight">{value}</p>
+              <p className="text-slate-600 text-sm mt-0.5">{label}</p>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Features Section */}
-      <section className="bg-white dark:bg-gray-950 py-24">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Everything you need to publish faster
-            </h2>
-            <p className="text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
-              One workflow from product photo to publish-ready content across all your platforms.
-            </p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-8 border border-gray-100 dark:border-gray-800">
-              <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center mb-5">
-                <svg aria-hidden="true" className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
+      {/* Features */}
+      <section id="features" className="max-w-6xl mx-auto px-6 py-24">
+        <div className="text-center mb-14">
+          <p className="text-blue-400 text-sm font-semibold uppercase tracking-widest mb-3">Everything you need</p>
+          <h2 className="text-3xl sm:text-4xl font-black tracking-tight mb-4">Built for creators who move fast</h2>
+          <p className="text-slate-500 text-base max-w-xl mx-auto">One workflow from product photo to publish-ready content across all your platforms.</p>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {FEATURES.map(({ icon: Icon, color, bg, glow, title, desc }) => (
+            <div
+              key={title}
+              className={`group bg-[#0c1018] shadow-[0_0_0_1px_rgba(255,255,255,0.06)] ${glow} rounded-2xl p-6 hover:-translate-y-0.5 transition-all duration-200`}
+            >
+              <div className={`w-10 h-10 ${bg} rounded-xl flex items-center justify-center mb-4`}>
+                <Icon className={`w-5 h-5 ${color}`} />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">AI Image Generation</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-                Use DALL-E 3, Stable Diffusion, Flux or Seedream with your own API keys. Upload a style reference and product photo — Ombryth does the rest.
-              </p>
+              <h3 className="text-white font-bold mb-2 tracking-tight">{title}</h3>
+              <p className="text-slate-500 text-sm leading-relaxed">{desc}</p>
             </div>
-
-            <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-8 border border-gray-100 dark:border-gray-800">
-              <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/40 flex items-center justify-center mb-5">
-                <svg aria-hidden="true" className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Metadata Stripped</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-                Every generated image is automatically processed to remove EXIF and metadata — keeping your workflow and AI usage private.
-              </p>
-            </div>
-
-            <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-8 border border-gray-100 dark:border-gray-800">
-              <div className="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center mb-5">
-                <svg aria-hidden="true" className="w-6 h-6 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Multi-Platform Captions</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-                Get Pinterest titles, Instagram captions, Facebook posts, and Google Ads headlines + descriptions — all generated simultaneously.
-              </p>
-            </div>
-
-            <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-8 border border-gray-100 dark:border-gray-800">
-              <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center mb-5">
-                <svg aria-hidden="true" className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 21a9 9 0 100-18 9 9 0 000 18zm0 0c2.485 0 4-2.015 4-4.5S14.485 8 12 8s-4 2.015-4 4.5S9.515 21 12 21zM2.458 12H22M12 2.458v19.084" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">9 Languages</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-                Generate captions in English, Spanish, French, German, Portuguese, Italian, Dutch, Polish, or Hungarian. One click.
-              </p>
-            </div>
-
-            <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-8 border border-gray-100 dark:border-gray-800">
-              <div className="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center mb-5">
-                <svg aria-hidden="true" className="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Destination-aware captions</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-                Paste your affiliate link. Ombryth reads the page and weaves the relevant keywords into your captions automatically.
-              </p>
-            </div>
-
-            <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-8 border border-gray-100 dark:border-gray-800">
-              <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-5">
-                <svg aria-hidden="true" className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Your keys, your costs</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-                Connect any AI provider you already use — OpenAI, Anthropic, Replicate, Stability AI, or BytePlus. Pay providers directly at their rates. Zero markup.
-              </p>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
       {/* How it works */}
-      <section className="bg-gray-50 dark:bg-gray-900 py-24">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">How it works</h2>
-            <p className="text-lg text-gray-500 dark:text-gray-400">Three steps from upload to publish</p>
+      <section className="max-w-5xl mx-auto px-6 pb-24">
+        <div className="bg-[#0c1018] shadow-[0_0_0_1px_rgba(59,130,246,0.15)] rounded-3xl p-10">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-black tracking-tight">Three steps to publish-ready content</h2>
           </div>
-          <div className="grid sm:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             {[
-              { step: "1", title: "Upload references", desc: "Drop in a style reference image and your product photo. Set the mood with lighting and category presets." },
-              { step: "2", title: "Choose your platforms", desc: "Select Pinterest, Instagram, Facebook, Google Ads, or all four. Pick your AI image and text models." },
-              { step: "3", title: "Generate & publish", desc: "Click generate. Download your clean image and copy captions directly into your publishing tool." },
-            ].map((item) => (
-              <div key={item.step} className="text-center">
-                <div className="w-10 h-10 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center mx-auto mb-4 text-sm" aria-hidden="true">
-                  {item.step}
+              { n: "1", title: "Upload references", desc: "Drop in a style reference image and your product photo. Set the mood with lighting and category presets." },
+              { n: "2", title: "Choose your platforms", desc: "Select Pinterest, Instagram, Facebook, Google Ads, or all four. Pick your AI image and text models." },
+              { n: "3", title: "Generate & publish", desc: "Click generate. Download your clean image and copy captions directly into your publishing tool." },
+            ].map(({ n, title, desc }, i) => (
+              <div key={n} className="text-center relative">
+                {i < 2 && (
+                  <div className="hidden md:block absolute top-6 left-[58%] right-[-42%] h-px bg-gradient-to-r from-blue-500/30 to-transparent" />
+                )}
+                <div className="w-12 h-12 rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center mx-auto mb-4 relative z-10">
+                  <span className="text-blue-400 font-black text-lg">{n}</span>
                 </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{item.title}</h3>
-                <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">{item.desc}</p>
+                <h3 className="text-white font-bold mb-2">{title}</h3>
+                <p className="text-slate-500 text-sm leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="max-w-6xl mx-auto px-6 py-24">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">Frequently asked questions</h2>
-          <p className="text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
-            Everything you need to know before you start generating.
-          </p>
+      {/* Pricing */}
+      <section id="pricing" className="max-w-6xl mx-auto px-6 pb-24">
+        <div className="text-center mb-14">
+          <p className="text-blue-400 text-sm font-semibold uppercase tracking-widest mb-3">Pricing</p>
+          <h2 className="text-3xl sm:text-4xl font-black tracking-tight mb-4">Simple pricing</h2>
+          <p className="text-slate-500 text-base">Start free, upgrade when you need more</p>
         </div>
-        <div className="max-w-2xl mx-auto bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm px-6">
+        <div className="grid sm:grid-cols-2 gap-5 max-w-3xl mx-auto">
+          {/* Free plan */}
+          <div className="bg-[#0c1018] rounded-2xl p-8 shadow-[0_0_0_1px_rgba(255,255,255,0.07)]">
+            <h3 className="text-lg font-bold text-white mb-1">Free</h3>
+            <p className="text-slate-500 text-sm mb-6">Try it out, no commitment</p>
+            <div className="text-4xl font-black text-white mb-6">
+              €0<span className="text-lg font-normal text-slate-600">/mo</span>
+            </div>
+            <ul className="space-y-3 mb-8">
+              {["10 free generations", "All image models", "All text models", "Pinterest, Instagram, Facebook, Google Ads", "Metadata stripping"].map((item) => (
+                <li key={item} className="flex items-center gap-2.5 text-sm text-slate-400">
+                  <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Link href="/signup" className="block text-center border border-white/10 hover:border-white/20 text-slate-300 hover:text-white font-medium px-6 py-2.5 rounded-xl transition-colors text-sm">
+              Get started free
+            </Link>
+          </div>
+
+          {/* Pro plan */}
+          <div className="relative bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-8 overflow-hidden shadow-xl shadow-blue-600/20">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.12),transparent_60%)]" />
+            <div className="relative">
+              <div className="absolute -top-1 right-0 bg-white/20 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                Most popular
+              </div>
+              <h3 className="text-lg font-bold text-white mb-1">Pro</h3>
+              <p className="text-blue-200 text-sm mb-6">For active creators</p>
+              <div className="text-4xl font-black text-white mb-1">
+                €2.99<span className="text-lg font-normal text-blue-300">/mo</span>
+              </div>
+              <p className="text-blue-300 text-xs mb-6">No long-term commitment</p>
+              <p className="text-white/80 text-xs font-bold uppercase tracking-wide mb-3">Everything in Free, plus:</p>
+              <ul className="space-y-3 mb-8">
+                {["Unlimited generations", "Batch mode (3 variations)", "Priority support", "9 caption languages", "Destination-aware captions"].map((item) => (
+                  <li key={item} className="flex items-center gap-2.5 text-sm text-white">
+                    <Check className="w-4 h-4 text-blue-200 shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/signup" className="block text-center bg-white hover:bg-blue-50 text-blue-700 font-bold px-6 py-2.5 rounded-xl transition-colors text-sm shadow-lg">
+                Start Pro — €2.99/mo
+              </Link>
+            </div>
+          </div>
+        </div>
+        <p className="text-center text-slate-700 text-sm mt-6">Prices in EUR. Billed monthly. Cancel anytime. Your API keys, your costs.</p>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="max-w-2xl mx-auto px-6 pb-24">
+        <div className="text-center mb-12">
+          <p className="text-blue-400 text-sm font-semibold uppercase tracking-widest mb-3">FAQ</p>
+          <h2 className="text-3xl font-black tracking-tight mb-4">Frequently asked questions</h2>
+          <p className="text-slate-500 text-base">Everything you need to know before you start generating.</p>
+        </div>
+        <div className="bg-[#0c1018] shadow-[0_0_0_1px_rgba(255,255,255,0.07)] rounded-2xl px-6">
           {FAQ_ITEMS.map((item) => (
             <FaqItem key={item.q} q={item.q} a={item.a} />
           ))}
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section className="bg-gray-50 dark:bg-gray-900 py-24">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">Simple pricing</h2>
-            <p className="text-lg text-gray-500 dark:text-gray-400">Start free, upgrade when you need more</p>
-          </div>
-          <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {/* Free Plan */}
-            <div className="bg-white dark:bg-gray-950 rounded-2xl p-8 border border-gray-100 dark:border-gray-800 shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Free</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">Try it out, no commitment</p>
-              <div className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
-                €0<span className="text-lg font-normal text-gray-400 dark:text-gray-500">/mo</span>
-              </div>
-              <ul className="space-y-3 mb-8">
-                {[
-                  "10 free generations",
-                  "All image models",
-                  "All text models",
-                  "Pinterest, Instagram, Facebook, Google Ads",
-                  "Metadata stripping",
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                    <svg aria-hidden="true" className="w-4 h-4 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/signup"
-                className="block text-center border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-700 dark:text-gray-300 font-medium px-6 py-2.5 rounded-lg transition-colors text-sm"
-              >
-                Get started free
-              </Link>
-            </div>
-
-            {/* Pro Plan */}
-            <div className="bg-blue-600 rounded-2xl p-8 border border-blue-600 shadow-sm relative overflow-hidden">
-              <div className="absolute top-4 right-4 bg-blue-500 text-white text-xs font-medium px-2.5 py-1 rounded-full">
-                Most popular
-              </div>
-              <h3 className="text-lg font-semibold text-white mb-1">Pro</h3>
-              <p className="text-blue-100 text-sm mb-6">For active creators</p>
-              <div className="text-4xl font-bold text-white mb-2">
-                €2.99<span className="text-lg font-normal text-blue-200">/mo</span>
-              </div>
-              <p className="text-blue-200 text-xs mb-5">🔒 No long-term commitment</p>
-              <p className="text-white text-xs font-semibold uppercase tracking-wide mb-3">Everything in Free, plus:</p>
-              <ul className="space-y-3 mb-8">
-                {[
-                  "Unlimited generations",
-                  "Batch mode (3 variations)",
-                  "Priority support",
-                  "9 caption languages",
-                  "Destination-aware captions",
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-sm text-white">
-                    <svg aria-hidden="true" className="w-4 h-4 text-blue-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/signup"
-                className="block text-center bg-white hover:bg-blue-50 text-blue-600 font-semibold px-6 py-2.5 rounded-lg transition-colors text-sm"
-              >
-                Start Pro — €2.99/mo
-              </Link>
-            </div>
-          </div>
-          <p className="text-center text-gray-400 dark:text-gray-500 text-sm mt-6">
-            Prices in EUR. Billed monthly. Cancel anytime. Your API keys, your costs.
+      {/* Final CTA */}
+      <section className="max-w-3xl mx-auto px-4 sm:px-6 pb-24 text-center">
+        <div className="bg-gradient-to-br from-blue-500/[0.08] to-cyan-500/[0.04] shadow-[0_0_0_1px_rgba(59,130,246,0.2)] rounded-3xl p-8 sm:p-12">
+          <h2 className="text-3xl sm:text-4xl font-black tracking-tight mb-4">Ready to move faster?</h2>
+          <p className="text-slate-400 text-base mb-8 max-w-lg mx-auto leading-relaxed">
+            Stop spending hours creating content manually. Generate scroll-stopping images and platform captions in seconds — powered by your own AI keys.
           </p>
+          <Link
+            href="/signup"
+            className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 py-3.5 rounded-xl transition-all text-base shadow-xl shadow-blue-600/25 group"
+          >
+            Generate your first image free
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <p className="text-slate-700 text-sm mt-4">10 generations free · No credit card · Cancel anytime</p>
         </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="max-w-6xl mx-auto px-6 py-24 text-center">
-        <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-          Ready to move faster?
-        </h2>
-        <p className="text-lg text-gray-500 dark:text-gray-400 mb-8 max-w-lg mx-auto">
-          Stop spending hours creating content manually. Ombryth gives you scroll-stopping images and platform captions in seconds — powered by your own AI keys.
-        </p>
-        <Link
-          href="/signup"
-          className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3.5 rounded-lg transition-colors text-base"
-        >
-          Generate your first image free
-          <svg aria-hidden="true" className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-          </svg>
-        </Link>
-        <p className="mt-3 text-sm text-gray-400 dark:text-gray-500">10 generations free · No credit card · Cancel anytime</p>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-100 dark:border-gray-800 py-8 bg-white dark:bg-gray-950">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="text-base font-extrabold tracking-tight bg-gradient-to-r from-blue-500 to-blue-700 bg-clip-text text-transparent">Ombryth</span>
-          <p className="text-gray-400 dark:text-gray-500 text-sm">
-            © {new Date().getFullYear()} Ombryth. All rights reserved.
-          </p>
-          <div className="flex items-center gap-5 text-sm text-gray-400 dark:text-gray-500">
-            <Link href="/privacy" className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Privacy</Link>
-            <Link href="/terms" className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Terms</Link>
+      <footer className="border-t border-white/[0.06] py-8 px-6">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <span className="text-base font-black tracking-tight">Ombryth</span>
+          <p className="text-slate-700 text-sm">© {new Date().getFullYear()} Ombryth. All rights reserved.</p>
+          <div className="flex items-center gap-6 text-sm text-slate-600">
+            <Link href="/terms" className="hover:text-slate-300 transition-colors">Terms</Link>
+            <Link href="/privacy" className="hover:text-slate-300 transition-colors">Privacy</Link>
+            <a href="mailto:hello@ombryth.com" className="hover:text-slate-300 transition-colors">Support</a>
           </div>
         </div>
       </footer>
+
+      </div>{/* end relative content wrapper */}
     </div>
   )
 }
