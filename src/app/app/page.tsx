@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react"
 import Image from "next/image"
-import { Upload, X, Download, Copy, Check, Wand2, Info, ChevronLeft, ChevronRight, ChevronDown, BookMarked, Link, ArrowRight, RotateCcw } from "lucide-react"
+import { Upload, X, Download, Copy, Check, Wand2, Info, ChevronLeft, ChevronRight, ChevronDown, BookMarked, Link, ArrowRight, RotateCcw, Target, Hash } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Slider } from "@/components/ui/slider"
@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/tooltip"
 import { useToast } from "@/hooks/use-toast"
 import { NICHE_PRESETS, LIGHTING_PRESETS, DEFAULT_NICHE, DEFAULT_STYLE, type CustomNiche } from "@/lib/presets"
+import type { StrategyNiche } from "@/app/app/strategy/page"
 import type {
   ImageModel,
   TextModel,
@@ -348,6 +349,14 @@ export default function GeneratePage() {
   const [selectedVariation, setSelectedVariation] = useState(0)
   const [language, setLanguage] = useState<Language>("en")
 
+  // Strategy keywords
+  const [strategyNiches, setStrategyNiches] = useState<StrategyNiche[]>([])
+  const [strategyOpen, setStrategyOpen] = useState(false)
+  const [activeStrategyId, setActiveStrategyId] = useState<string | null>(null)
+  const [keywordsInjected, setKeywordsInjected] = useState(false)
+
+  const activeStrategyNiche = strategyNiches.find(n => n.id === activeStrategyId) ?? null
+
   // Destination URL
   const [destinationUrl, setDestinationUrl] = useState("")
   const [destinationContext, setDestinationContext] = useState<{ title: string; description: string } | null>(null)
@@ -375,6 +384,7 @@ export default function GeneratePage() {
       if (Array.isArray(def.default_platforms) && def.default_platforms.length > 0) setPlatforms(def.default_platforms as Platform[])
     })
     fetch("/api/niches").then(r => r.ok ? r.json() : { niches: [] }).then(d => setCustomNiches(d.niches ?? []))
+    fetch("/api/strategy").then(r => r.ok ? r.json() : { niches: [] }).then(d => setStrategyNiches(d.niches ?? []))
   }, [])
 
   // Output state
@@ -887,6 +897,130 @@ export default function GeneratePage() {
               </div>
             )}
           </div>
+
+          {/* Strategy Keywords — collapsible */}
+          {strategyNiches.length > 0 && (
+            <div className="bg-white dark:bg-card rounded-xl border border-gray-100 dark:border-border overflow-hidden">
+              <button
+                onClick={() => setStrategyOpen(o => !o)}
+                className="w-full flex items-center justify-between px-4 py-3 text-left"
+              >
+                <div className="flex items-center gap-1.5">
+                  <Target className="w-3.5 h-3.5 text-gray-400" />
+                  <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer">
+                    Strategy Keywords
+                    {activeStrategyNiche && (
+                      <span className="ml-1.5 normal-case font-normal text-blue-600 dark:text-blue-400">
+                        · {activeStrategyNiche.name}
+                      </span>
+                    )}
+                  </Label>
+                </div>
+                <ChevronDown className={cn("w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0", strategyOpen && "rotate-180")} />
+              </button>
+              {strategyOpen && (
+                <div className="px-4 pb-4 space-y-3">
+                  {/* Niche selector */}
+                  <div className="flex flex-wrap gap-1.5">
+                    <button
+                      onClick={() => { setActiveStrategyId(null); setKeywordsInjected(false) }}
+                      className={cn(
+                        "px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors",
+                        activeStrategyId === null
+                          ? "border-gray-300 bg-gray-100 text-gray-700"
+                          : "border-gray-100 dark:border-border text-gray-400 hover:border-gray-200"
+                      )}
+                    >
+                      None
+                    </button>
+                    {strategyNiches.map(n => (
+                      <button
+                        key={n.id}
+                        onClick={() => { setActiveStrategyId(n.id); setKeywordsInjected(false) }}
+                        className={cn(
+                          "px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors",
+                          activeStrategyId === n.id
+                            ? "border-blue-200 bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:border-blue-500/30 dark:text-blue-400"
+                            : "border-gray-100 dark:border-border text-gray-500 hover:border-gray-200 dark:hover:border-border/80"
+                        )}
+                      >
+                        <span
+                          className="inline-block w-1.5 h-1.5 rounded-full mr-1.5 -mb-px"
+                          style={{ background: n.color }}
+                        />
+                        {n.name}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Keywords preview + inject button */}
+                  {activeStrategyNiche && (
+                    <div className="space-y-2">
+                      {activeStrategyNiche.keywords.length > 0 ? (
+                        <>
+                          <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
+                            {activeStrategyNiche.keywords.slice(0, 20).map(kw => (
+                              <span
+                                key={kw}
+                                className="px-1.5 py-0.5 rounded text-[10px] bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 font-medium"
+                              >
+                                #{kw}
+                              </span>
+                            ))}
+                            {activeStrategyNiche.keywords.length > 20 && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] bg-gray-50 dark:bg-white/[0.04] text-gray-400">
+                                +{activeStrategyNiche.keywords.length - 20} more
+                              </span>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => {
+                              const kwLine = `Caption keywords: ${activeStrategyNiche.keywords.join(", ")}`
+                              setCustomPrompt(prev => prev ? `${prev}\n${kwLine}` : kwLine)
+                              setAdditionalOpen(true)
+                              setKeywordsInjected(true)
+                            }}
+                            disabled={keywordsInjected}
+                            className={cn(
+                              "w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold border transition-all",
+                              keywordsInjected
+                                ? "bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/30 text-green-700 dark:text-green-400 cursor-default"
+                                : "bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/30 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20"
+                            )}
+                          >
+                            {keywordsInjected
+                              ? <><Check className="w-3 h-3" /> Keywords added to instructions</>
+                              : <><Hash className="w-3 h-3" /> Inject {activeStrategyNiche.keywords.length} keywords into prompt</>
+                            }
+                          </button>
+                        </>
+                      ) : (
+                        <p className="text-xs text-gray-400 italic">
+                          No keywords in this niche yet — go to Strategy to add PinClicks research.
+                        </p>
+                      )}
+
+                      {/* Schedule info */}
+                      {(activeStrategyNiche.posting_times || activeStrategyNiche.posting_frequency) && (
+                        <div className="flex gap-3 pt-1 border-t border-gray-50 dark:border-white/[0.04]">
+                          {activeStrategyNiche.posting_times && (
+                            <p className="text-[10px] text-gray-400 dark:text-slate-500">
+                              🕐 {activeStrategyNiche.posting_times}
+                            </p>
+                          )}
+                          {activeStrategyNiche.posting_frequency && (
+                            <p className="text-[10px] text-gray-400 dark:text-slate-500">
+                              📅 {activeStrategyNiche.posting_frequency}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Destination URL — collapsible */}
           <div className="bg-white dark:bg-card rounded-xl border border-gray-100 dark:border-border overflow-hidden">

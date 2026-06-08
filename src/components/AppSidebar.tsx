@@ -2,17 +2,18 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Wand2, Clock, Settings, CreditCard, LogOut, Zap, HelpCircle, Menu, X } from "lucide-react"
+import { Wand2, Clock, Settings, CreditCard, LogOut, Zap, HelpCircle, Menu, X, Target } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 import { useEffect, useState } from "react"
 import { HelpDrawer } from "@/components/HelpDrawer"
 
 const navItems = [
-  { href: "/app", label: "Generate", icon: Wand2, exact: true },
-  { href: "/app/history", label: "History", icon: Clock },
+  { href: "/app",          label: "Generate", icon: Wand2,   exact: true },
+  { href: "/app/strategy", label: "Strategy", icon: Target },
+  { href: "/app/history",  label: "History",  icon: Clock },
   { href: "/app/settings", label: "Settings", icon: Settings },
-  { href: "/app/billing", label: "Billing", icon: CreditCard },
+  { href: "/app/billing",  label: "Billing",  icon: CreditCard },
 ]
 
 interface UserStatus {
