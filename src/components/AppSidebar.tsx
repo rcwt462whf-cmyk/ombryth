@@ -10,7 +10,7 @@ import { HelpDrawer } from "@/components/HelpDrawer"
 
 const navItems = [
   { href: "/app",          label: "Generate", icon: Wand2,   exact: true },
-  { href: "/app/strategy", label: "Strategy", icon: Target },
+  { href: "/app/strategy", label: "Keywords", icon: Target },
   { href: "/app/history",  label: "History",  icon: Clock },
   { href: "/app/settings", label: "Settings", icon: Settings },
   { href: "/app/billing",  label: "Billing",  icon: CreditCard },

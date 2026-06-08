@@ -908,7 +908,7 @@ export default function GeneratePage() {
                 <div className="flex items-center gap-1.5">
                   <Target className="w-3.5 h-3.5 text-gray-400" />
                   <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer">
-                    Strategy Keywords
+                    Keywords
                     {activeStrategyNiche && (
                       <span className="ml-1.5 normal-case font-normal text-blue-600 dark:text-blue-400">
                         · {activeStrategyNiche.name}
@@ -996,24 +996,8 @@ export default function GeneratePage() {
                         </>
                       ) : (
                         <p className="text-xs text-gray-400 italic">
-                          No keywords in this niche yet — go to Strategy to add PinClicks research.
+                          No keywords in this set yet — go to Keyword Strategy to add your research.
                         </p>
-                      )}
-
-                      {/* Schedule info */}
-                      {(activeStrategyNiche.posting_times || activeStrategyNiche.posting_frequency) && (
-                        <div className="flex gap-3 pt-1 border-t border-gray-50 dark:border-white/[0.04]">
-                          {activeStrategyNiche.posting_times && (
-                            <p className="text-[10px] text-gray-400 dark:text-slate-500">
-                              🕐 {activeStrategyNiche.posting_times}
-                            </p>
-                          )}
-                          {activeStrategyNiche.posting_frequency && (
-                            <p className="text-[10px] text-gray-400 dark:text-slate-500">
-                              📅 {activeStrategyNiche.posting_frequency}
-                            </p>
-                          )}
-                        </div>
                       )}
                     </div>
                   )}
