@@ -364,6 +364,28 @@ const HOOK_STYLES = [
   { name: "opinion",        instruction: `HOOK — Strong opinion: Confident, specific, mildly controversial. e.g. "Open shelving in kitchens is almost always a mistake." or "A rug does more for a living room than any sofa upgrade."` },
 ]
 
+// Rotating title formulas — paired with hook styles for coherent variety
+const TITLE_FORMULAS = [
+  { name: "question",      instruction: `Title uses a genuine question that surfaces a real problem or decision. e.g. "Why does every bathroom look better in photos than in person?" or "When did kitchens start feeling so clinical?"` },
+  { name: "how",           instruction: `Title uses "How [something specific] changed [room/result]". e.g. "How one pendant lamp changed the whole kitchen" or "How switching to warmer bulbs fixed my living room"` },
+  { name: "direct-claim",  instruction: `Title is a short, confident declarative statement. No "The/A/An" at the start. e.g. "Warm light before dark is not optional." or "Linen curtains age better than everything else."` },
+  { name: "before-you",    instruction: `Title is an instruction or warning before an action. e.g. "Read this before you choose bathroom tiles" or "Do this before buying any houseplant" or "One thing to fix before you repaint"` },
+  { name: "number-list",   instruction: `Title uses a specific number + outcome. e.g. "Three lighting swaps that changed everything" or "Two plants. One corner. Completely different room." or "Four bathroom details that date a space immediately"` },
+  { name: "single-truth",  instruction: `Title is a short single-truth statement naming the one decision that matters. e.g. "The headboard is the most important decision in a bedroom" or "Grout colour matters more than tile colour"` },
+  { name: "curiosity",     instruction: `Title names something popular then reveals a surprising gap. e.g. "The most saved kitchen on Pinterest — and what most people miss about it" or "Zellige tiles: what nobody mentions before you order"` },
+  { name: "outcome-first", instruction: `Title leads with the result, not the method. e.g. "A bedroom that feels like a hotel — without the cost" or "Plants that survive low light without drama" or "Bathrooms that still look good in ten years"` },
+]
+
+// Rotating content angles — changes the perspective and focus of captions
+const CONTENT_ANGLES = [
+  `ANGLE: Focus on the sensory experience — how it feels, looks in different light, sounds (quiet / warm / airy). Make the reader feel like they're in the space.`,
+  `ANGLE: Focus on the specific problem this solves — what frustrates people, what common mistake this avoids, why most [rooms/plants/kitchens] fail without this.`,
+  `ANGLE: Focus on one specific material, finish or detail (e.g. zellige texture, linen drape, matte black vs polished chrome). Concrete and specific.`,
+  `ANGLE: Focus on the time dimension — how this looks over time, what ages well vs dates badly, seasonal relevance.`,
+  `ANGLE: Focus on the discovery moment — the specific thing you notice after living with this choice. Conversational, like sharing insider knowledge.`,
+  `ANGLE: Focus on scale and proportion — what makes this room feel bigger/smaller/taller, the one spatial decision that changed everything.`,
+]
+
 /** Short instruction for Seedream's explicit image-slot prompt */
 function prominenceStrengthToInstruction(strength: number): string {
   if (strength < 30) return "The product should be subtly visible, not the main focus. "
@@ -412,8 +434,10 @@ function buildTextSystemPrompt(
 ): string {
   const persona = customPersona?.trim() || DEFAULT_SYSTEM_PERSONA
 
-  // Pick a random hook style — forces genuine variety across generations
+  // Pick a random hook style, title formula, and content angle — forces genuine variety
   const hookStyle = HOOK_STYLES[Math.floor(Math.random() * HOOK_STYLES.length)]
+  const titleFormula = TITLE_FORMULAS[Math.floor(Math.random() * TITLE_FORMULAS.length)]
+  const contentAngle = CONTENT_ANGLES[Math.floor(Math.random() * CONTENT_ANGLES.length)]
 
   const destinationBlock = destinationContext?.title || destinationContext?.description
     ? `\nThe content being promoted links to a page titled "${destinationContext.title}" described as: "${destinationContext.description}". Naturally weave relevant keywords from this context into your captions and descriptions to align with the destination. Do not mention the URL directly.\n`
@@ -431,29 +455,36 @@ function buildTextSystemPrompt(
 
 ${imageRef}
 ${productBlock}${destinationBlock}
+${contentAngle}
+
 HOOK FORMULA FOR THIS GENERATION:
 ${hookStyle.instruction}
 Write original copy using this structure — do not copy the example literally.
 
+TITLE FORMULA FOR THIS GENERATION:
+${titleFormula.instruction}
+Write a title that follows this structure — do not copy the example literally. Vary your sentence structure and starting word.
+
 ⚠️ MANDATORY NON-NEGOTIABLES — failure on any of these is unacceptable:
 1. EMOJIS: You MUST include 1-2 emojis in every caption/description. Place them where they feel natural mid-sentence or at end of a line. Pick from: 🌿 💡 🚿 🛏️ 🏺 🌱 🪵 🏡 ✨ 👇 🪴 🧼
-2. CTA: Always end with "Full guide in the link. 👇" — never "on the blog", never anything else
+2. CTA: Always end with "Full guide in the link. 👇" — never "on the blog", never "link in bio", never anything else
 3. HOOK: First sentence must use the formula above — short, punchy, stops scrolling
 4. TONE: Warm, conversational, like a knowledgeable friend. Not dry, not clinical, not a product listing
+5. VARIETY: Every generation must feel distinct. Do not reuse the same opening word, sentence structure, or angle across title/description/caption.
 
-BANNED: stunning, gorgeous, amazing, game-changing, transform, elevate, discover, nobody tells you, the secret to, say hello to, find the perfect, level up, bullet points, first person "I"
+BANNED WORDS: stunning, gorgeous, amazing, game-changing, transform, elevate, discover, nobody tells you, the secret to, say hello to, find the perfect, level up, bullet points, first person "I", "nestled", "tucked"
+BANNED TITLE PATTERNS: "The [noun] that [verb]" is overused — only use it if it's the assigned title formula. Never start every title with "The".
 
 PINTEREST:
-- Title: max 100 chars, hook formula, no hashtags. e.g. "The living room lighting rule that changes everything after dark"
-- Description: 2-3 short punchy sentences using the hook. Warm and engaging. MUST have 1 emoji. End with "Full guide in the link. 👇"
-  GOOD: "Light is not optional for a plant. It is everything. 🌿 Match the light level first and almost any plant becomes easy to keep. Full guide in the link. 👇"
-  BAD: "This bathroom has matte black fittings and a rain shower. Full guide on the blog."
-- Alt text: describe what's visible (materials, colours, objects). End with topic + "guide 2026."
-- Caption: same vibe as description, slightly different angle
-- Hashtags (20): 8-10 niche-specific exact terms (#zelligetile #arcfloorlamp), 6-8 topic (#bathroomdesign #kitchenrenovation), 2-3 intent (#renovationtips #plantguide). No vanity tags (#home #design)
+- Title: max 100 chars. Use the TITLE FORMULA assigned above. No hashtags.
+  Examples of VARIED title structures: "Why does every bathroom look better in photos than in person?" / "How one pendant lamp changed the whole kitchen" / "Read this before you choose bathroom tiles" / "Linen curtains age better than everything else." / "Grout colour matters more than tile colour"
+- Description: 2-3 short punchy sentences. Use the HOOK FORMULA. Warm and engaging. MUST have 1 emoji naturally placed. End with "Full guide in the link. 👇"
+- Alt text: describe what's visible (materials, colours, objects, lighting). End with topic + "guide 2026."
+- Caption: same energy as description but from a different angle — do not just rephrase the description
+- Hashtags (20): 8-10 niche-specific exact terms (#zelligetile #arcfloorlamp), 6-8 topic (#bathroomdesign #kitchenrenovation), 2-3 intent (#renovationtips #plantguide). No vanity tags (#home #design #beautiful)
 
 INSTAGRAM:
-- Caption: hook → 2-3 warm sentences → "Link in bio 👇". 150-250 chars
+- Caption: hook → 2-3 warm sentences → "Full guide in the link. 👇". 150-250 chars total
 - Hashtags (30): mix niche + topic + broad + intent
 
 FACEBOOK:
@@ -487,7 +518,7 @@ async function generateTextWithOpenAI(
   const resp = await openai.chat.completions.create({
     model: "gpt-4o",
     messages: [{ role: "user", content: systemPrompt }],
-    temperature: 0.7,
+    temperature: 0.95,
     max_tokens: 1200,
     response_format: { type: "json_object" },
   })

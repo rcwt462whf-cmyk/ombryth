@@ -23,6 +23,26 @@ const HOOK_STYLES = [
   `Strong opinion: Confident, specific, mildly controversial. e.g. "Open shelving in kitchens is almost always a mistake."`,
 ]
 
+const TITLE_FORMULAS = [
+  `Title uses a genuine question surfacing a real problem. e.g. "Why does every bathroom look better in photos than in person?" or "When did kitchens start feeling so clinical?"`,
+  `Title uses "How [specific thing] changed [room/result]". e.g. "How one pendant lamp changed the whole kitchen" or "How switching to warmer bulbs fixed my living room"`,
+  `Title is a short confident declarative — no "The/A/An" at the start. e.g. "Warm light before dark is not optional." or "Linen curtains age better than everything else."`,
+  `Title is an instruction/warning before an action. e.g. "Read this before you choose bathroom tiles" or "One thing to fix before you repaint"`,
+  `Title uses a specific number + outcome. e.g. "Three lighting swaps that changed everything" or "Four bathroom details that date a space immediately"`,
+  `Title is a short single-truth naming the one decision that matters. e.g. "Grout colour matters more than tile colour" or "The headboard is the most important bedroom decision"`,
+  `Title names something popular then reveals a surprising gap. e.g. "The most saved kitchen on Pinterest — and what most people miss about it"`,
+  `Title leads with the result, not the method. e.g. "A bedroom that feels like a hotel — without the cost" or "Plants that survive low light without drama"`,
+]
+
+const CONTENT_ANGLES = [
+  `ANGLE: Focus on the sensory experience — how it feels, looks in different light, sounds (quiet / warm / airy). Make the reader feel like they're in the space.`,
+  `ANGLE: Focus on the specific problem this solves — what frustrates people, what common mistake this avoids, why most rooms fail without this.`,
+  `ANGLE: Focus on one specific material, finish or detail (e.g. zellige texture, linen drape, matte black vs polished chrome). Concrete and specific.`,
+  `ANGLE: Focus on the time dimension — how this looks over time, what ages well vs dates badly, seasonal relevance.`,
+  `ANGLE: Focus on the discovery moment — the specific thing you notice after living with this choice. Conversational, like sharing insider knowledge.`,
+  `ANGLE: Focus on scale and proportion — what makes this room feel bigger/smaller/taller, the one spatial decision that changed everything.`,
+]
+
 function sanitizeHashtags(output: PlatformOutput): PlatformOutput {
   const cleanTags = (tags: unknown): string[] => {
     if (!Array.isArray(tags)) return []
@@ -58,8 +78,10 @@ export async function POST(request: Request) {
     const keyMap: Record<string, string> = {}
     for (const row of apiKeys ?? []) keyMap[row.provider] = decryptKey(row.encrypted_key)
 
-    // Pick a fresh random hook style for variety
+    // Pick fresh random hook, title formula, and content angle for variety
     const hookStyle = HOOK_STYLES[Math.floor(Math.random() * HOOK_STYLES.length)]
+    const titleFormula = TITLE_FORMULAS[Math.floor(Math.random() * TITLE_FORMULAS.length)]
+    const contentAngle = CONTENT_ANGLES[Math.floor(Math.random() * CONTENT_ANGLES.length)]
     const persona = userData?.custom_system_prompt?.trim() ||
       "You are a top-performing social media content creator for lifestyle and home decor affiliate marketing. Punchy, hook-first, conversational. Short sentences. 1-2 emojis. Concrete CTA. Write like a real person."
 
@@ -84,13 +106,20 @@ export async function POST(request: Request) {
 
 ${imageRef}
 ${productBlock}${destBlock}
-HOOK (mandatory — use on every platform):
+${contentAngle}
+
+HOOK FORMULA (use on every platform):
 ${hookStyle}
 Write original copy using this structure. Do not copy the formula literally.
 
+TITLE FORMULA (for Pinterest title):
+${titleFormula}
+Write a title that follows this structure. Vary your sentence structure and starting word.
+
 ${scopeInstruction}
 
-BANNED: stunning, gorgeous, amazing, game-changing, transform your space, nobody tells you, the secret to, discover, say hello to
+BANNED WORDS: stunning, gorgeous, amazing, game-changing, transform your space, nobody tells you, the secret to, discover, say hello to, nestled, tucked
+BANNED TITLE PATTERNS: Do not start every title with "The". Vary your title structure every time.
 
 ⚠️ MANDATORY: 1-2 emojis per caption placed naturally (🌿 💡 🚿 🛏️ 🏺 🌱 🪵 🏡 ✨ 👇 🪴). CTA always "Full guide in the link. 👇" — never "on the blog". Warm, friendly tone — not dry or clinical.
 Pinterest description: hook-first, 2-3 punchy sentences, 1 emoji, end "Full guide in the link. 👇". No listing of image objects.
