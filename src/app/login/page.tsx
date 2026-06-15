@@ -38,32 +38,37 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#060a0f] text-white flex">
+    <div className="min-h-screen bg-[#060810] text-white flex">
 
       {/* ── Left branded panel (desktop only) ───────────────────────────── */}
       <div className="hidden lg:flex lg:w-[52%] relative flex-col justify-between p-12 overflow-hidden border-r border-white/[0.06]">
 
-        {/* Dot grid */}
+        {/* Line grid */}
         <div className="absolute inset-0 pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+          style={{
+            backgroundImage: `linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)`,
+            backgroundSize: "48px 48px",
+          }}
+        />
 
-        {/* Ambient glow */}
-        <div className="absolute -bottom-20 -left-20 w-[480px] h-[480px] bg-blue-600/[0.12] rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-blue-400/[0.04] rounded-full blur-[100px] pointer-events-none" />
+        {/* Ambient glows */}
+        <div className="absolute -bottom-20 -left-20 w-[480px] h-[480px] bg-indigo-600/[0.1] rounded-full blur-[130px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-violet-600/[0.05] rounded-full blur-[100px] pointer-events-none" />
 
         {/* Top accent line */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-blue-400 to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-indigo-500 via-violet-500 to-transparent" />
 
         {/* Logo */}
-        <Link href="/" className="relative z-10 text-2xl font-black tracking-tight text-white">
+        <Link href="/" className="relative z-10 font-display text-2xl font-bold tracking-tight text-white">
           Ombryth
         </Link>
 
         {/* Headline + features */}
         <div className="relative z-10">
-          <h2 className="text-4xl font-black tracking-tight leading-[1.1] mb-4">
+          <h2 className="font-display text-4xl font-bold tracking-tight leading-[1.08] mb-4">
             Generate scroll-stopping<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-indigo-300 to-violet-400">
               content in seconds.
             </span>
           </h2>
@@ -73,8 +78,8 @@ export default function LoginPage() {
           <ul className="space-y-4">
             {FEATURES.map(({ icon: Icon, text }) => (
               <li key={text} className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
-                  <Icon className="w-4 h-4 text-blue-400" />
+                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
+                  <Icon className="w-4 h-4 text-indigo-400" />
                 </div>
                 <span className="text-sm text-slate-400">{text}</span>
               </li>
@@ -94,23 +99,24 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
 
           {/* Mobile logo */}
-          <Link href="/" className="lg:hidden block mb-8 text-2xl font-black tracking-tight text-white text-center">
+          <Link href="/" className="lg:hidden block mb-8 font-display text-2xl font-bold tracking-tight text-white text-center">
             Ombryth
           </Link>
 
           {/* Heading */}
           <div className="mb-8 text-center">
-            <h1 className="text-2xl font-black tracking-tight text-white mb-1">Welcome back</h1>
+            <h1 className="font-display text-2xl font-bold tracking-tight text-white mb-1">Welcome back</h1>
             <p className="text-sm text-slate-500">Sign in to your account to continue</p>
           </div>
 
           {/* Card */}
-          <div className="bg-[#0c1018] shadow-[0_0_0_1px_rgba(255,255,255,0.07)] rounded-2xl p-6">
+          <div className="relative bg-[#0c1018] shadow-[0_0_0_1px_rgba(255,255,255,0.07)] rounded-2xl p-6 overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent" />
             <form onSubmit={handleSubmit} className="space-y-4">
 
               {/* Email */}
               <div className="space-y-1.5">
-                <label htmlFor="email" className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <label htmlFor="email" className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Email
                 </label>
                 <input
@@ -121,17 +127,17 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   autoComplete="email"
-                  className="w-full bg-white/[0.04] border border-white/[0.1] text-white placeholder:text-slate-600 text-sm rounded-xl px-3.5 py-2.5 outline-none focus:border-blue-500/50 focus:bg-white/[0.06] transition-all"
+                  className="w-full bg-white/[0.04] border border-white/[0.09] text-white placeholder:text-slate-700 text-sm rounded-xl px-3.5 py-2.5 outline-none focus:border-indigo-500/50 focus:bg-white/[0.06] transition-all"
                 />
               </div>
 
               {/* Password */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label htmlFor="password" className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                  <label htmlFor="password" className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                     Password
                   </label>
-                  <Link href="/forgot-password" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
+                  <Link href="/forgot-password" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
                     Forgot password?
                   </Link>
                 </div>
@@ -144,7 +150,7 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     autoComplete="current-password"
-                    className="w-full bg-white/[0.04] border border-white/[0.1] text-white placeholder:text-slate-600 text-sm rounded-xl px-3.5 py-2.5 pr-10 outline-none focus:border-blue-500/50 focus:bg-white/[0.06] transition-all"
+                    className="w-full bg-white/[0.04] border border-white/[0.09] text-white placeholder:text-slate-700 text-sm rounded-xl px-3.5 py-2.5 pr-10 outline-none focus:border-indigo-500/50 focus:bg-white/[0.06] transition-all"
                   />
                   <button
                     type="button"
@@ -169,7 +175,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2.5 rounded-xl transition-all text-sm shadow-lg shadow-blue-600/20 mt-1"
+                className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition-all text-sm shadow-[0_4px_16px_rgba(99,102,241,0.2)] mt-1"
               >
                 {loading ? "Signing in…" : "Sign in"}
               </button>
@@ -179,7 +185,7 @@ export default function LoginPage() {
           {/* Footer link */}
           <p className="text-center mt-5 text-sm text-slate-600">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
+            <Link href="/signup" className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
               Sign up free
             </Link>
           </p>
