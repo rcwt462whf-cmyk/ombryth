@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { Plus, Trash2, Save, X, FileText, Hash, Check, Target } from "lucide-react"
-import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
