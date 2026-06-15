@@ -547,6 +547,16 @@ export default function GeneratePage() {
       }
 
       setResult(data as unknown as GenerationResult)
+      // Warn if text generation failed (image succeeded but captions are empty)
+      if ((data as GenerationResult).textModelUsed === "failed") {
+        toast({
+          variant: "destructive",
+          title: "Captions failed",
+          description: "Image generated but captions couldn't be written. Check that your text model API key is saved in Settings → API Keys.",
+        })
+      } else if ((data as GenerationResult).textModelUsed === "none") {
+        toast({ title: "No platforms selected", description: "Select at least one platform to generate captions." })
+      }
       // Keep free usage counter in sync
       const freeUsed = data.freeUsed as number | null | undefined
       if (freeUsed !== null && freeUsed !== undefined) setFreeUsedCount(freeUsed)
