@@ -84,11 +84,11 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
       {/* Logo */}
       <div className="px-5 py-4 border-b border-gray-100 dark:border-white/[0.07] flex items-center justify-between">
         <Link href="/app" className="flex items-center gap-2.5">
-          <span className="text-xl font-black tracking-tight text-gray-900 dark:text-white">
+          <span className="font-display text-xl font-bold tracking-tight text-gray-900 dark:text-white">
             Ombryth
           </span>
           {isPro && (
-            <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 px-1.5 py-0.5 rounded-full tracking-wide">
+            <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 px-1.5 py-0.5 rounded-full tracking-wide">
               PRO
             </span>
           )}
@@ -113,11 +113,11 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
                 isActive
-                  ? "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 shadow-[inset_2px_0_0_0] shadow-blue-500 dark:shadow-blue-500"
+                  ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 shadow-[inset_2px_0_0_0] shadow-indigo-500 dark:shadow-indigo-500"
                   : "text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-white/[0.05] hover:text-gray-900 dark:hover:text-white"
               )}
             >
-              <Icon className={cn("w-4 h-4 shrink-0", isActive ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-slate-500")} />
+              <Icon className={cn("w-4 h-4 shrink-0", isActive ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-slate-500")} />
               {label}
             </Link>
           )
@@ -136,7 +136,7 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
               <div
                 className={cn(
                   "h-1.5 rounded-full transition-all",
-                  freeUsed >= 10 ? "bg-red-500" : freeUsed >= 7 ? "bg-amber-500" : "bg-blue-500"
+                  freeUsed >= 10 ? "bg-red-500" : freeUsed >= 7 ? "bg-amber-500" : "bg-indigo-500"
                 )}
                 style={{ width: `${freePercent}%` }}
               />
@@ -144,7 +144,7 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
             {freeUsed >= 10 ? (
               <Link
                 href="/app/billing"
-                className="flex items-center justify-center gap-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-lg px-3 py-1.5 transition-colors w-full shadow-md shadow-blue-600/20"
+                className="flex items-center justify-center gap-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg px-3 py-1.5 transition-colors w-full shadow-md shadow-indigo-600/20"
               >
                 <Zap className="w-3 h-3" />
                 Upgrade to Pro
@@ -188,12 +188,12 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
   return (
     <>
       {/* ── Desktop sidebar ───────────────────────────────────────────────── */}
-      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-60 bg-white dark:bg-[#0a0e15] border-r border-gray-100 dark:border-white/[0.07] flex-col z-30">
+      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-60 bg-white dark:bg-[#08090f] border-r border-gray-100 dark:border-white/[0.07] flex-col z-30">
         {sidebarContent}
       </aside>
 
       {/* ── Mobile top bar ───────────────────────────────────────────────── */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center gap-3 px-4 py-3 bg-white dark:bg-[#0a0e15] border-b border-gray-100 dark:border-white/[0.07]">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center gap-3 px-4 py-3 bg-white dark:bg-[#08090f] border-b border-gray-100 dark:border-white/[0.07]">
         <button
           onClick={() => setMobileOpen(true)}
           className="p-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/[0.05] transition-colors"
@@ -206,7 +206,7 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
             Ombryth
           </span>
           {isPro && (
-            <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 px-1.5 py-0.5 rounded-full">
+            <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 px-1.5 py-0.5 rounded-full">
               PRO
             </span>
           )}
@@ -221,7 +221,7 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
             onClick={() => setMobileOpen(false)}
             aria-hidden="true"
           />
-          <aside className="lg:hidden fixed left-0 top-0 h-screen w-72 max-w-[85vw] bg-white dark:bg-[#0a0e15] border-r border-gray-100 dark:border-white/[0.07] flex flex-col z-50">
+          <aside className="lg:hidden fixed left-0 top-0 h-screen w-72 max-w-[85vw] bg-white dark:bg-[#08090f] border-r border-gray-100 dark:border-white/[0.07] flex flex-col z-50">
             {sidebarContent}
           </aside>
         </>

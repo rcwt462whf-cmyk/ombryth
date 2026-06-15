@@ -1595,7 +1595,7 @@ export default function SettingsPage() {
         <PinterestOAuthToast />
       </Suspense>
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-foreground">Settings</h1>
+        <h1 className="font-display text-xl font-bold text-foreground">Settings</h1>
         <p className="text-sm text-muted-foreground mt-0.5">Manage your API keys, appearance, prompts and account</p>
       </div>
 

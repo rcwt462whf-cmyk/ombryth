@@ -10,7 +10,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   } catch { /* preview mode */ }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#07080f]">
       <AppSidebar userEmail={userEmail} />
       {/* pt-16 on mobile = room for the fixed top bar; lg:ml-60 = desktop sidebar */}
       <main className="pt-16 lg:pt-0 lg:ml-60 min-h-screen p-4 lg:p-8">{children}</main>

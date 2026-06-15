@@ -23,16 +23,16 @@ export default async function BillingPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-gray-900">Billing</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Manage your subscription</p>
+        <h1 className="font-display text-xl font-bold text-gray-900 dark:text-white">Billing</h1>
+        <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">Manage your subscription</p>
       </div>
 
       {/* Current plan card */}
-      <div className="bg-white rounded-xl border border-gray-100 p-6">
+      <div className="bg-white dark:bg-card rounded-xl border border-gray-100 dark:border-white/[0.07] p-6">
         <div className="flex items-start justify-between mb-5">
           <div>
-            <h2 className="text-base font-semibold text-gray-900">Current plan</h2>
-            <p className="text-sm text-gray-500 mt-0.5">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white">Current plan</h2>
+            <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">
               {isPro ? "You have unlimited access" : `${freeUsed}/10 free generations used`}
             </p>
           </div>
@@ -89,19 +89,20 @@ export default async function BillingPage() {
               </div>
               <div className="w-full bg-gray-100 rounded-full h-2">
                 <div
-                  className="bg-blue-500 h-2 rounded-full transition-all"
+                  className="bg-indigo-500 h-2 rounded-full transition-all"
                   style={{ width: `${Math.min((freeUsed / 10) * 100, 100)}%` }}
                 />
               </div>
             </div>
 
             {/* Upgrade card */}
-            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-5 text-white">
-              <div className="flex items-center gap-2 mb-2">
-                <Zap className="w-5 h-5 text-blue-200" />
+            <div className="bg-gradient-to-b from-indigo-700 to-blue-800 rounded-xl p-5 text-white shadow-[0_8px_32px_rgba(99,102,241,0.2)] relative overflow-hidden">
+              <div className="absolute -top-8 -right-8 w-40 h-40 bg-white/[0.05] rounded-full blur-2xl pointer-events-none" />
+              <div className="flex items-center gap-2 mb-2 relative">
+                <Zap className="w-5 h-5 text-indigo-200" />
                 <span className="font-semibold">Upgrade to Pro</span>
               </div>
-              <p className="text-blue-200 text-sm mb-4">
+              <p className="text-indigo-200 text-sm mb-4 relative">
                 Unlimited generations, all models, batch mode — for just €2.99/month.
               </p>
               <ul className="space-y-1.5 mb-5">
@@ -110,8 +111,8 @@ export default async function BillingPage() {
                   "Batch mode (3 variations)",
                   "Priority support",
                 ].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-sm text-blue-100">
-                    <CheckCircle2 className="w-4 h-4 text-blue-300 shrink-0" />
+                  <li key={item} className="flex items-center gap-2 text-sm text-white/90 relative">
+                    <CheckCircle2 className="w-4 h-4 text-indigo-200 shrink-0" />
                     {item}
                   </li>
                 ))}

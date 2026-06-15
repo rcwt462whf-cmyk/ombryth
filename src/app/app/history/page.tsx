@@ -205,8 +205,8 @@ export default function HistoryPage() {
     return (
       <div className="max-w-6xl mx-auto space-y-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">History</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Loading…</p>
+          <h1 className="font-display text-xl font-bold text-gray-900 dark:text-white">History</h1>
+          <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">Loading…</p>
         </div>
       </div>
     )
@@ -216,8 +216,8 @@ export default function HistoryPage() {
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">History</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <h1 className="font-display text-xl font-bold text-gray-900 dark:text-white">History</h1>
+          <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">
             {generations.length} generation{generations.length !== 1 ? "s" : ""}
             {hasActiveFilters ? " (filtered)" : ""}
           </p>
@@ -226,7 +226,7 @@ export default function HistoryPage() {
           <button
             onClick={handleExport}
             disabled={loading || exporting}
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-lg hover:bg-gray-50 dark:hover:bg-white/[0.07] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {exporting ? (
               <>
@@ -296,8 +296,8 @@ export default function HistoryPage() {
       </div>
 
       {generations.length === 0 ? (
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-16 flex flex-col items-center justify-center text-center">
-          <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+        <div className="bg-white dark:bg-card rounded-xl border border-gray-100 dark:border-white/[0.07] p-16 flex flex-col items-center justify-center text-center">
+          <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-white/[0.05] flex items-center justify-center mb-4">
             <Clock className="w-8 h-8 text-gray-300 dark:text-gray-600" />
           </div>
           {hasActiveFilters ? (
@@ -326,7 +326,7 @@ export default function HistoryPage() {
             const lightingEmoji = LIGHTING_PRESETS[gen.lighting_preset as LightingPreset]?.emoji ?? ""
 
             return (
-              <div key={gen.id} className="group bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-sm transition-shadow">
+              <div key={gen.id} className="group bg-white dark:bg-card rounded-xl border border-gray-100 dark:border-white/[0.07] overflow-hidden hover:shadow-sm dark:hover:border-white/[0.12] transition-all">
 
                 {/* Image thumbnail */}
                 {gen.image_url ? (
@@ -374,7 +374,7 @@ export default function HistoryPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="relative aspect-[4/3] bg-gray-50 dark:bg-gray-800 flex items-center justify-center border-b border-gray-100 dark:border-gray-700">
+                  <div className="relative aspect-[4/3] bg-gray-50 dark:bg-white/[0.03] flex items-center justify-center border-b border-gray-100 dark:border-white/[0.07]">
                     <ImageIcon className="w-8 h-8 text-gray-200 dark:text-gray-600" />
                     <div className="absolute top-2 right-2">
                       <button
@@ -434,7 +434,7 @@ export default function HistoryPage() {
                   {Array.isArray(gen.platforms) && gen.platforms.length > 0 && (
                     <div className="flex gap-1">
                       {(gen.platforms as string[]).map((p) => (
-                        <span key={p} className="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 text-[11px] font-medium capitalize">
+                        <span key={p} className="inline-flex items-center px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[11px] font-medium capitalize border border-indigo-100 dark:border-indigo-500/20">
                           {p}
                         </span>
                       ))}
@@ -469,7 +469,7 @@ export default function HistoryPage() {
           <div className="flex justify-center pt-2">
             <button
               onClick={loadMore}
-              className="px-4 py-2 text-sm font-medium text-blue-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-lg hover:bg-gray-50 dark:hover:bg-white/[0.07] transition-colors"
             >
               Load more
             </button>
