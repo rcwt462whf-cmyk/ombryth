@@ -1515,7 +1515,7 @@ function VynthrApiKeyCard() {
         <button
           onClick={generateKey}
           disabled={generating}
-          className="h-8 px-3 text-xs font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 transition-colors"
+          className="h-8 px-3 text-xs font-medium rounded-lg bg-[#5fe6c4] hover:bg-[#4ad6b4] text-[#0b3b30] disabled:opacity-50 transition-colors"
         >
           {generating ? "Generating…" : "+ New key"}
         </button>

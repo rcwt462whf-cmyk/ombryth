@@ -226,7 +226,7 @@ export default function StrategyPage() {
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-blue-600 bg-clip-text text-transparent dark:from-white dark:via-blue-300 dark:to-blue-500">
+          <h1 className="font-display text-xl font-semibold tracking-tight text-[#171717] dark:text-[#f2f2f2]">
             Keyword Strategy
           </h1>
           <p className="text-sm text-gray-400 mt-0.5">
@@ -235,7 +235,7 @@ export default function StrategyPage() {
         </div>
         <button
           onClick={() => { setShowCreate(true); setExpandedId(null) }}
-          className="shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold transition-all shadow-lg shadow-blue-600/20 hover:-translate-y-px active:translate-y-0"
+          className="shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#5fe6c4] hover:bg-[#4ad6b4] text-[#0b3b30] text-sm font-bold transition-all shadow-lg shadow-black/10 hover:-translate-y-px active:translate-y-0"
         >
           <Plus className="w-4 h-4" /> New set
         </button>
@@ -265,15 +265,15 @@ export default function StrategyPage() {
       {/* ── Cards grid ───────────────────────────────────────────────────── */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <svg className="w-5 h-5 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 animate-spin text-[#0b3b30] dark:text-[#5fe6c4]" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
           </svg>
         </div>
       ) : niches.length === 0 && !showCreate ? (
         <div className="bg-white dark:bg-card rounded-xl border border-gray-100 dark:border-border p-14 text-center">
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 flex items-center justify-center mx-auto mb-4">
-            <Target className="w-6 h-6 text-blue-500" />
+          <div className="w-12 h-12 rounded-2xl bg-[#eafbf4] dark:bg-[#5fe6c4]/10 border border-[#bdebd9] dark:border-[#5fe6c4]/20 flex items-center justify-center mx-auto mb-4">
+            <Target className="w-6 h-6 text-[#0b3b30] dark:text-[#5fe6c4]" />
           </div>
           <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">No keyword sets yet</h3>
           <p className="text-xs text-gray-400 mb-5 max-w-xs mx-auto leading-relaxed">
@@ -281,7 +281,7 @@ export default function StrategyPage() {
           </p>
           <button
             onClick={() => setShowCreate(true)}
-            className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-colors shadow-md shadow-blue-600/20"
+            className="px-4 py-2 rounded-xl bg-[#5fe6c4] hover:bg-[#4ad6b4] text-[#0b3b30] text-xs font-bold transition-colors shadow-md shadow-black/10"
           >
             + New set
           </button>
@@ -379,7 +379,7 @@ function NicheCard({ niche, onEdit, onDelete, isDeleting }: {
         {keywords.length > 0 ? (
           <div className="flex flex-wrap gap-1">
             {preview.map(kw => (
-              <span key={kw} className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400">
+              <span key={kw} className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#eafbf4] dark:bg-[#5fe6c4]/10 text-[#0b3b30] dark:text-[#5fe6c4] dark:text-[#5fe6c4]">
                 #{kw}
               </span>
             ))}
@@ -419,11 +419,11 @@ function NicheForm({ form, isCreate, saving, onUpdateText, onAddKeywords, onRemo
   isDeleting?: boolean
 }) {
   return (
-    <div className="bg-white dark:bg-card rounded-xl border border-blue-200 dark:border-blue-500/30 overflow-hidden shadow-sm">
+    <div className="bg-white dark:bg-card rounded-xl border border-[#5fe6c4]/50 dark:border-[#5fe6c4]/30 overflow-hidden shadow-sm">
       <div className="h-[3px]" style={{ background: form.color }} />
       <div className="p-4 space-y-4">
 
-        <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">
+        <p className="text-[10px] font-bold text-[#0b3b30] dark:text-[#5fe6c4] dark:text-[#5fe6c4] uppercase tracking-widest">
           {isCreate ? "New keyword set" : "Editing"}
         </p>
 
@@ -438,7 +438,7 @@ function NicheForm({ form, isCreate, saving, onUpdateText, onAddKeywords, onRemo
             onChange={e => onUpdateText("name", e.target.value)}
             placeholder="e.g. Scandinavian Bedroom"
             autoFocus={isCreate}
-            className="w-full bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white text-sm rounded-xl px-3.5 py-2.5 outline-none focus:border-blue-400 dark:focus:border-blue-500/50 transition-colors placeholder:text-gray-300 dark:placeholder:text-slate-600"
+            className="w-full bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white text-sm rounded-xl px-3.5 py-2.5 outline-none focus:border-[#5fe6c4] dark:focus:border-[#5fe6c4]/50 transition-colors placeholder:text-gray-300 dark:placeholder:text-slate-600"
           />
         </div>
 
@@ -484,13 +484,13 @@ function NicheForm({ form, isCreate, saving, onUpdateText, onAddKeywords, onRemo
               }}
               placeholder={"minimalist bedroom decor\nscandinavian interior ideas\ncozy bedroom aesthetic\nboho room inspo"}
               rows={4}
-              className="flex-1 bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white text-xs rounded-xl px-3 py-2.5 outline-none focus:border-blue-400 dark:focus:border-blue-500/50 transition-colors placeholder:text-gray-300 dark:placeholder:text-slate-600 resize-none font-mono"
+              className="flex-1 bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white text-xs rounded-xl px-3 py-2.5 outline-none focus:border-[#5fe6c4] dark:focus:border-[#5fe6c4]/50 transition-colors placeholder:text-gray-300 dark:placeholder:text-slate-600 resize-none font-mono"
             />
             <button
               onClick={onAddKeywords}
               disabled={!form.keywordInput.trim()}
               title="Add (⌘+Enter)"
-              className="self-start p-2.5 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="self-start p-2.5 rounded-xl bg-[#eafbf4] dark:bg-[#5fe6c4]/10 border border-[#5fe6c4]/50 dark:border-[#5fe6c4]/20 text-[#0b3b30] dark:text-[#5fe6c4] dark:text-[#5fe6c4] hover:bg-blue-100 dark:hover:bg-[#5fe6c4]/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -501,7 +501,7 @@ function NicheForm({ form, isCreate, saving, onUpdateText, onAddKeywords, onRemo
               {form.keywords.map(kw => (
                 <span
                   key={kw}
-                  className="flex items-center gap-1 pl-2 pr-1 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-500/20"
+                  className="flex items-center gap-1 pl-2 pr-1 py-0.5 rounded-full text-[10px] font-medium bg-[#eafbf4] dark:bg-[#5fe6c4]/10 text-[#0b3b30] dark:text-[#5fe6c4] dark:text-[#5fe6c4] border border-[#bdebd9] dark:border-[#5fe6c4]/20"
                 >
                   #{kw}
                   <button
@@ -531,7 +531,7 @@ function NicheForm({ form, isCreate, saving, onUpdateText, onAddKeywords, onRemo
             onChange={e => onUpdateText("notes", e.target.value)}
             placeholder="Content ideas, visual style, seasonal focus, target audience..."
             rows={3}
-            className="w-full bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white text-xs rounded-xl px-3 py-2.5 outline-none focus:border-blue-400 dark:focus:border-blue-500/50 transition-colors placeholder:text-gray-300 dark:placeholder:text-slate-600 resize-none leading-relaxed"
+            className="w-full bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white text-xs rounded-xl px-3 py-2.5 outline-none focus:border-[#5fe6c4] dark:focus:border-[#5fe6c4]/50 transition-colors placeholder:text-gray-300 dark:placeholder:text-slate-600 resize-none leading-relaxed"
           />
         </div>
 
@@ -559,7 +559,7 @@ function NicheForm({ form, isCreate, saving, onUpdateText, onAddKeywords, onRemo
             <button
               onClick={onSave}
               disabled={saving || !form.name.trim()}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm shadow-blue-600/20"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#5fe6c4] hover:bg-[#4ad6b4] text-[#0b3b30] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm shadow-black/10"
             >
               <Save className="w-3 h-3" />
               {saving ? "Saving…" : "Save"}

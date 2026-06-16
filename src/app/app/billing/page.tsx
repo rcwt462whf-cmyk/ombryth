@@ -89,20 +89,20 @@ export default async function BillingPage() {
               </div>
               <div className="w-full bg-gray-100 rounded-full h-2">
                 <div
-                  className="bg-indigo-500 h-2 rounded-full transition-all"
+                  className="bg-[#5fe6c4] h-2 rounded-full transition-all"
                   style={{ width: `${Math.min((freeUsed / 10) * 100, 100)}%` }}
                 />
               </div>
             </div>
 
             {/* Upgrade card */}
-            <div className="bg-gradient-to-b from-indigo-700 to-blue-800 rounded-xl p-5 text-white shadow-[0_8px_32px_rgba(99,102,241,0.2)] relative overflow-hidden">
+            <div className="bg-[#1c1c1c] rounded-xl p-5 text-white shadow-[0_8px_24px_rgba(0,0,0,0.12)] relative overflow-hidden">
               <div className="absolute -top-8 -right-8 w-40 h-40 bg-white/[0.05] rounded-full blur-2xl pointer-events-none" />
               <div className="flex items-center gap-2 mb-2 relative">
-                <Zap className="w-5 h-5 text-indigo-200" />
+                <Zap className="w-5 h-5 text-[#9fe9d2]" />
                 <span className="font-semibold">Upgrade to Pro</span>
               </div>
-              <p className="text-indigo-200 text-sm mb-4 relative">
+              <p className="text-[#9fe9d2] text-sm mb-4 relative">
                 Unlimited generations, all models, batch mode — for just €2.99/month.
               </p>
               <ul className="space-y-1.5 mb-5">
@@ -112,7 +112,7 @@ export default async function BillingPage() {
                   "Priority support",
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-2 text-sm text-white/90 relative">
-                    <CheckCircle2 className="w-4 h-4 text-indigo-200 shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-[#9fe9d2] shrink-0" />
                     {item}
                   </li>
                 ))}

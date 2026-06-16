@@ -3,7 +3,11 @@
 import { useState } from "react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
-import { Eye, EyeOff, Zap, KeyRound, Globe } from "lucide-react"
+import { Eye, EyeOff, Zap, KeyRound, Globe, Mail } from "lucide-react"
+import { ThemeToggle } from "@/components/ThemeToggle"
+
+const MINT = "#5fe6c4"
+const ON_MINT = "#0b3b30"
 
 const FEATURES = [
   { icon: Zap,      text: "10 free generations — no card needed" },
@@ -64,38 +68,32 @@ export default function SignupPage() {
   // ── Success / check inbox state ──────────────────────────────────────────
   if (success) {
     return (
-      <div className="min-h-screen bg-[#060a0f] text-white flex flex-col items-center justify-center px-6 py-12">
-        <div
-          className="fixed inset-0 pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.028) 1px, transparent 1px)", backgroundSize: "28px 28px" }}
-        />
-        <div className="fixed -top-40 left-1/3 w-[500px] h-[500px] bg-blue-600/[0.07] rounded-full blur-[120px] pointer-events-none" />
+      <div className="min-h-screen bg-white dark:bg-[#1e1e1e] text-[#171717] dark:text-[#f2f2f2] flex flex-col items-center justify-center px-6 py-12 relative">
+        <div className="absolute top-5 right-5"><ThemeToggle /></div>
 
-        <Link href="/" className="relative mb-10 text-2xl font-black tracking-tight text-white">
-          Ombryth
+        <Link href="/" className="mb-10 font-display text-2xl font-bold tracking-tight flex items-center gap-2">
+          Ombryth <span className="w-2.5 h-2.5 rounded-full" style={{ background: MINT }} />
         </Link>
 
-        <div className="relative w-full max-w-sm bg-[#0c1018] shadow-[0_0_0_1px_rgba(255,255,255,0.07)] rounded-2xl p-8 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mx-auto mb-5">
-            <svg className="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
+        <div className="w-full max-w-sm bg-white dark:bg-[#262626] border border-[#dfdfdf] dark:border-[#383838] rounded-xl p-8 text-center shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:shadow-none">
+          <div className="w-14 h-14 rounded-xl bg-[#eafbf4] dark:bg-[#223b34] flex items-center justify-center mx-auto mb-5">
+            <Mail className="w-7 h-7 text-[#0b3b30] dark:text-[#5fe6c4]" />
           </div>
-          <h2 className="text-xl font-black tracking-tight text-white mb-2">Check your inbox</h2>
-          <p className="text-slate-500 text-sm leading-relaxed mb-1">We sent a confirmation link to</p>
-          <p className="font-semibold text-white text-sm mb-4">{email}</p>
-          <p className="text-slate-500 text-sm leading-relaxed mb-7">
+          <h2 className="font-display text-xl font-semibold tracking-tight mb-2">Check your inbox</h2>
+          <p className="text-[#707070] dark:text-[#a3a3a3] text-sm leading-relaxed mb-1">We sent a confirmation link to</p>
+          <p className="font-medium text-sm mb-4">{email}</p>
+          <p className="text-[#707070] dark:text-[#a3a3a3] text-sm leading-relaxed mb-7">
             Click the link to activate your account, then come back and sign in.
           </p>
           <div className="flex items-center justify-center gap-4">
             <button
               onClick={handleResend}
               disabled={resendStatus === "sending"}
-              className="text-sm text-slate-400 hover:text-white border border-white/[0.1] hover:border-white/[0.2] px-4 py-2 rounded-lg transition-all disabled:opacity-50"
+              className="text-sm text-[#707070] dark:text-[#a3a3a3] hover:text-[#171717] dark:hover:text-white border border-[#dfdfdf] dark:border-[#383838] hover:bg-[#fafafa] dark:hover:bg-[#2a2a2a] px-4 py-2 rounded-md transition-all disabled:opacity-50"
             >
               {resendStatus === "sent" ? "Sent!" : resendStatus === "sending" ? "Sending…" : "Resend email"}
             </button>
-            <Link href="/login" className="text-sm text-blue-400 hover:text-blue-300 font-medium transition-colors">
+            <Link href="/login" className="text-sm font-medium text-[#171717] dark:text-[#f2f2f2] hover:underline">
               Back to login
             </Link>
           </div>
@@ -106,156 +104,107 @@ export default function SignupPage() {
 
   // ── Main signup form ─────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#060a0f] text-white flex">
+    <div className="min-h-screen bg-white dark:bg-[#1e1e1e] text-[#171717] dark:text-[#f2f2f2] flex">
 
-      {/* ── Left branded panel (desktop only) ─────────────────────────── */}
-      <div className="hidden lg:flex lg:w-[52%] relative flex-col justify-between p-12 overflow-hidden border-r border-white/[0.06]">
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
-        <div className="absolute -bottom-20 -left-20 w-[480px] h-[480px] bg-blue-600/[0.12] rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-blue-400/[0.04] rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-blue-400 to-transparent" />
+      {/* Left branded panel (desktop only) */}
+      <div className="hidden lg:flex lg:w-[52%] relative flex-col justify-between p-12 bg-[#fafafa] dark:bg-[#181818] border-r border-[#ededed] dark:border-[#2e2e2e] overflow-hidden isolate">
+        <div className="absolute inset-0 -z-10 pointer-events-none block dark:hidden" style={{ backgroundImage: "linear-gradient(rgba(17,17,17,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(17,17,17,0.04) 1px, transparent 1px)", backgroundSize: "56px 56px", maskImage: "radial-gradient(120% 80% at 0% 0%, #000 30%, transparent 75%)", WebkitMaskImage: "radial-gradient(120% 80% at 0% 0%, #000 30%, transparent 75%)" }} />
+        <div className="absolute inset-0 -z-10 pointer-events-none hidden dark:block" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)", backgroundSize: "56px 56px", maskImage: "radial-gradient(120% 80% at 0% 0%, #000 30%, transparent 75%)", WebkitMaskImage: "radial-gradient(120% 80% at 0% 0%, #000 30%, transparent 75%)" }} />
 
-        <Link href="/" className="relative z-10 text-2xl font-black tracking-tight text-white">
-          Ombryth
+        <Link href="/" className="relative font-display text-2xl font-bold tracking-tight flex items-center gap-2">
+          Ombryth <span className="w-2.5 h-2.5 rounded-full" style={{ background: MINT }} />
         </Link>
 
-        <div className="relative z-10">
-          <h2 className="text-4xl font-black tracking-tight leading-[1.1] mb-4">
-            Start generating<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
-              in minutes.
-            </span>
+        <div className="relative">
+          <h2 className="font-display text-4xl font-semibold tracking-[-0.02em] leading-[1.1] mb-4">
+            Start generating in minutes.
           </h2>
-          <p className="text-slate-500 text-base mb-8 leading-relaxed">
+          <p className="text-[#707070] dark:text-[#a3a3a3] text-base mb-8 leading-relaxed">
             No credit card. No commitment. Just results.
           </p>
           <ul className="space-y-4">
             {FEATURES.map(({ icon: Icon, text }) => (
               <li key={text} className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
-                  <Icon className="w-4 h-4 text-blue-400" />
+                <div className="w-8 h-8 rounded-lg bg-white dark:bg-[#262626] border border-[#dfdfdf] dark:border-[#383838] flex items-center justify-center shrink-0">
+                  <Icon className="w-4 h-4 text-[#171717] dark:text-[#f2f2f2]" />
                 </div>
-                <span className="text-sm text-slate-400">{text}</span>
+                <span className="text-sm text-[#707070] dark:text-[#a3a3a3]">{text}</span>
               </li>
             ))}
           </ul>
         </div>
 
-        <p className="relative z-10 text-xs text-slate-700">
+        <p className="relative text-xs text-[#9a9a9a] dark:text-[#6f6f6f]">
           © {new Date().getFullYear()} Ombryth · All rights reserved
         </p>
       </div>
 
-      {/* ── Right form panel ─────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+      {/* Right form panel */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative">
+        <div className="absolute top-5 right-5"><ThemeToggle /></div>
 
         <div className="w-full max-w-sm">
-          <Link href="/" className="lg:hidden block mb-8 text-2xl font-black tracking-tight text-white">
-            Ombryth
+          <Link href="/" className="lg:hidden flex items-center justify-center gap-2 mb-8 font-display text-2xl font-bold tracking-tight">
+            Ombryth <span className="w-2.5 h-2.5 rounded-full" style={{ background: MINT }} />
           </Link>
           <div className="mb-8">
-            <h1 className="text-2xl font-black tracking-tight text-white mb-1">Create your account</h1>
-            <p className="text-sm text-slate-500">10 free generations included — no card required</p>
+            <h1 className="font-display text-2xl font-semibold tracking-tight mb-1">Create your account</h1>
+            <p className="text-sm text-[#707070] dark:text-[#a3a3a3]">10 free generations included — no card required</p>
           </div>
 
-          <div className="bg-[#0c1018] shadow-[0_0_0_1px_rgba(255,255,255,0.07)] rounded-2xl p-6">
+          <div className="bg-white dark:bg-[#262626] border border-[#dfdfdf] dark:border-[#383838] rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:shadow-none">
             <form onSubmit={handleSubmit} className="space-y-4">
-
-              {/* Email */}
               <div className="space-y-1.5">
-                <label htmlFor="email" className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Email
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="email"
-                  className="w-full bg-white/[0.04] border border-white/[0.1] text-white placeholder:text-slate-600 text-sm rounded-xl px-3.5 py-2.5 outline-none focus:border-blue-500/50 focus:bg-white/[0.06] transition-all"
-                />
+                <label htmlFor="email" className="text-xs font-medium text-[#707070] dark:text-[#a3a3a3]">Email</label>
+                <input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email"
+                  className="w-full bg-white dark:bg-[#1e1e1e] border border-[#dfdfdf] dark:border-[#383838] text-[#171717] dark:text-[#f2f2f2] placeholder:text-[#9a9a9a] dark:placeholder:text-[#6f6f6f] text-sm rounded-md px-3.5 py-2.5 outline-none focus:border-[#5fe6c4] transition-colors" />
               </div>
 
-              {/* Password */}
               <div className="space-y-1.5">
-                <label htmlFor="password" className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Password
-                </label>
+                <label htmlFor="password" className="text-xs font-medium text-[#707070] dark:text-[#a3a3a3]">Password</label>
                 <div className="relative">
-                  <input
-                    id="password"
-                    type={showPw ? "text" : "password"}
-                    placeholder="Min. 8 characters"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    autoComplete="new-password"
-                    className="w-full bg-white/[0.04] border border-white/[0.1] text-white placeholder:text-slate-600 text-sm rounded-xl px-3.5 py-2.5 pr-10 outline-none focus:border-blue-500/50 focus:bg-white/[0.06] transition-all"
-                  />
+                  <input id="password" type={showPw ? "text" : "password"} placeholder="Min. 8 characters" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="new-password"
+                    className="w-full bg-white dark:bg-[#1e1e1e] border border-[#dfdfdf] dark:border-[#383838] text-[#171717] dark:text-[#f2f2f2] placeholder:text-[#9a9a9a] dark:placeholder:text-[#6f6f6f] text-sm rounded-md px-3.5 py-2.5 pr-10 outline-none focus:border-[#5fe6c4] transition-colors" />
                   <button type="button" onClick={() => setShowPw(v => !v)} tabIndex={-1}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-400 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9a9a9a] dark:text-[#6f6f6f] hover:text-[#171717] dark:hover:text-white transition-colors"
                     aria-label={showPw ? "Hide password" : "Show password"}>
                     {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
 
-              {/* Confirm password */}
               <div className="space-y-1.5">
-                <label htmlFor="confirm-password" className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Confirm password
-                </label>
+                <label htmlFor="confirm-password" className="text-xs font-medium text-[#707070] dark:text-[#a3a3a3]">Confirm password</label>
                 <div className="relative">
-                  <input
-                    id="confirm-password"
-                    type={showConfirm ? "text" : "password"}
-                    placeholder="Repeat your password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    autoComplete="new-password"
-                    className="w-full bg-white/[0.04] border border-white/[0.1] text-white placeholder:text-slate-600 text-sm rounded-xl px-3.5 py-2.5 pr-10 outline-none focus:border-blue-500/50 focus:bg-white/[0.06] transition-all"
-                  />
+                  <input id="confirm-password" type={showConfirm ? "text" : "password"} placeholder="Repeat your password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required autoComplete="new-password"
+                    className="w-full bg-white dark:bg-[#1e1e1e] border border-[#dfdfdf] dark:border-[#383838] text-[#171717] dark:text-[#f2f2f2] placeholder:text-[#9a9a9a] dark:placeholder:text-[#6f6f6f] text-sm rounded-md px-3.5 py-2.5 pr-10 outline-none focus:border-[#5fe6c4] transition-colors" />
                   <button type="button" onClick={() => setShowConfirm(v => !v)} tabIndex={-1}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-400 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9a9a9a] dark:text-[#6f6f6f] hover:text-[#171717] dark:hover:text-white transition-colors"
                     aria-label={showConfirm ? "Hide password" : "Show password"}>
                     {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
 
-              {/* Error */}
               {error && (
-                <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-xl px-3.5 py-2.5">
-                  {error}
-                </div>
+                <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm rounded-md px-3.5 py-2.5">{error}</div>
               )}
 
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2.5 rounded-xl transition-all text-sm shadow-lg shadow-blue-600/20 mt-1"
-              >
+              <button type="submit" disabled={loading} className="w-full font-medium py-2.5 rounded-md transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed mt-1" style={{ background: MINT, color: ON_MINT }}>
                 {loading ? "Creating account…" : "Create free account"}
               </button>
 
-              <p className="text-center text-xs text-slate-700 pt-1">
+              <p className="text-center text-xs text-[#9a9a9a] dark:text-[#6f6f6f] pt-1">
                 By signing up you agree to our{" "}
-                <Link href="/terms" className="underline hover:text-slate-400 transition-colors">Terms</Link> and{" "}
-                <Link href="/privacy" className="underline hover:text-slate-400 transition-colors">Privacy Policy</Link>.
+                <Link href="/terms" className="underline hover:text-[#171717] dark:hover:text-white transition-colors">Terms</Link> and{" "}
+                <Link href="/privacy" className="underline hover:text-[#171717] dark:hover:text-white transition-colors">Privacy Policy</Link>.
               </p>
             </form>
           </div>
 
-          <p className="text-center mt-5 text-sm text-slate-600">
+          <p className="text-center mt-5 text-sm text-[#707070] dark:text-[#a3a3a3]">
             Already have an account?{" "}
-            <Link href="/login" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
-              Sign in
-            </Link>
+            <Link href="/login" className="font-medium text-[#171717] dark:text-[#f2f2f2] hover:underline">Sign in</Link>
           </p>
         </div>
       </div>

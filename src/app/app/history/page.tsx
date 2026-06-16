@@ -358,7 +358,7 @@ export default function HistoryPage() {
                             URL.revokeObjectURL(url)
                           } catch { /* non-fatal */ }
                         }}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center w-6 h-6 rounded-md bg-white/80 hover:bg-blue-50 text-gray-400 hover:text-blue-500 backdrop-blur-sm"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center w-6 h-6 rounded-md bg-white/80 hover:bg-[#eafbf4] text-gray-400 hover:text-[#0b3b30] backdrop-blur-sm"
                         title="Download image"
                       >
                         <Download className="w-3.5 h-3.5" />
@@ -434,7 +434,7 @@ export default function HistoryPage() {
                   {Array.isArray(gen.platforms) && gen.platforms.length > 0 && (
                     <div className="flex gap-1">
                       {(gen.platforms as string[]).map((p) => (
-                        <span key={p} className="inline-flex items-center px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[11px] font-medium capitalize border border-indigo-100 dark:border-indigo-500/20">
+                        <span key={p} className="inline-flex items-center px-2 py-0.5 rounded-md bg-[#eafbf4] dark:bg-[#5fe6c4]/10 text-[#0b3b30] dark:text-[#5fe6c4] dark:text-[#5fe6c4] text-[11px] font-medium capitalize border border-[#bdebd9] dark:border-[#5fe6c4]/20">
                           {p}
                         </span>
                       ))}
@@ -469,7 +469,7 @@ export default function HistoryPage() {
           <div className="flex justify-center pt-2">
             <button
               onClick={loadMore}
-              className="px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-lg hover:bg-gray-50 dark:hover:bg-white/[0.07] transition-colors"
+              className="px-4 py-2 text-sm font-medium text-[#0b3b30] dark:text-[#5fe6c4] dark:text-[#5fe6c4] bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-lg hover:bg-gray-50 dark:hover:bg-white/[0.07] transition-colors"
             >
               Load more
             </button>

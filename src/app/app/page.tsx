@@ -112,7 +112,7 @@ function UploadZone({
         </div>
       ) : (
         <div
-          className="rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-600 bg-gray-50 dark:bg-white/[0.02] hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 aspect-square flex flex-col items-center justify-center cursor-pointer transition-colors"
+          className="rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-[#5fe6c4] dark:hover:border-[#5fe6c4]/50 bg-gray-50 dark:bg-white/[0.02] hover:bg-[#eafbf4]/30 dark:hover:bg-[#5fe6c4]/5 aspect-square flex flex-col items-center justify-center cursor-pointer transition-colors"
           onClick={() => inputRef.current?.click()}
           onDrop={handleDrop}
           onDragOver={(e) => e.preventDefault()}
@@ -192,7 +192,7 @@ function OutputField({ label, value }: { label: string; value: string | string[]
 function LoadingSpinner({ text }: { text?: string }) {
   return (
     <div className="flex flex-col items-center gap-3">
-      <svg className="w-8 h-8 animate-spin text-indigo-400" fill="none" viewBox="0 0 24 24">
+      <svg className="w-8 h-8 animate-spin text-[#5fe6c4]" fill="none" viewBox="0 0 24 24">
         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
       </svg>
@@ -701,8 +701,8 @@ export default function GeneratePage() {
               />
             </div>
             {productFile && (
-              <p className="text-xs text-indigo-600 mt-2 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+              <p className="text-xs text-[#0b3b30] dark:text-[#5fe6c4] mt-2 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#5fe6c4]"></span>
                 This product will be described and placed in the generated scene.
               </p>
             )}
@@ -765,7 +765,7 @@ export default function GeneratePage() {
                   className={cn(
                     "px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors border",
                     niche === key
-                      ? "border-indigo-200 bg-indigo-50 text-indigo-700"
+                      ? "border-[#5fe6c4] bg-[#eafbf4] text-[#0b3b30]"
                       : "border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600 text-gray-500 hover:text-gray-700"
                   )}
                 >
@@ -780,7 +780,7 @@ export default function GeneratePage() {
                   className={cn(
                     "px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors border",
                     niche === customNiche.id
-                      ? "border-indigo-200 bg-indigo-50 text-indigo-700"
+                      ? "border-[#5fe6c4] bg-[#eafbf4] text-[#0b3b30]"
                       : "border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600 text-gray-500 hover:text-gray-700"
                   )}
                 >
@@ -808,7 +808,7 @@ export default function GeneratePage() {
                       className={cn(
                         "px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors border",
                         stylePreset === key
-                          ? "border-indigo-200 bg-indigo-50 text-indigo-700"
+                          ? "border-[#5fe6c4] bg-[#eafbf4] text-[#0b3b30]"
                           : "border-gray-100 hover:border-gray-200 text-gray-500 hover:text-gray-700"
                       )}
                     >
@@ -825,7 +825,7 @@ export default function GeneratePage() {
                     className={cn(
                       "px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors border",
                       stylePreset === p.id
-                        ? "border-indigo-200 bg-indigo-50 text-indigo-700"
+                        ? "border-[#5fe6c4] bg-[#eafbf4] text-[#0b3b30]"
                         : "border-gray-100 hover:border-gray-200 text-gray-500 hover:text-gray-700"
                     )}
                   >
@@ -853,7 +853,7 @@ export default function GeneratePage() {
                     className={cn(
                       "flex flex-col items-center justify-center px-1 py-2.5 rounded-lg text-[10px] transition-colors border",
                       lighting === key
-                        ? "border-indigo-200 bg-indigo-50 text-indigo-700 font-medium"
+                        ? "border-[#5fe6c4] bg-[#eafbf4] text-[#0b3b30] font-medium"
                         : "border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600 text-gray-500 hover:text-gray-700"
                     )}
                   >
@@ -950,7 +950,7 @@ export default function GeneratePage() {
                         className={cn(
                           "px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors",
                           activeStrategyId === n.id
-                            ? "border-indigo-200 bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:border-indigo-500/30 dark:text-indigo-400"
+                            ? "border-[#5fe6c4] bg-[#eafbf4] text-[#0b3b30] dark:bg-[#5fe6c4]/10 dark:border-[#5fe6c4]/30 dark:text-[#5fe6c4]"
                             : "border-gray-100 dark:border-border text-gray-500 hover:border-gray-200 dark:hover:border-border/80"
                         )}
                       >
@@ -972,7 +972,7 @@ export default function GeneratePage() {
                             {activeStrategyNiche.keywords.slice(0, 20).map(kw => (
                               <span
                                 key={kw}
-                                className="px-1.5 py-0.5 rounded text-[10px] bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 font-medium"
+                                className="px-1.5 py-0.5 rounded text-[10px] bg-[#eafbf4] dark:bg-[#5fe6c4]/10 text-[#0b3b30] dark:text-[#5fe6c4] dark:text-[#5fe6c4] font-medium"
                               >
                                 #{kw}
                               </span>
@@ -995,7 +995,7 @@ export default function GeneratePage() {
                               "w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold border transition-all",
                               keywordsInjected
                                 ? "bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/30 text-green-700 dark:text-green-400 cursor-default"
-                                : "bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20"
+                                : "bg-[#eafbf4] dark:bg-[#5fe6c4]/10 border-[#5fe6c4] dark:border-[#5fe6c4]/30 text-[#0b3b30] dark:text-[#5fe6c4] dark:text-[#5fe6c4] hover:bg-[#d6f5ea] dark:hover:bg-[#5fe6c4]/20"
                             )}
                           >
                             {keywordsInjected
@@ -1045,7 +1045,7 @@ export default function GeneratePage() {
                         setScrapeError(null)
                       }
                     }}
-                    className="px-2 py-1 text-[11px] rounded-md border border-gray-200 bg-gray-50 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 text-gray-600 transition-colors"
+                    className="px-2 py-1 text-[11px] rounded-md border border-gray-200 bg-gray-50 hover:bg-[#eafbf4] hover:border-[#5fe6c4] hover:text-[#0b3b30] dark:text-[#5fe6c4] text-gray-600 transition-colors"
                   >
                     {l.label}
                   </button>
@@ -1068,7 +1068,7 @@ export default function GeneratePage() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") fetchDestinationContext(destinationUrl)
                 }}
-                className="flex-1 h-10 px-3 text-xs rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 placeholder:text-gray-300"
+                className="flex-1 h-10 px-3 text-xs rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#5fe6c4]/50 focus:border-[#5fe6c4] placeholder:text-gray-300"
               />
               {destinationUrl && (
                 <button
@@ -1086,7 +1086,7 @@ export default function GeneratePage() {
               <button
                 onClick={() => fetchDestinationContext(destinationUrl)}
                 disabled={scrapingUrl || !destinationUrl}
-                className="h-8 w-8 flex items-center justify-center rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-600 hover:bg-indigo-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="h-8 w-8 flex items-center justify-center rounded-lg bg-[#eafbf4] border border-[#5fe6c4] text-[#0b3b30] dark:text-[#5fe6c4] hover:bg-[#d6f5ea] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 title="Fetch page context"
               >
                 {scrapingUrl ? (
@@ -1170,11 +1170,11 @@ export default function GeneratePage() {
                       onClick={() => setAspectRatio(value)}
                       className={cn(
                         "py-2 rounded-lg text-xs font-medium border transition-all flex flex-col items-center gap-1.5",
-                        active ? "border-indigo-200 bg-indigo-50 text-indigo-700" : "border-gray-100 text-gray-500 hover:border-gray-200"
+                        active ? "border-[#5fe6c4] bg-[#eafbf4] text-[#0b3b30]" : "border-gray-100 text-gray-500 hover:border-gray-200"
                       )}
                     >
                       <span
-                        className={cn("rounded-[2px] border-[1.5px] transition-colors", active ? "border-indigo-400 bg-indigo-100" : "border-gray-300 bg-gray-100")}
+                        className={cn("rounded-[2px] border-[1.5px] transition-colors", active ? "border-[#5fe6c4] bg-[#d6f5ea]" : "border-gray-300 bg-gray-100")}
                         style={{ width: pw, height: ph }}
                       />
                       <span className="leading-none">{label}</span>
@@ -1234,7 +1234,7 @@ export default function GeneratePage() {
                     className={cn(
                       "w-7 h-7 rounded-lg text-xs font-semibold border transition-colors",
                       captionVariations === n
-                        ? "bg-indigo-600 border-indigo-600 text-white"
+                        ? "bg-[#5fe6c4] border-[#5fe6c4] text-[#0b3b30]"
                         : "border-gray-200 text-gray-500 hover:border-gray-300"
                     )}
                   >{n}</button>
@@ -1251,8 +1251,8 @@ export default function GeneratePage() {
               className={cn(
                 "w-full h-11 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all",
                 loading
-                  ? "bg-blue-400 cursor-not-allowed text-white"
-                  : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md shadow-indigo-200/60 hover:shadow-lg hover:shadow-indigo-300/60 hover:-translate-y-px active:translate-y-0"
+                  ? "bg-[#9fe9d2] cursor-not-allowed text-[#0b3b30]"
+                  : "bg-[#5fe6c4] text-[#0b3b30] shadow-sm hover:bg-[#4ad6b4] hover:-translate-y-px active:translate-y-0"
               )}
             >
               {loading ? (
@@ -1350,7 +1350,7 @@ export default function GeneratePage() {
                       value={downloadLabel}
                       onChange={e => setDownloadLabel(e.target.value)}
                       placeholder="e.g. kitchen-shoot (optional)"
-                      className="flex-1 h-6 px-2 text-[11px] rounded border border-gray-200 bg-gray-50 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-200 placeholder:text-gray-300"
+                      className="flex-1 h-6 px-2 text-[11px] rounded border border-gray-200 bg-gray-50 text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#5fe6c4]/50 placeholder:text-gray-300"
                     />
                     <span className="text-[10px] text-gray-400 shrink-0 hidden sm:block">→ {(downloadLabel.trim().replace(/[^a-zA-Z0-9_\-]/g, "-") || "ombryth")}-v1.jpg</span>
                   </div>
@@ -1389,7 +1389,7 @@ export default function GeneratePage() {
                         onClick={() => setSelectedImageIndex(i)}
                         className={cn(
                           "w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors shrink-0 relative",
-                          i === selectedImageIndex ? "border-indigo-500" : "border-gray-200 hover:border-gray-300"
+                          i === selectedImageIndex ? "border-[#5fe6c4]" : "border-gray-200 hover:border-gray-300"
                         )}
                       >
                         <Image
@@ -1407,13 +1407,11 @@ export default function GeneratePage() {
             ) : (
               <div className={cn("relative flex flex-col items-center justify-center gap-3 overflow-hidden", ASPECT_RATIO_CLASS[aspectRatio])}>
                 {/* Animated gradient background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/60 dark:from-gray-800 dark:via-blue-950/20 dark:to-indigo-950/30" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(99,102,241,0.07),transparent_60%)]" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_80%,rgba(59,130,246,0.07),transparent_60%)]" />
+                <div className="absolute inset-0 bg-[#fafafa] dark:bg-[#1a1a1a]" />
                 {/* Content */}
                 <div className="relative z-10 flex flex-col items-center gap-3">
                   <div className="w-14 h-14 rounded-2xl bg-white/80 dark:bg-gray-700/80 shadow-sm border border-white dark:border-gray-600 flex items-center justify-center backdrop-blur-sm">
-                    <Wand2 className="w-7 h-7 text-indigo-400" />
+                    <Wand2 className="w-7 h-7 text-[#5fe6c4]" />
                   </div>
                   <div className="text-center">
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Your image will appear here</p>
@@ -1493,8 +1491,8 @@ export default function GeneratePage() {
               )}
 
               {result.productDescription && (
-                <p className="text-xs text-indigo-600 dark:text-indigo-400 flex items-center gap-1 mt-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                <p className="text-xs text-[#0b3b30] dark:text-[#5fe6c4] dark:text-[#5fe6c4] flex items-center gap-1 mt-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#5fe6c4]"></span>
                   Product: &ldquo;{result.productDescription}&rdquo;
                 </p>
               )}
@@ -1516,7 +1514,7 @@ export default function GeneratePage() {
                           className={cn(
                             "px-2 py-0.5 rounded text-[11px] font-semibold border transition-colors",
                             selectedVariation === i
-                              ? "bg-indigo-600 border-indigo-600 text-white"
+                              ? "bg-[#5fe6c4] border-[#5fe6c4] text-[#0b3b30]"
                               : "border-gray-200 text-gray-500 hover:border-gray-300"
                           )}
                         >
@@ -1531,7 +1529,7 @@ export default function GeneratePage() {
                   <button
                     onClick={() => rewriteCaptions("captions")}
                     disabled={rewritingCaptions || loading}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 disabled:opacity-40 transition-colors"
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium border border-[#5fe6c4] bg-[#eafbf4] text-[#0b3b30] hover:bg-[#d6f5ea] disabled:opacity-40 transition-colors"
                   >
                     {rewritingCaptions
                       ? <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
