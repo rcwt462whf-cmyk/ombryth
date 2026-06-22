@@ -70,6 +70,13 @@ export interface PlatformOutput {
     description2: string
     altText: string
   }
+  /** Which rotating formula combo produced this caption — for A/B diagnostics (e.g. Vynthr) */
+  _variants?: {
+    hook: string
+    title: string
+    angle: string
+    cta: string
+  }
 }
 
 export interface GenerationResult {

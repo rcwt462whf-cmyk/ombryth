@@ -145,9 +145,11 @@ export default function LandingPage() {
               Bring your own AI keys. Generate lifestyle images and platform-ready captions for Pinterest, Instagram, Facebook, and Google Ads — in seconds, not hours.
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
-              <Link href="/signup" className="inline-flex items-center justify-center gap-2 font-medium px-6 py-3 rounded-md transition-all text-[15px] group" style={{ background: MINT, color: ON_MINT }}>
+              <Link href="/signup" className="inline-flex items-center justify-center gap-2.5 font-medium px-6 py-3 rounded-md transition-all text-[15px] group" style={{ background: MINT, color: ON_MINT }}>
                 Generate your first image free
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full transition-transform group-hover:translate-x-0.5" style={{ background: ON_MINT }}>
+                  <ArrowRight className="w-3 h-3" style={{ color: MINT }} />
+                </span>
               </Link>
               <Link href="/login" className="inline-flex items-center justify-center bg-white dark:bg-[#262626] border border-[#c7c7c7] dark:border-[#454545] text-[#171717] dark:text-[#f2f2f2] font-medium px-6 py-3 rounded-md hover:bg-[#fafafa] dark:hover:bg-[#2e2e2e] transition-colors text-[15px]">
                 Sign in
