@@ -472,6 +472,33 @@ const LANGUAGE_NAMES: Record<string, string> = {
   "nl": "Dutch", "pl": "Polish", "hu": "Hungarian",
 }
 
+// Per-platform spec + JSON schema, assembled on demand so the model only writes
+// the platforms the user actually selected (no wasted tokens on hidden output).
+const PLATFORM_SPECS: Record<string, string> = {
+  pinterest: `PINTEREST (the title is your single biggest click lever — make it search-friendly AND promise a payoff):
+- Title: max 100 chars. Use the TITLE FORMULA above and INCLUDE the subject's main keyword. Should read like something a person would actually search, with a clear reason to click. No hashtags.
+- Description: 2-3 short sentences. Open the gap with the HOOK FORMULA, build a little desire, then end with the assigned CTA. 1 emoji minimum. Do NOT give away the specifics.
+- Alt text: describe what's visible (materials, colours, objects, lighting). End with topic + "guide 2026."
+- Caption: same click goal from a different angle — do not just rephrase the description. Ends with the assigned CTA.
+- Hashtags (20): center on the SUBJECT, not incidental objects in the image. 8-10 subject-specific exact terms (subject "layered lighting" → #layeredlighting #livingroomlighting #ambientlighting), 6-8 topic (#livingroomdesign #lightingideas), 2-3 intent (#shopthelook #homedecorideas). No vanity tags (#home #design #beautiful), and no tags about props that aren't the subject.`,
+  instagram: `INSTAGRAM:
+- Caption: hook → 2-3 sentences that build the gap → assigned CTA. 150-250 chars total
+- Hashtags (30): mix niche + topic + broad + intent`,
+  facebook: `FACEBOOK:
+- Caption: hook → 1-2 sentences → assigned CTA. Max 150 chars
+- Hashtags: 3-5 broad only`,
+  "google-ads": `GOOGLE-ADS (every line should pull the click):
+- 3 headlines (≤30 chars each): benefit/outcome-led, at least one with a number or "get the look".
+- 2 descriptions (≤90 chars each): name the payoff + an explicit click-through CTA.`,
+}
+
+const PLATFORM_JSON: Record<string, string> = {
+  pinterest: `"pinterest": { "title": "...", "description": "...", "altText": "...", "caption": "...", "hashtags": ["no","hash","prefix"] }`,
+  instagram: `"instagram": { "caption": "...", "altText": "...", "hashtags": ["30","tags"] }`,
+  facebook: `"facebook": { "caption": "...", "altText": "...", "hashtags": ["5","tags"] }`,
+  "google-ads": `"google-ads": { "headline1": "30 chars", "headline2": "30 chars", "headline3": "30 chars", "description1": "90 chars", "description2": "90 chars", "altText": "..." }`,
+}
+
 function buildTextSystemPrompt(
   prompt: string,
   platforms: string[],
@@ -489,6 +516,10 @@ function buildTextSystemPrompt(
   const titleFormula = TITLE_FORMULAS[Math.floor(Math.random() * TITLE_FORMULAS.length)]
   const contentAngle = CONTENT_ANGLES[Math.floor(Math.random() * CONTENT_ANGLES.length)]
   const ctaStyle = CTA_STYLES[Math.floor(Math.random() * CTA_STYLES.length)]
+
+  // Build specs + JSON schema for ONLY the selected platforms (avoids generating hidden, paid-for captions).
+  const platformSpecs = platforms.map((p) => PLATFORM_SPECS[p]).filter(Boolean).join("\n\n")
+  const jsonSchema = `{ ${platforms.map((p) => PLATFORM_JSON[p]).filter(Boolean).join(", ")} }`
 
   const subjectBlock = subject
     ? `\nSUBJECT — what this post is about. Every title, hook, description, caption and hashtag MUST be about this:\n→ ${subject}\n`
@@ -544,27 +575,10 @@ CTA FOR THIS GENERATION (use it verbatim as the closing line of the Pinterest de
 BANNED WORDS: stunning, gorgeous, amazing, game-changing, transform, elevate, discover, nobody tells you, the secret to, say hello to, find the perfect, level up, bullet points, "nestled", "tucked". Avoid first-person "I" except inside a natural CTA (e.g. "I linked every piece").
 BANNED TITLE PATTERNS: "The [noun] that [verb]" is overused — only use it if it's the assigned title formula. Never start every title with "The".
 
-PINTEREST (the title is your single biggest click lever — make it search-friendly AND promise a payoff):
-- Title: max 100 chars. Use the TITLE FORMULA above and INCLUDE the subject's main keyword. Should read like something a person would actually search, with a clear reason to click. No hashtags.
-- Description: 2-3 short sentences. Open the gap with the HOOK FORMULA, build a little desire, then end with the assigned CTA. 1 emoji minimum. Do NOT give away the specifics.
-- Alt text: describe what's visible (materials, colours, objects, lighting). End with topic + "guide 2026."
-- Caption: same click goal from a different angle — do not just rephrase the description. Ends with the assigned CTA.
-- Hashtags (20): center on the SUBJECT, not incidental objects in the image. 8-10 subject-specific exact terms (subject "layered lighting" → #layeredlighting #livingroomlighting #ambientlighting), 6-8 topic (#livingroomdesign #lightingideas), 2-3 intent (#shopthelook #homedecorideas). No vanity tags (#home #design #beautiful), and no tags about props that aren't the subject.
+${platformSpecs}
 
-INSTAGRAM:
-- Caption: hook → 2-3 sentences that build the gap → assigned CTA. 150-250 chars total
-- Hashtags (30): mix niche + topic + broad + intent
-
-FACEBOOK:
-- Caption: hook → 1-2 sentences → assigned CTA. Max 150 chars
-- Hashtags: 3-5 broad only
-
-GOOGLE-ADS (every line should pull the click):
-- 3 headlines (≤30 chars each): benefit/outcome-led, at least one with a number or "get the look".
-- 2 descriptions (≤90 chars each): name the payoff + an explicit click-through CTA.
-
-Return ONLY valid JSON for platforms: ${platforms.join(", ")}.
-{ "pinterest": { "title": "...", "description": "...", "altText": "...", "caption": "...", "hashtags": ["no","hash","prefix"] }, "instagram": { "caption": "...", "altText": "...", "hashtags": ["30","tags"] }, "facebook": { "caption": "...", "altText": "...", "hashtags": ["5","tags"] }, "google-ads": { "headline1": "30 chars", "headline2": "30 chars", "headline3": "30 chars", "description1": "90 chars", "description2": "90 chars", "altText": "..." } }
+Return ONLY valid JSON for the selected platform(s): ${platforms.join(", ")}. Do NOT include keys for any other platform.
+${jsonSchema}
 Return ONLY the JSON. No markdown.${language && language !== "en" ? `\n\nLANGUAGE: Write ALL output in ${LANGUAGE_NAMES[language] ?? language} as a native speaker. Hashtags: joinedwords, no spaces.` : ""}`
 
   return {
