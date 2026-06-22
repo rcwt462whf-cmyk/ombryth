@@ -37,12 +37,12 @@ export default function ForgotPasswordPage() {
       {/* Backgrounds */}
       <div className="fixed inset-0 pointer-events-none"
         style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.028) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
-      <div className="fixed top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-blue-500 to-transparent" />
-      <div className="fixed -top-40 left-1/3 w-[500px] h-[500px] bg-blue-600/[0.07] rounded-full blur-[120px] pointer-events-none" />
+      <div className="fixed top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#5fe6c4] to-transparent" />
+      <div className="fixed -top-40 left-1/3 w-[500px] h-[500px] bg-[#5fe6c4]/[0.06] rounded-full blur-[120px] pointer-events-none" />
 
       {/* Logo */}
-      <Link href="/" className="relative mb-10 text-2xl font-black tracking-tight text-white">
-        Ombryth
+      <Link href="/" className="relative mb-10 font-display text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+        Ombryth <span className="w-2.5 h-2.5 rounded-full" style={{ background: "#5fe6c4" }} />
       </Link>
 
       <div className="relative w-full max-w-sm">
@@ -99,7 +99,7 @@ export default function ForgotPasswordPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2.5 rounded-xl transition-all text-sm shadow-lg shadow-blue-600/20"
+                className="w-full bg-[#5fe6c4] hover:bg-[#54d6b6] disabled:opacity-50 disabled:cursor-not-allowed text-[#0b3b30] font-bold py-2.5 rounded-xl transition-all text-sm"
               >
                 {loading ? "Sending…" : "Send reset link"}
               </button>

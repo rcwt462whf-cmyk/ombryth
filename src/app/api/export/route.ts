@@ -73,7 +73,7 @@ export async function GET() {
   return new Response(content, {
     headers: {
       "Content-Type": "application/zip",
-      "Content-Disposition": `attachment; filename="flowgen-export-${Date.now()}.zip"`,
+      "Content-Disposition": `attachment; filename="ombryth-export-${Date.now()}.zip"`,
     },
   })
 }

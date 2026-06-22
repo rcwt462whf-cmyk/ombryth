@@ -202,7 +202,7 @@ export async function sendWelcomeEmail(
   email: string,
   referralCode?: string
 ): Promise<void> {
-  const from = process.env.RESEND_FROM_EMAIL ?? "hello@flowgen.app"
+  const from = process.env.RESEND_FROM_EMAIL ?? "hello@ombryth.io"
 
   await resend.emails.send({
     from: `Ombryth <${from}>`,

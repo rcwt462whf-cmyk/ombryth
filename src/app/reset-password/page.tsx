@@ -139,11 +139,8 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
-              <span className="text-white text-sm font-bold">F</span>
-            </div>
-            <span className="font-semibold text-gray-900 text-lg">FlowGen</span>
+          <Link href="/" className="inline-flex items-center gap-2 font-display text-2xl font-bold tracking-tight text-gray-900">
+            Ombryth <span className="w-2.5 h-2.5 rounded-full" style={{ background: "#5fe6c4" }} />
           </Link>
           <h1 className="mt-6 text-2xl font-bold text-gray-900">Set new password</h1>
           <p className="mt-2 text-sm text-gray-500">Choose a strong password for your account</p>

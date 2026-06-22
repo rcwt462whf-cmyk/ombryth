@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { AppSidebar } from "@/components/AppSidebar"
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  let userEmail = "preview@flowgen.app"
+  let userEmail = "preview@ombryth.io"
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()

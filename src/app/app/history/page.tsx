@@ -155,7 +155,7 @@ export default function HistoryPage() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = `flowgen-export-${Date.now()}.zip`
+      a.download = `ombryth-export-${Date.now()}.zip`
       a.click()
       URL.revokeObjectURL(url)
     } catch {
