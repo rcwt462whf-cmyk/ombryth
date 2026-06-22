@@ -2,8 +2,26 @@ import { NextResponse } from "next/server"
 import { headers } from "next/headers"
 import { stripe } from "@/lib/stripe"
 import { createClient } from "@/lib/supabase/server"
-import { sendWelcomeEmail } from "@/lib/emails/welcome"
+import {
+  sendProWelcomeEmail,
+  sendPaymentFailedEmail,
+  sendSubscriptionCancelledEmail,
+  sendRenewalEmail,
+} from "@/lib/emails/billing"
 import type Stripe from "stripe"
+
+/** Look up a user's email by their Stripe customer id (for billing emails). */
+async function emailFor(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  customerId: string,
+): Promise<string | null> {
+  const { data } = await supabase
+    .from("users")
+    .select("email")
+    .eq("stripe_customer_id", customerId)
+    .single()
+  return (data?.email as string | undefined) ?? null
+}
 
 export async function POST(request: Request) {
   const body = await request.text()
@@ -72,19 +90,13 @@ export async function POST(request: Request) {
         .update({ subscription_status: status })
         .eq("stripe_customer_id", customerId)
 
-      // Send welcome email to new subscriber (non-fatal)
+      // Pro welcome email (non-fatal). The onboarding welcome already fires on the
+      // first generation, so a paying user gets a billing-specific welcome here.
       try {
-        const { data: userRow } = await supabase
-          .from("users")
-          .select("email, referral_code")
-          .eq("stripe_customer_id", customerId)
-          .single()
-
-        if (userRow?.email) {
-          await sendWelcomeEmail(userRow.email, userRow.referral_code ?? undefined)
-        }
+        const email = await emailFor(supabase, customerId)
+        if (email) await sendProWelcomeEmail(email)
       } catch (emailErr) {
-        console.error("[webhook] welcome email failed:", emailErr)
+        console.error("[webhook] pro welcome email failed:", emailErr)
       }
       break
     }
@@ -109,6 +121,14 @@ export async function POST(request: Request) {
         .from("users")
         .update({ subscription_status: "cancelled" })
         .eq("stripe_customer_id", customerId)
+
+      // Win-back email (non-fatal)
+      try {
+        const email = await emailFor(supabase, customerId)
+        if (email) await sendSubscriptionCancelledEmail(email)
+      } catch (emailErr) {
+        console.error("[webhook] cancellation email failed:", emailErr)
+      }
       break
     }
 
@@ -120,6 +140,14 @@ export async function POST(request: Request) {
         .from("users")
         .update({ subscription_status: "past_due" })
         .eq("stripe_customer_id", customerId)
+
+      // Dunning email — keep the payer (non-fatal)
+      try {
+        const email = await emailFor(supabase, customerId)
+        if (email) await sendPaymentFailedEmail(email)
+      } catch (emailErr) {
+        console.error("[webhook] payment-failed email failed:", emailErr)
+      }
       break
     }
 
@@ -131,6 +159,16 @@ export async function POST(request: Request) {
         .from("users")
         .update({ subscription_status: "active" })
         .eq("stripe_customer_id", customerId)
+
+      // Only email on real renewals — the first invoice is covered by the Pro welcome.
+      if (invoice.billing_reason === "subscription_cycle") {
+        try {
+          const email = await emailFor(supabase, customerId)
+          if (email) await sendRenewalEmail(email)
+        } catch (emailErr) {
+          console.error("[webhook] renewal email failed:", emailErr)
+        }
+      }
       break
     }
 
