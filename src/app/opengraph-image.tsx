@@ -90,7 +90,7 @@ export default function OGImage() {
               color: "rgba(255,255,255,0.45)",
             }}
           >
-            ombryth.io
+            ombryth.com
           </div>
         </div>
       </div>

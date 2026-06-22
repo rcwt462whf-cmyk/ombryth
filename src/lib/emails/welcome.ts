@@ -1,6 +1,6 @@
 import { resend } from "@/lib/resend"
 
-const APP_URL = "https://ombryth.io"
+const APP_URL = "https://ombryth.com"
 
 function buildWelcomeHtml(referralCode?: string): string {
   const referralSection = referralCode
@@ -184,7 +184,7 @@ function buildWelcomeHtml(referralCode?: string): string {
             <td style="padding: 24px 40px; border-top: 1px solid #f3f4f6; text-align: center;">
               <p style="margin: 0; font-size: 12px; color: #9ca3af; line-height: 1.5;">
                 Ombryth &middot;
-                <a href="mailto:hello@ombryth.io?subject=Unsubscribe"
+                <a href="mailto:hello@ombryth.com?subject=Unsubscribe"
                    style="color: #9ca3af; text-decoration: underline;">Unsubscribe</a>
               </p>
             </td>
@@ -202,7 +202,7 @@ export async function sendWelcomeEmail(
   email: string,
   referralCode?: string
 ): Promise<void> {
-  const from = process.env.RESEND_FROM_EMAIL ?? "hello@ombryth.io"
+  const from = process.env.RESEND_FROM_EMAIL ?? "hello@ombryth.com"
 
   await resend.emails.send({
     from: `Ombryth <${from}>`,

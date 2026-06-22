@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-display", weight: ["400", "500", "600", "700"] })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://ombryth.io"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://ombryth.com"),
   title: "Ombryth — AI lifestyle images + social captions",
   description:
     "Bring your own AI keys. Generate scroll-stopping Pinterest, Instagram, Facebook and Google Ads content for your products in one click.",
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     title: "Ombryth — AI lifestyle images + social captions",
     description:
       "Bring your own AI keys. Generate scroll-stopping Pinterest, Instagram, Facebook and Google Ads content — in one click.",
-    url: "https://ombryth.io",
+    url: "https://ombryth.com",
     siteName: "Ombryth",
     type: "website",
   },

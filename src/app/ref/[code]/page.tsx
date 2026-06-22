@@ -33,7 +33,7 @@ export default async function ReferralPage({ params }: PageProps) {
             This referral link is not valid or has expired.
           </p>
           <a
-            href="https://ombryth.io"
+            href="https://ombryth.com"
             className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors text-sm"
           >
             Visit Ombryth

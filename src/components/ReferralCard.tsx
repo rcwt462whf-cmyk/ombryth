@@ -13,7 +13,7 @@ interface ReferralCardProps {
 export function ReferralCard({ referralCode, freeMonths, referralCount }: ReferralCardProps) {
   const [copied, setCopied] = useState(false)
 
-  const referralLink = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://ombryth.io"}/ref/${referralCode}`
+  const referralLink = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://ombryth.com"}/ref/${referralCode}`
 
   async function copyLink() {
     try {

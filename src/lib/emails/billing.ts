@@ -3,7 +3,7 @@ import { resend } from "@/lib/resend"
 // On-brand Ombryth billing emails — mint accent, minimal, no fluff (tool-first voice).
 // Each send is awaited by the caller inside try/catch so a failure never breaks the webhook.
 
-const APP_URL = "https://ombryth.io"
+const APP_URL = "https://ombryth.com"
 const MINT = "#5fe6c4"
 const ON_MINT = "#0b3b30"
 const INK = "#171717"
@@ -11,7 +11,7 @@ const MUTED = "#707070"
 const BORDER = "#ededed"
 
 function fromAddress(): string {
-  const addr = process.env.RESEND_FROM_EMAIL ?? "hello@ombryth.io"
+  const addr = process.env.RESEND_FROM_EMAIL ?? "hello@ombryth.com"
   return `Ombryth <${addr}>`
 }
 
@@ -53,7 +53,7 @@ ${bodyHtml}${ctaHtml}${footnoteHtml}
 </td></tr>
 <tr><td style="padding:28px 40px 32px;">
 <p style="margin:0;border-top:1px solid ${BORDER};padding-top:18px;font-size:12px;line-height:1.6;color:#9ca3af;">
-Ombryth · <a href="${APP_URL}/app/billing" style="color:#9ca3af;text-decoration:underline;">Manage subscription</a> · <a href="mailto:hello@ombryth.io" style="color:#9ca3af;text-decoration:underline;">Contact support</a>
+Ombryth · <a href="${APP_URL}/app/billing" style="color:#9ca3af;text-decoration:underline;">Manage subscription</a> · <a href="mailto:hello@ombryth.com" style="color:#9ca3af;text-decoration:underline;">Contact support</a>
 </p>
 </td></tr>
 </table>

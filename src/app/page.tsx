@@ -300,7 +300,7 @@ export default function LandingPage() {
           <div className="flex gap-6">
             <a href="/privacy" className="hover:text-[#171717] dark:hover:text-white transition-colors">Privacy</a>
             <a href="/terms" className="hover:text-[#171717] dark:hover:text-white transition-colors">Terms</a>
-            <a href="mailto:hello@ombryth.io" className="hover:text-[#171717] dark:hover:text-white transition-colors">Contact</a>
+            <a href="mailto:hello@ombryth.com" className="hover:text-[#171717] dark:hover:text-white transition-colors">Contact</a>
           </div>
           <span>© 2026 Ombryth</span>
         </div>
