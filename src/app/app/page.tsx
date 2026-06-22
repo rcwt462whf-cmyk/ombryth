@@ -100,7 +100,7 @@ function UploadZone({
       </div>
 
       {preview ? (
-        <div className="relative rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700 aspect-square bg-gray-50 dark:bg-gray-800">
+        <div className="relative rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700 aspect-square bg-gray-50 dark:bg-gray-800 shadow-sm">
           <Image src={preview} alt={label} fill className="object-cover" unoptimized />
           <button
             onClick={() => onFileChange(null)}
@@ -112,7 +112,7 @@ function UploadZone({
         </div>
       ) : (
         <div
-          className="rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-[#5fe6c4] dark:hover:border-[#5fe6c4]/50 bg-gray-50 dark:bg-white/[0.02] hover:bg-[#eafbf4]/30 dark:hover:bg-[#5fe6c4]/5 aspect-square flex flex-col items-center justify-center cursor-pointer transition-colors"
+          className="rounded-xl border-2 border-dotted border-gray-200 dark:border-gray-700 hover:border-[#5fe6c4] dark:hover:border-[#5fe6c4]/50 bg-gray-50/50 dark:bg-white/[0.02] hover:bg-[#eafbf4]/30 dark:hover:bg-[#5fe6c4]/5 aspect-square flex flex-col items-center justify-center cursor-pointer transition-all duration-200 ease-out"
           onClick={() => inputRef.current?.click()}
           onDrop={handleDrop}
           onDragOver={(e) => e.preventDefault()}
@@ -179,10 +179,10 @@ function OutputField({ label, value }: { label: string; value: string | string[]
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-widest">{label}</span>
+        <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em]">{label}</span>
         <CopyButton text={displayText} />
       </div>
-      <p className="text-sm text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-white/[0.04] dark:border dark:border-white/[0.06] rounded-lg px-3 py-2 leading-relaxed whitespace-pre-wrap">
+      <p className="text-sm text-gray-800 dark:text-gray-200 bg-stone-50 dark:bg-white/[0.04] dark:border dark:border-white/[0.06] rounded-xl px-3 py-2.5 leading-relaxed whitespace-pre-wrap">
         {displayText}
       </p>
     </div>
@@ -191,12 +191,20 @@ function OutputField({ label, value }: { label: string; value: string | string[]
 
 function LoadingSpinner({ text }: { text?: string }) {
   return (
-    <div className="flex flex-col items-center gap-3">
-      <svg className="w-8 h-8 animate-spin text-[#5fe6c4]" fill="none" viewBox="0 0 24 24">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-      </svg>
-      {text && <p className="text-sm text-gray-500">{text}</p>}
+    <div className="flex flex-col items-center gap-4">
+      <div className="relative w-12 h-12">
+        {/* Outer orbit ring */}
+        <div className="absolute inset-0 rounded-full border-2 border-[#5fe6c4]/20 dark:border-[#5fe6c4]/10" />
+        {/* Spinning arc */}
+        <svg className="absolute inset-0 w-12 h-12 animate-spin" viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="22" stroke="#5fe6c4" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="80 60" />
+        </svg>
+        {/* Center dot pulse */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-2.5 h-2.5 rounded-full bg-[#5fe6c4] animate-pulse shadow-[0_0_12px_rgba(95,230,196,0.5)]" />
+        </div>
+      </div>
+      {text && <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{text}</p>}
     </div>
   )
 }

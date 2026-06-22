@@ -31,9 +31,12 @@ interface AppSidebarProps {
 
 function Wordmark() {
   return (
-    <span className="font-display text-xl font-bold tracking-tight text-[#171717] dark:text-[#f2f2f2] flex items-center gap-2">
+    <span className="font-display text-[22px] font-bold tracking-tight text-[#171717] dark:text-[#f2f2f2] flex items-center gap-2.5">
       Ombryth
-      <span className="w-2 h-2 rounded-full" style={{ background: MINT }} />
+      <span className="relative flex items-center justify-center">
+        <span className="absolute w-5 h-5 rounded-full opacity-25 blur-[6px]" style={{ background: MINT }} />
+        <span className="relative w-2.5 h-2.5 rounded-full" style={{ background: MINT }} />
+      </span>
     </span>
   )
 }
@@ -101,7 +104,7 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
   const sidebarContent = (
     <>
       {/* Logo */}
-      <div className="px-5 py-4 border-b border-[#ededed] dark:border-[#2e2e2e] flex items-center justify-between">
+      <div className="px-5 py-4 flex items-center justify-between">
         <Link href="/app" className="flex items-center gap-2.5">
           <Wordmark />
           {isPro && proBadge}
@@ -117,9 +120,10 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
           </button>
         </div>
       </div>
+      <div className="divider-gradient mx-4" />
 
       {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         {navItems.map(({ href, label, icon: Icon, exact }) => {
           const isActive = exact ? pathname === href : pathname.startsWith(href)
           return (
@@ -127,13 +131,19 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-all",
+                "relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
                 isActive
                   ? "bg-[#eafbf4] dark:bg-[#5fe6c4]/10 text-[#0b3b30] dark:text-[#5fe6c4]"
-                  : "text-[#707070] dark:text-[#a3a3a3] hover:bg-[#f4f4f4] dark:hover:bg-[#262626] hover:text-[#171717] dark:hover:text-white"
+                  : "text-[#707070] dark:text-[#a3a3a3] hover:bg-[#f0f0ee] dark:hover:bg-[#1f1f1f] hover:text-[#171717] dark:hover:text-white"
               )}
             >
-              <Icon className={cn("w-4 h-4 shrink-0", isActive ? "text-[#0b3b30] dark:text-[#5fe6c4]" : "text-[#9a9a9a] dark:text-[#6f6f6f]")} />
+              {isActive && (
+                <span
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-4 rounded-full"
+                  style={{ background: MINT }}
+                />
+              )}
+              <Icon className={cn("w-4 h-4 shrink-0 transition-colors duration-150", isActive ? "text-[#0b3b30] dark:text-[#5fe6c4]" : "text-[#9a9a9a] dark:text-[#6f6f6f]")} />
               {label}
             </Link>
           )
@@ -142,16 +152,16 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
 
       {/* Free trial indicator */}
       {userStatus && !isPro && (
-        <div className="px-4 pb-2">
-          <div className="bg-[#fafafa] dark:bg-[#262626] rounded-xl p-3 border border-[#ededed] dark:border-[#383838]">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-medium text-[#707070] dark:text-[#a3a3a3]">Free trial</span>
-              <span className="text-xs text-[#9a9a9a] dark:text-[#6f6f6f] tabular-nums">{freeUsed}/10</span>
+        <div className="px-3 pb-2">
+          <div className="bg-[#f0efed] dark:bg-[#1a1a1a] rounded-xl p-3.5 border border-[#e5e4e1] dark:border-[#2a2a2a] shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-[#555] dark:text-[#b0b0b0]">Free trial</span>
+              <span className="text-[11px] font-medium text-[#9a9a9a] dark:text-[#6f6f6f] tabular-nums">{freeUsed}/10</span>
             </div>
-            <div className="w-full bg-[#ededed] dark:bg-[#383838] rounded-full h-1.5 mb-2.5">
+            <div className="w-full bg-[#dddbd8] dark:bg-[#2e2e2e] rounded-full h-1.5 mb-3">
               <div
                 className={cn(
-                  "h-1.5 rounded-full transition-all",
+                  "h-1.5 rounded-full transition-all duration-300",
                   freeUsed >= 10 ? "bg-red-500" : freeUsed >= 7 ? "bg-amber-500" : ""
                 )}
                 style={freeUsed < 7 ? { width: `${freePercent}%`, background: MINT } : { width: `${freePercent}%` }}
@@ -160,7 +170,7 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
             {freeUsed >= 10 ? (
               <Link
                 href="/app/billing"
-                className="flex items-center justify-center gap-1.5 text-xs font-medium rounded-md px-3 py-1.5 transition-colors w-full"
+                className="flex items-center justify-center gap-1.5 text-xs font-semibold rounded-lg px-3 py-2 transition-all duration-150 w-full hover:shadow-md"
                 style={{ background: MINT, color: ON_MINT }}
               >
                 <Zap className="w-3 h-3" />
@@ -176,25 +186,28 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
       )}
 
       {/* User + Sign Out */}
-      <div className="p-3 border-t border-[#ededed] dark:border-[#2e2e2e]">
-        <div className="px-3 py-1.5 mb-1">
-          <p className="text-xs font-medium text-[#707070] dark:text-[#a3a3a3] truncate">{userEmail}</p>
-          {isPro && (
-            <p className="text-[11px] font-medium mt-0.5" style={{ color: ON_MINT }}>Pro · Unlimited</p>
-          )}
+      <div className="px-3 pt-0 pb-3">
+        <div className="divider-gradient mb-3" />
+        <div className="px-3 py-1 mb-1 flex items-center gap-2">
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-medium text-[#888] dark:text-[#777] truncate max-w-[160px]">{userEmail}</p>
+            {isPro && (
+              <p className="text-[10px] font-medium mt-0.5" style={{ color: ON_MINT }}>Pro · Unlimited</p>
+            )}
+          </div>
         </div>
         <button
           onClick={() => setHelpOpen(true)}
-          className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-[#707070] dark:text-[#a3a3a3] hover:bg-[#f4f4f4] dark:hover:bg-[#262626] hover:text-[#171717] dark:hover:text-white transition-all w-full text-left mb-0.5"
+          className="flex items-center gap-3 px-3 py-1.5 rounded-lg text-[13px] text-[#707070] dark:text-[#a3a3a3] hover:bg-[#f0f0ee] dark:hover:bg-[#1f1f1f] hover:text-[#171717] dark:hover:text-white transition-all duration-150 w-full text-left mb-0.5"
         >
-          <HelpCircle className="w-4 h-4 shrink-0" />
+          <HelpCircle className="w-3.5 h-3.5 shrink-0" />
           Help &amp; API Guides
         </button>
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-[#707070] dark:text-[#a3a3a3] hover:bg-[#f4f4f4] dark:hover:bg-[#262626] hover:text-[#171717] dark:hover:text-white transition-all w-full text-left"
+          className="flex items-center gap-3 px-3 py-1.5 rounded-lg text-[13px] text-[#707070] dark:text-[#a3a3a3] hover:bg-[#f0f0ee] dark:hover:bg-[#1f1f1f] hover:text-[#171717] dark:hover:text-white transition-all duration-150 w-full text-left"
         >
-          <LogOut className="w-4 h-4 shrink-0" />
+          <LogOut className="w-3.5 h-3.5 shrink-0" />
           Sign out
         </button>
       </div>
@@ -205,7 +218,7 @@ export function AppSidebar({ userEmail }: AppSidebarProps) {
   return (
     <>
       {/* ── Desktop sidebar ───────────────────────────────────────────────── */}
-      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-60 bg-white dark:bg-[#181818] border-r border-[#ededed] dark:border-[#2e2e2e] flex-col z-30">
+      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-60 bg-[#faf9f7] dark:bg-[#111111] border-r border-[#e8e6e3] dark:border-[#1e1e1e] flex-col z-30">
         {sidebarContent}
       </aside>
 
