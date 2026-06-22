@@ -1053,9 +1053,10 @@ export default function GeneratePage() {
                         setScrapeError(null)
                       }
                     }}
-                    className="px-2 py-1 text-[11px] rounded-md border border-gray-200 bg-gray-50 hover:bg-[#eafbf4] hover:border-[#5fe6c4] hover:text-[#0b3b30] dark:text-[#5fe6c4] text-gray-600 transition-colors"
+                    className="inline-flex items-center gap-1.5 max-w-[220px] px-2.5 py-1.5 text-xs rounded-full border border-gray-200 bg-white text-gray-700 hover:border-[#5fe6c4] hover:bg-[#eafbf4] hover:text-[#0b3b30] dark:bg-[#232323] dark:border-[#383838] dark:text-[#cfcfcf] dark:hover:bg-[#5fe6c4]/15 dark:hover:border-[#5fe6c4] dark:hover:text-[#5fe6c4] transition-colors"
                   >
-                    {l.label}
+                    <Link className="w-3 h-3 shrink-0 text-[#5fe6c4]" />
+                    <span className="truncate">{l.label}</span>
                   </button>
                 ))}
               </div>
@@ -1076,7 +1077,7 @@ export default function GeneratePage() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") fetchDestinationContext(destinationUrl)
                 }}
-                className="flex-1 h-10 px-3 text-xs rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#5fe6c4]/50 focus:border-[#5fe6c4] placeholder:text-gray-300"
+                className="flex-1 h-10 px-3 text-xs rounded-lg border border-gray-200 bg-white text-gray-900 dark:bg-[#1c1c1c] dark:border-[#383838] dark:text-[#f2f2f2] focus:outline-none focus:ring-2 focus:ring-[#5fe6c4]/50 focus:border-[#5fe6c4] placeholder:text-gray-300 dark:placeholder:text-[#6f6f6f]"
               />
               {destinationUrl && (
                 <button
@@ -1085,7 +1086,7 @@ export default function GeneratePage() {
                     setDestinationContext(null)
                     setScrapeError(null)
                   }}
-                  className="h-8 w-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
+                  className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 dark:border-[#383838] dark:text-[#8a8a8a] dark:hover:text-[#f2f2f2] dark:hover:border-[#4a4a4a] dark:hover:bg-[#262626] transition-colors"
                   title="Clear"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -1094,7 +1095,7 @@ export default function GeneratePage() {
               <button
                 onClick={() => fetchDestinationContext(destinationUrl)}
                 disabled={scrapingUrl || !destinationUrl}
-                className="h-8 w-8 flex items-center justify-center rounded-lg bg-[#eafbf4] border border-[#5fe6c4] text-[#0b3b30] dark:text-[#5fe6c4] hover:bg-[#d6f5ea] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg bg-[#5fe6c4] text-[#0b3b30] hover:bg-[#54d6b6] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 title="Fetch page context"
               >
                 {scrapingUrl ? (
@@ -1108,9 +1109,9 @@ export default function GeneratePage() {
               </button>
             </div>
             {destinationContext && (destinationContext.title || destinationContext.description) && (
-              <div className="flex items-center gap-2 bg-green-50 border border-green-100 rounded-lg px-2.5 py-2">
-                <Check className="w-3.5 h-3.5 text-green-500 shrink-0" />
-                <p className="text-xs text-green-700 leading-snug flex-1 min-w-0 truncate">
+              <div className="flex items-center gap-2 bg-[#eafbf4] border border-[#bff0e1] dark:bg-[#5fe6c4]/10 dark:border-[#5fe6c4]/25 rounded-lg px-2.5 py-2">
+                <Check className="w-3.5 h-3.5 text-[#0b9c75] dark:text-[#5fe6c4] shrink-0" />
+                <p className="text-xs text-[#0b3b30] dark:text-[#9fefd8] leading-snug flex-1 min-w-0 truncate">
                   {destinationContext.title || destinationContext.description}
                 </p>
                 {destinationUrl && !savedLinks.some(l => l.url === destinationUrl) && (
@@ -1121,7 +1122,7 @@ export default function GeneratePage() {
                       const d = await res.json()
                       if (d.link) setSavedLinks(prev => [d.link, ...prev])
                     }}
-                    className="shrink-0 text-[11px] text-green-600 hover:text-green-800 font-medium transition-colors whitespace-nowrap"
+                    className="shrink-0 text-[11px] text-[#0b9c75] hover:text-[#0b3b30] dark:text-[#5fe6c4] dark:hover:text-[#9fefd8] font-medium transition-colors whitespace-nowrap"
                   >
                     + Save
                   </button>
