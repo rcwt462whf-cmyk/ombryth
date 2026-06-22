@@ -349,6 +349,7 @@ export default function GeneratePage() {
   const [freeUsedCount, setFreeUsedCount] = useState<number | null>(null)
   const [additionalOpen, setAdditionalOpen] = useState(false)
   const [customPrompt, setCustomPrompt] = useState("")
+  const [captionSubject, setCaptionSubject] = useState("")
   const [platforms, setPlatforms] = useState<Platform[]>(["pinterest", "instagram"])
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>("2:3")
   const [batchMode, setBatchMode] = useState(false)
@@ -499,6 +500,7 @@ export default function GeneratePage() {
           stylePreset: styleOpen ? stylePreset : undefined,
           lightingPreset: lightingOpen ? lighting : undefined,
           customPrompt: customPrompt || undefined,
+          captionSubject: captionSubject || undefined,
           platforms,
           aspectRatio,
           language,
@@ -912,6 +914,19 @@ export default function GeneratePage() {
                   className="text-sm resize-none"
                   rows={3}
                 />
+                <div className="mt-3">
+                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    Caption topic <span className="text-gray-400 font-normal">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="What the captions should be about — e.g. layered lighting"
+                    value={captionSubject}
+                    onChange={(e) => setCaptionSubject(e.target.value)}
+                    className="mt-1 w-full h-9 px-3 text-sm rounded-lg border border-gray-200 bg-white text-gray-900 dark:bg-[#1c1c1c] dark:border-[#383838] dark:text-[#f2f2f2] focus:outline-none focus:ring-2 focus:ring-[#5fe6c4]/50 focus:border-[#5fe6c4] placeholder:text-gray-300 dark:placeholder:text-[#6f6f6f]"
+                  />
+                  <p className="mt-1 text-[11px] text-gray-400">Keeps titles &amp; captions on-topic — won&apos;t drift to other objects in the image. Defaults to your prompt if blank.</p>
+                </div>
               </div>
             )}
           </div>

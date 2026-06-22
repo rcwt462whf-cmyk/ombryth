@@ -789,6 +789,7 @@ export async function POST(request: Request) {
       return cleaned.slice(0, maxLen) || undefined
     }
     config.customPrompt = sanitizeText(config.customPrompt, 500)
+    config.captionSubject = sanitizeText(config.captionSubject, 200)
     if (config.destinationContext) {
       config.destinationContext.title = sanitizeText(config.destinationContext.title, 200) ?? ""
       config.destinationContext.description = sanitizeText(config.destinationContext.description, 600) ?? ""
@@ -1005,6 +1006,7 @@ export async function POST(request: Request) {
 
     // The ONE topic every caption must stay on — prevents drift to whatever object is most visible.
     const captionSubject =
+      config.captionSubject?.trim() ||
       config.customPrompt?.trim() ||
       product?.description?.trim() ||
       (config.niche ?? config.categoryPreset ?? "").replace(/[-_]/g, " ").trim() ||
@@ -1064,24 +1066,32 @@ export async function POST(request: Request) {
 
     // Save generation records (non-fatal — never block the response on a DB write error)
     try {
-      await Promise.all(
-        imageUrls.map((imageUrl) =>
-          supabase.from("generations").insert({
-            user_id: user.id,
-            image_model: config.imageModel,
-            text_model: config.textModel,
-            category_preset: config.niche ?? config.categoryPreset ?? null,
-            lighting_preset: config.lightingPreset ?? null,
-            platforms: config.platforms,
-            prompt_used: finalPrompt,
-            status: "completed",
-            has_style_reference: !!styleFile,
-            has_product_reference: !!productFile,
-            product_description: product?.description ?? null,
-            image_url: imageUrl ?? null,
-          })
-        )
-      )
+      // Which formula combo(s) produced these captions — for A/B diagnostics (Vynthr).
+      const captionVariantsUsed = textOutputs.map((t) => t._variants).filter(Boolean)
+      const baseRows = imageUrls.map((imageUrl) => ({
+        user_id: user.id,
+        image_model: config.imageModel,
+        text_model: config.textModel,
+        category_preset: config.niche ?? config.categoryPreset ?? null,
+        lighting_preset: config.lightingPreset ?? null,
+        platforms: config.platforms,
+        prompt_used: finalPrompt,
+        status: "completed",
+        has_style_reference: !!styleFile,
+        has_product_reference: !!productFile,
+        product_description: product?.description ?? null,
+        image_url: imageUrl ?? null,
+      }))
+      const rowsWithVariants = baseRows.map((r) => ({
+        ...r,
+        caption_variants: captionVariantsUsed.length ? captionVariantsUsed : null,
+      }))
+      const { error: insertErr } = await supabase.from("generations").insert(rowsWithVariants)
+      if (insertErr) {
+        // Most likely the caption_variants column hasn't been migrated yet — retry without it.
+        console.warn("[generate] insert with caption_variants failed, retrying without:", insertErr.message)
+        await supabase.from("generations").insert(baseRows)
+      }
     } catch (saveErr) {
       console.error("[generate] history save failed:", saveErr)
       // Non-fatal — image was generated successfully, just log the error

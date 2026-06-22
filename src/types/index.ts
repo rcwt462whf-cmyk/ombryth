@@ -30,6 +30,7 @@ export interface GenerateRequest {
   stylePreset?: string
   lightingPreset: LightingPreset
   customPrompt?: string
+  captionSubject?: string
   platforms: Platform[]
   aspectRatio: AspectRatio
   language?: Language
