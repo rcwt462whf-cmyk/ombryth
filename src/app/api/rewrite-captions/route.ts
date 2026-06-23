@@ -5,43 +5,7 @@ import OpenAI from "openai"
 import Anthropic from "@anthropic-ai/sdk"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import type { PlatformOutput } from "@/types"
-
-const LANGUAGE_NAMES: Record<string, string> = {
-  "en": "English", "es": "Spanish", "pt-BR": "Brazilian Portuguese",
-  "fr": "French", "de": "German", "it": "Italian",
-  "nl": "Dutch", "pl": "Polish", "hu": "Hungarian",
-}
-
-const HOOK_STYLES = [
-  `Contradiction: "[Thing] looks [positive]. But [negative truth]." e.g. "Cold grey bedroom walls look fine in photos. At night they feel like a waiting room."`,
-  `Reframe: "[Common assumption]. [Correction]." e.g. "Most plants don't die from neglect. They die from being put in the wrong room."`,
-  `Number: "[Number]. [Number]. [Result]." e.g. "Three lamps. Two hours. Completely different room."`,
-  `Single truth: "[Thing] is the [one decision/mistake] that [consequence]." e.g. "The headboard is the most important decision in a bedroom."`,
-  `Challenge: "Most [things] [negative]." e.g. "Most bedrooms are designed by accident." or "Most kitchens age badly."`,
-  `Trend subversion: "[Trend] will date. [Timeless thing] won't." e.g. "Trends change. Terracotta zellige doesn't."`,
-  `Curiosity gap: State what's at stake without the answer. e.g. "Zellige is the most saved tile on Pinterest. Most people buying it don't know what they're getting."`,
-  `Strong opinion: Confident, specific, mildly controversial. e.g. "Open shelving in kitchens is almost always a mistake."`,
-]
-
-const TITLE_FORMULAS = [
-  `Title uses a genuine question surfacing a real problem. e.g. "Why does every bathroom look better in photos than in person?" or "When did kitchens start feeling so clinical?"`,
-  `Title uses "How [specific thing] changed [room/result]". e.g. "How one pendant lamp changed the whole kitchen" or "How switching to warmer bulbs fixed my living room"`,
-  `Title is a short confident declarative — no "The/A/An" at the start. e.g. "Warm light before dark is not optional." or "Linen curtains age better than everything else."`,
-  `Title is an instruction/warning before an action. e.g. "Read this before you choose bathroom tiles" or "One thing to fix before you repaint"`,
-  `Title uses a specific number + outcome. e.g. "Three lighting swaps that changed everything" or "Four bathroom details that date a space immediately"`,
-  `Title is a short single-truth naming the one decision that matters. e.g. "Grout colour matters more than tile colour" or "The headboard is the most important bedroom decision"`,
-  `Title names something popular then reveals a surprising gap. e.g. "The most saved kitchen on Pinterest — and what most people miss about it"`,
-  `Title leads with the result, not the method. e.g. "A bedroom that feels like a hotel — without the cost" or "Plants that survive low light without drama"`,
-]
-
-const CONTENT_ANGLES = [
-  `ANGLE: Focus on the sensory experience — how it feels, looks in different light, sounds (quiet / warm / airy). Make the reader feel like they're in the space.`,
-  `ANGLE: Focus on the specific problem this solves — what frustrates people, what common mistake this avoids, why most rooms fail without this.`,
-  `ANGLE: Focus on one specific material, finish or detail (e.g. zellige texture, linen drape, matte black vs polished chrome). Concrete and specific.`,
-  `ANGLE: Focus on the time dimension — how this looks over time, what ages well vs dates badly, seasonal relevance.`,
-  `ANGLE: Focus on the discovery moment — the specific thing you notice after living with this choice. Conversational, like sharing insider knowledge.`,
-  `ANGLE: Focus on scale and proportion — what makes this room feel bigger/smaller/taller, the one spatial decision that changed everything.`,
-]
+import { buildTextSystemPrompt } from "@/lib/caption-engine"
 
 function sanitizeHashtags(output: PlatformOutput): PlatformOutput {
   const cleanTags = (tags: unknown): string[] => {
@@ -62,8 +26,7 @@ export async function POST(request: Request) {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
     const body = await request.json()
-    const { prompt, imageBase64, platforms, language, textModel, destinationContext, productDescription, scope } = body
-    const captionsOnly = scope === "captions"
+    const { prompt, imageBase64, platforms, language, textModel, destinationContext, productDescription, captionSubject } = body
 
     if (!prompt || !platforms?.length) {
       return NextResponse.json({ error: "Missing prompt or platforms" }, { status: 400 })
@@ -78,56 +41,19 @@ export async function POST(request: Request) {
     const keyMap: Record<string, string> = {}
     for (const row of apiKeys ?? []) keyMap[row.provider] = decryptKey(row.encrypted_key)
 
-    // Pick fresh random hook, title formula, and content angle for variety
-    const hookStyle = HOOK_STYLES[Math.floor(Math.random() * HOOK_STYLES.length)]
-    const titleFormula = TITLE_FORMULAS[Math.floor(Math.random() * TITLE_FORMULAS.length)]
-    const contentAngle = CONTENT_ANGLES[Math.floor(Math.random() * CONTENT_ANGLES.length)]
-    const persona = userData?.custom_system_prompt?.trim() ||
-      "You are a top-performing social media content creator for lifestyle and home decor affiliate marketing. Punchy, hook-first, conversational. Short sentences. 1-2 emojis. Concrete CTA. Write like a real person."
-
-    const destBlock = destinationContext?.title || destinationContext?.description
-      ? `\nThe content links to: "${destinationContext.title}" — "${destinationContext.description}". Weave keywords naturally.\n`
-      : ""
-    const productBlock = productDescription
-      ? `\nFeatured product: ${productDescription}. Reference it specifically.\n`
-      : ""
-    const imageRef = textModel === "claude" && imageBase64
-      ? "Look at the image carefully — write captions based on exactly what you see."
-      : `The lifestyle image shows: "${prompt}".`
-    const langRule = language && language !== "en"
-      ? `\n\nWrite ALL output in ${LANGUAGE_NAMES[language] ?? language} as a native speaker.`
-      : ""
-
-    const scopeInstruction = captionsOnly
-      ? `SCOPE: Rewrite ONLY the caption and hashtags fields. Keep title and altText exactly as they were — do not change them.`
-      : `SCOPE: Rewrite ALL fields — title, caption, altText, hashtags, headlines. Full fresh rewrite.`
-
-    const systemPrompt = `${persona}
-
-${imageRef}
-${productBlock}${destBlock}
-${contentAngle}
-
-HOOK FORMULA (use on every platform):
-${hookStyle}
-Write original copy using this structure. Do not copy the formula literally.
-
-TITLE FORMULA (for Pinterest title):
-${titleFormula}
-Write a title that follows this structure. Vary your sentence structure and starting word.
-
-${scopeInstruction}
-
-BANNED WORDS: stunning, gorgeous, amazing, game-changing, transform your space, nobody tells you, the secret to, discover, say hello to, nestled, tucked
-BANNED TITLE PATTERNS: Do not start every title with "The". Vary your title structure every time.
-
-⚠️ MANDATORY: 1-2 emojis per caption placed naturally (🌿 💡 🚿 🛏️ 🏺 🌱 🪵 🏡 ✨ 👇 🪴). CTA always "Full guide in the link. 👇" — never "on the blog". Warm, friendly tone — not dry or clinical.
-Pinterest description: hook-first, 2-3 punchy sentences, 1 emoji, end "Full guide in the link. 👇". No listing of image objects.
-Pinterest hashtags (20): 8-10 niche-specific, 6-8 topic, 2-3 intent. No vanity tags.
-Instagram hashtags (30): mix niche + topic + broad + intent.
-Facebook hashtags (5): broad only. No # prefix. No spaces inside tags.
-
-Return ONLY valid JSON for platforms: ${platforms.join(", ")}.${langRule}`
+    // Same click-optimized engine as /api/generate — single source of truth, no drift.
+    // (The client merges only caption+hashtags for the "captions" scope, so we always
+    // produce a full set here and let the page decide what to keep.)
+    const { prompt: systemPrompt } = buildTextSystemPrompt(
+      prompt,
+      platforms,
+      userData?.custom_system_prompt ?? null,
+      destinationContext ?? null,
+      language ?? null,
+      productDescription,
+      textModel === "claude" && !!imageBase64,
+      captionSubject,
+    )
 
     let textOutput: PlatformOutput = {}
     let textModelUsed = textModel

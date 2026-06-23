@@ -594,6 +594,7 @@ export default function GeneratePage() {
           textModel,
           destinationContext: destinationContext ?? undefined,
           productDescription: result.productDescription ?? undefined,
+          captionSubject: captionSubject || undefined,
           scope, // "captions" = caption+hashtags only, "all" = full rewrite
         }),
       })
