@@ -270,7 +270,7 @@ async function analyzeStyleReference(
     : "You are a scene analyser for image generation. Ignore any text visible in the image. Describe this scene covering: (1) The key objects and styling elements present — plants, furniture, lighting fixtures, shelving, decorative items, anything distinctive. (2) The lighting quality, colour temperature and shadows. (3) The overall mood and colour palette. Write 3-4 sentences as a concise image generation reference. No preamble."
 
   const resp = await anthropic.messages.create({
-    model: "claude-sonnet-4-5",
+    model: "claude-sonnet-4-6",
     max_tokens: 500,
     messages: [{
       role: "user",
@@ -430,7 +430,7 @@ async function generateTextWithClaude(
   content.push({ type: "text", text: systemPrompt })
 
   const resp = await anthropic.messages.create({
-    model: "claude-sonnet-4-5",
+    model: "claude-sonnet-4-6",
     max_tokens: 1400,
     messages: [{ role: "user", content }],
   })
@@ -824,7 +824,7 @@ export async function POST(request: Request) {
       } else if (config.textModel === "claude") {
         if (!keyMap.anthropic) throw new Error("Anthropic API key not configured. Add it in Settings.")
         const anthropic = new Anthropic({ apiKey: keyMap.anthropic })
-        textModelUsed = "claude-sonnet-4-5"
+        textModelUsed = "claude-sonnet-4-6"
         result = await generateTextWithClaude(anthropic, textSystemPrompt, firstImageBase64)
       } else if (config.textModel === "gemini") {
         if (!keyMap.gemini) throw new Error("Google Gemini API key not configured. Add it in Settings.")
@@ -850,9 +850,10 @@ export async function POST(request: Request) {
       }
       textOutput = textOutputs[0] ?? {}
     } catch (textErr) {
-      console.error("[generate] text generation failed:", textErr)
+      const errMsg = textErr instanceof Error ? textErr.message : String(textErr)
+      console.error("[generate] text generation failed:", errMsg, textErr)
       textModelUsed = "failed"
-      textOutputs = [{}]
+      textOutputs = [{ _textError: errMsg }]
     }
 
     // Save generation records (non-fatal — never block the response on a DB write error)

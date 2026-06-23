@@ -77,10 +77,10 @@ export async function POST(request: Request) {
       const content: CB[] = []
       if (imageBase64) content.push({ type: "image", source: { type: "base64", media_type: "image/jpeg", data: imageBase64 } })
       content.push({ type: "text", text: systemPrompt })
-      const resp = await anthropic.messages.create({ model: "claude-sonnet-4-5", max_tokens: 1400, messages: [{ role: "user", content }] })
+      const resp = await anthropic.messages.create({ model: "claude-sonnet-4-6", max_tokens: 1400, messages: [{ role: "user", content }] })
       const raw = resp.content[0]?.type === "text" ? resp.content[0].text : "{}"
       textOutput = sanitizeHashtags(JSON.parse(raw.replace(/```json\n?|\n?```/g, "").trim()))
-      textModelUsed = "claude-sonnet-4-5"
+      textModelUsed = "claude-sonnet-4-6"
     } else if (textModel === "gemini") {
       if (!keyMap.gemini) return NextResponse.json({ error: "Gemini API key not configured." }, { status: 400 })
       const genAI = new GoogleGenerativeAI(keyMap.gemini)

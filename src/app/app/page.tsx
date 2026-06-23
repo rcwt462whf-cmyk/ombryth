@@ -572,10 +572,11 @@ export default function GeneratePage() {
       setResult(data as unknown as GenerationResult)
       // Warn if text generation failed (image succeeded but captions are empty)
       if ((data as unknown as GenerationResult).textModelUsed === "failed") {
+        const textError = (data as unknown as GenerationResult).textOutputs?.[0]?._textError as string | undefined
         toast({
           variant: "destructive",
           title: "Captions failed",
-          description: "Image generated but captions couldn't be written. Check that your text model API key is saved in Settings → API Keys.",
+          description: textError || "Image generated but captions couldn't be written. Check that your text model API key is saved in Settings → API Keys.",
         })
       } else if ((data as unknown as GenerationResult).textModelUsed === "none") {
         toast({ title: "No platforms selected", description: "Select at least one platform to generate captions." })
