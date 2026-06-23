@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useRef, useCallback, useEffect } from "react"
+import { useState, useRef, useCallback, useEffect, useMemo } from "react"
 import Image from "next/image"
-import { Upload, X, Download, Copy, Check, Wand2, Info, ChevronLeft, ChevronRight, ChevronDown, BookMarked, Link, ArrowRight, RotateCcw, Target, Hash } from "lucide-react"
+import { Upload, X, Download, Copy, Check, Wand2, Info, ChevronLeft, ChevronRight, ChevronDown, BookMarked, Link, ArrowRight, RotateCcw, Target, Hash, Folder } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Slider } from "@/components/ui/slider"
@@ -375,6 +375,19 @@ export default function GeneratePage() {
   // Saved prompts + links
   const [savedPrompts, setSavedPrompts] = useState<{ id: string; name: string; prompt: string }[]>([])
   const [savedLinks, setSavedLinks] = useState<{ id: string; label: string; url: string; title: string | null; description: string | null }[]>([])
+  const [collapsedFolders, setCollapsedFolders] = useState<Set<string>>(new Set())
+  // Auto-organize saved links into folders by destination domain; strays → "Other".
+  const linkGroups = useMemo(() => {
+    const groups: Record<string, typeof savedLinks> = {}
+    for (const l of savedLinks) {
+      let domain = "Other"
+      try { domain = new URL(l.url).hostname.replace(/^www\./, "") } catch { /* keep Other */ }
+      ;(groups[domain] ??= []).push(l)
+    }
+    return Object.entries(groups)
+      .map(([domain, links]) => ({ domain, links }))
+      .sort((a, b) => (a.domain === "Other" ? 1 : b.domain === "Other" ? -1 : b.links.length - a.links.length))
+  }, [savedLinks])
   useEffect(() => {
     fetch("/api/prompts").then(r => r.json()).then(d => setSavedPrompts(d.prompts ?? []))
     fetch("/api/saved-links").then(r => r.json()).then(d => setSavedLinks(d.links ?? []))
@@ -1058,23 +1071,47 @@ export default function GeneratePage() {
             <div className="px-4 pb-4 space-y-3">
             {/* Saved links quick-pick */}
             {savedLinks.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {savedLinks.map(l => (
-                  <button
-                    key={l.id}
-                    onClick={() => {
-                      setDestinationUrl(l.url)
-                      if (l.title || l.description) {
-                        setDestinationContext({ title: l.title ?? "", description: l.description ?? "" })
-                        setScrapeError(null)
-                      }
-                    }}
-                    className="inline-flex items-center gap-1.5 max-w-[220px] px-2.5 py-1.5 text-xs rounded-full border border-gray-200 bg-white text-gray-700 hover:border-[#5fe6c4] hover:bg-[#eafbf4] hover:text-[#0b3b30] dark:bg-[#232323] dark:border-[#383838] dark:text-[#cfcfcf] dark:hover:bg-[#5fe6c4]/15 dark:hover:border-[#5fe6c4] dark:hover:text-[#5fe6c4] transition-colors"
-                  >
-                    <Link className="w-3 h-3 shrink-0 text-[#5fe6c4]" />
-                    <span className="truncate">{l.label}</span>
-                  </button>
-                ))}
+              <div className="space-y-2">
+                {linkGroups.map(({ domain, links }) => {
+                  const collapsed = collapsedFolders.has(domain)
+                  return (
+                    <div key={domain}>
+                      <button
+                        type="button"
+                        onClick={() => setCollapsedFolders(prev => {
+                          const next = new Set(prev)
+                          if (next.has(domain)) next.delete(domain); else next.add(domain)
+                          return next
+                        })}
+                        className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                      >
+                        <ChevronDown className={cn("w-3 h-3 transition-transform", collapsed && "-rotate-90")} />
+                        <Folder className="w-3 h-3 text-[#5fe6c4]" />
+                        <span>{domain}</span>
+                        <span className="font-normal text-gray-400">{links.length}</span>
+                      </button>
+                      {!collapsed && (
+                        <div className="flex flex-wrap gap-1.5 mt-1.5 pl-4">
+                          {links.map(l => (
+                            <button
+                              key={l.id}
+                              onClick={() => {
+                                setDestinationUrl(l.url)
+                                if (l.title || l.description) {
+                                  setDestinationContext({ title: l.title ?? "", description: l.description ?? "" })
+                                  setScrapeError(null)
+                                }
+                              }}
+                              className="inline-flex items-center gap-1.5 max-w-[220px] px-2.5 py-1.5 text-xs rounded-full border border-gray-200 bg-white text-gray-700 hover:border-[#5fe6c4] hover:bg-[#eafbf4] hover:text-[#0b3b30] dark:bg-[#232323] dark:border-[#383838] dark:text-[#cfcfcf] dark:hover:bg-[#5fe6c4]/15 dark:hover:border-[#5fe6c4] dark:hover:text-[#5fe6c4] transition-colors"
+                            >
+                              <span className="truncate">{l.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             )}
             <p className="text-xs text-gray-400">
