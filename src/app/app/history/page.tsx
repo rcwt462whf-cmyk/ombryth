@@ -31,9 +31,23 @@ function ModelBadge({ label, color }: { label: string; color: string }) {
   )
 }
 
+type CaptionSet = {
+  title?: string
+  description?: string
+  caption?: string
+  altText?: string
+  hashtags?: string[]
+  headline1?: string
+  headline2?: string
+  headline3?: string
+  description1?: string
+  description2?: string
+}
+
 type Generation = {
   id: string
   user_id: string
+  captions?: Record<string, CaptionSet> | null
   image_url: string | null
   status: string
   category_preset: string
@@ -92,6 +106,7 @@ function buildUrl(limit: number, offset: number, model: string, platform: string
 export default function HistoryPage() {
   const { toast } = useToast()
   const [generations, setGenerations] = useState<Generation[]>([])
+  const [expandedCaptions, setExpandedCaptions] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [exporting, setExporting] = useState(false)
@@ -438,6 +453,36 @@ export default function HistoryPage() {
                           {p}
                         </span>
                       ))}
+                    </div>
+                  )}
+
+                  {/* Captions */}
+                  {gen.captions && Object.keys(gen.captions).length > 0 && (
+                    <div className="pt-0.5">
+                      <button
+                        onClick={() => setExpandedCaptions(expandedCaptions === gen.id ? null : gen.id)}
+                        className="text-[11px] font-medium text-[#0b9c75] dark:text-[#5fe6c4] hover:underline"
+                      >
+                        {expandedCaptions === gen.id ? "Hide captions" : "Show captions"}
+                      </button>
+                      {expandedCaptions === gen.id && (
+                        <div className="mt-2 space-y-2">
+                          {(Object.entries(gen.captions) as [string, CaptionSet][])
+                            .filter(([k]) => k !== "_variants")
+                            .map(([platform, c]) => (
+                              <div key={platform} className="rounded-lg border border-gray-100 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#1c1c1c] p-2.5">
+                                <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-1 capitalize">{platform.replace("-", " ")}</p>
+                                {c.title && <p className="text-xs font-medium text-gray-800 dark:text-gray-200">{c.title}</p>}
+                                {(c.description || c.caption) && <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 whitespace-pre-wrap">{c.description || c.caption}</p>}
+                                {(c.headline1 || c.headline2 || c.headline3) && <p className="text-xs text-gray-700 dark:text-gray-300">{[c.headline1, c.headline2, c.headline3].filter(Boolean).join(" · ")}</p>}
+                                {(c.description1 || c.description2) && <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{[c.description1, c.description2].filter(Boolean).join(" ")}</p>}
+                                {Array.isArray(c.hashtags) && c.hashtags.length > 0 && (
+                                  <p className="text-[11px] text-[#0b9c75] dark:text-[#5fe6c4] mt-1 break-words">{c.hashtags.map((h) => `#${h}`).join(" ")}</p>
+                                )}
+                              </div>
+                            ))}
+                        </div>
+                      )}
                     </div>
                   )}
 

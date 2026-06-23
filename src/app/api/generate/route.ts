@@ -1068,6 +1068,9 @@ export async function POST(request: Request) {
     try {
       // Which formula combo(s) produced these captions — for A/B diagnostics (Vynthr).
       const captionVariantsUsed = textOutputs.map((t) => t._variants).filter(Boolean)
+      // The captions themselves (minus the internal _variants tag) so History can show them.
+      const captionsToSave: Record<string, unknown> = {}
+      for (const [k, v] of Object.entries(textOutput)) if (k !== "_variants") captionsToSave[k] = v
       const baseRows = imageUrls.map((imageUrl) => ({
         user_id: user.id,
         image_model: config.imageModel,
@@ -1085,6 +1088,7 @@ export async function POST(request: Request) {
       const rowsWithVariants = baseRows.map((r) => ({
         ...r,
         caption_variants: captionVariantsUsed.length ? captionVariantsUsed : null,
+        captions: Object.keys(captionsToSave).length ? captionsToSave : null,
       }))
       const { error: insertErr } = await supabase.from("generations").insert(rowsWithVariants)
       if (insertErr) {

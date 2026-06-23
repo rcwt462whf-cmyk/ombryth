@@ -18,11 +18,11 @@ const FEATURES = [
 ]
 
 const INTEGRATIONS = [
-  { icon: MessageSquare, title: "Chat AI captions", desc: "OpenAI, Claude and Gemini write platform-ready captions from one prompt." },
-  { icon: Wand2, title: "AI image generation", desc: "DALL·E 3, Flux, Stable Diffusion and Seedream — your keys, your models." },
-  { icon: Globe, title: "Firecrawl", desc: "Context-aware captions are built in — Firecrawl elevates them, reading your destination page in richer detail for sharper copy." },
-  { icon: Search, title: "Keyword research", desc: "Add keyword research for best results — target the high-intent terms your audience is actually searching." },
-  { icon: Boxes, title: "Vynthr", desc: "Connect your Vynthr account and pull work straight into Ombryth." },
+  { icon: MessageSquare, title: "Chat AI captions", desc: "OpenAI, Claude and Gemini write platform-ready captions from one prompt.", soon: false },
+  { icon: Wand2, title: "AI image generation", desc: "DALL·E 3, Flux, Stable Diffusion and Seedream — your keys, your models.", soon: false },
+  { icon: Globe, title: "Firecrawl", desc: "Scrape your destination page for richer, context-aware captions.", soon: true },
+  { icon: Search, title: "Keyword research", desc: "Target the high-intent terms your audience is actually searching.", soon: true },
+  { icon: Boxes, title: "Vynthr", desc: "Connect your Vynthr account and pull work straight into Ombryth.", soon: true },
 ]
 
 const FAQ_ITEMS = [
@@ -226,8 +226,11 @@ export default function LandingPage() {
           <p className="text-[#707070] dark:text-[#a3a3a3] text-base max-w-xl">Bring your own keys — Ombryth orchestrates the tools you already use. More connections land regularly.</p>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {INTEGRATIONS.map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="bg-white dark:bg-[#262626] border border-[#dfdfdf] dark:border-[#383838] rounded-xl p-6">
+          {INTEGRATIONS.map(({ icon: Icon, title, desc, soon }) => (
+            <div key={title} className="relative bg-white dark:bg-[#262626] border border-[#dfdfdf] dark:border-[#383838] rounded-xl p-6">
+              {soon && (
+                <span className="absolute top-3 right-3 text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#f4f4f4] dark:bg-[#2e2e2e] text-[#9a9a9a] dark:text-[#6f6f6f] border border-[#e5e5e5] dark:border-[#3a3a3a]">Coming soon</span>
+              )}
               <div className="w-10 h-10 rounded-lg bg-[#f4f4f4] dark:bg-[#2e2e2e] flex items-center justify-center mb-4">
                 <Icon className="w-5 h-5 text-[#171717] dark:text-[#f2f2f2]" />
               </div>

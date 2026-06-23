@@ -83,7 +83,8 @@ create table if not exists public.generations (
   has_product_reference boolean default false,
   product_description text,
   image_url text,  -- public URL in Supabase Storage
-  caption_variants jsonb  -- [{hook,title,angle,cta}] per caption set — for A/B diagnostics
+  caption_variants jsonb,  -- [{hook,title,angle,cta}] per caption set — for A/B diagnostics
+  captions jsonb  -- the generated platform captions, so History can show them
 );
 
 alter table public.generations enable row level security;
