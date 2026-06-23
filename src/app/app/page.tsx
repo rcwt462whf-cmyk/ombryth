@@ -1351,7 +1351,7 @@ export default function GeneratePage() {
           {/* Image output */}
           <div className="bg-white dark:bg-card rounded-xl border border-gray-100 dark:border-border overflow-hidden">
             {loading ? (
-              <div className={cn("flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-800/60 gap-4", ASPECT_RATIO_CLASS[aspectRatio])}>
+              <div className={cn("flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-800/60 bg-dot-canvas gap-4", ASPECT_RATIO_CLASS[aspectRatio])}>
                 <LoadingSpinner text={loadingMsg} />
                 <p className="text-xs text-gray-400">This may take 10–60 seconds</p>
               </div>
@@ -1468,8 +1468,8 @@ export default function GeneratePage() {
               </div>
             ) : (
               <div className={cn("relative flex flex-col items-center justify-center gap-3 overflow-hidden", ASPECT_RATIO_CLASS[aspectRatio])}>
-                {/* Animated gradient background */}
-                <div className="absolute inset-0 bg-[#fafafa] dark:bg-[#1a1a1a]" />
+                {/* Dotted canvas background */}
+                <div className="absolute inset-0 bg-[#fafafa] dark:bg-[#1a1a1a] bg-dot-canvas" />
                 {/* Content */}
                 <div className="relative z-10 flex flex-col items-center gap-3">
                   <div className="w-14 h-14 rounded-2xl bg-white/80 dark:bg-gray-700/80 shadow-sm border border-white dark:border-gray-600 flex items-center justify-center backdrop-blur-sm">

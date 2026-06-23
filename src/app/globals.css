@@ -123,6 +123,16 @@
       linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
   }
 
+  /* Subtle dot canvas (22px) — Supabase-style, for empty/loading surfaces */
+  .bg-dot-canvas {
+    background-image: radial-gradient(rgba(17, 17, 17, 0.06) 1.2px, transparent 1.2px);
+    background-size: 22px 22px;
+  }
+
+  .dark .bg-dot-canvas {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1.2px, transparent 1.2px);
+  }
+
   /* Frosted glass card utility */
   .glass {
     background: hsl(0 0% 100% / 0.7);
