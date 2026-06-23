@@ -78,6 +78,7 @@ export interface PlatformOutput {
     angle: string
     cta: string
   }
+  _textError?: string
 }
 
 export interface GenerationResult {
