@@ -438,7 +438,7 @@ function NicheForm({ form, isCreate, saving, onUpdateText, onAddKeywords, onRemo
             onChange={e => onUpdateText("name", e.target.value)}
             placeholder="e.g. Scandinavian Bedroom"
             autoFocus={isCreate}
-            className="w-full bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white text-sm rounded-xl px-3.5 py-2.5 outline-none focus:border-[#5fe6c4] dark:focus:border-[#5fe6c4]/50 transition-colors placeholder:text-gray-300 dark:placeholder:text-slate-600"
+            className="w-full bg-white dark:bg-[#1c1c1c] border border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white text-sm rounded-xl px-3.5 py-2.5 outline-none focus:border-[#5fe6c4] dark:focus:border-[#5fe6c4]/50 transition-colors placeholder:text-gray-300 dark:placeholder:text-slate-600"
           />
         </div>
 
@@ -484,7 +484,7 @@ function NicheForm({ form, isCreate, saving, onUpdateText, onAddKeywords, onRemo
               }}
               placeholder={"minimalist bedroom decor\nscandinavian interior ideas\ncozy bedroom aesthetic\nboho room inspo"}
               rows={4}
-              className="flex-1 bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white text-xs rounded-xl px-3 py-2.5 outline-none focus:border-[#5fe6c4] dark:focus:border-[#5fe6c4]/50 transition-colors placeholder:text-gray-300 dark:placeholder:text-slate-600 resize-none font-mono"
+              className="flex-1 bg-white dark:bg-[#1c1c1c] border border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white text-xs rounded-xl px-3 py-2.5 outline-none focus:border-[#5fe6c4] dark:focus:border-[#5fe6c4]/50 transition-colors placeholder:text-gray-300 dark:placeholder:text-slate-600 resize-none font-mono"
             />
             <button
               onClick={onAddKeywords}
@@ -531,7 +531,7 @@ function NicheForm({ form, isCreate, saving, onUpdateText, onAddKeywords, onRemo
             onChange={e => onUpdateText("notes", e.target.value)}
             placeholder="Content ideas, visual style, seasonal focus, target audience..."
             rows={3}
-            className="w-full bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white text-xs rounded-xl px-3 py-2.5 outline-none focus:border-[#5fe6c4] dark:focus:border-[#5fe6c4]/50 transition-colors placeholder:text-gray-300 dark:placeholder:text-slate-600 resize-none leading-relaxed"
+            className="w-full bg-white dark:bg-[#1c1c1c] border border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white text-xs rounded-xl px-3 py-2.5 outline-none focus:border-[#5fe6c4] dark:focus:border-[#5fe6c4]/50 transition-colors placeholder:text-gray-300 dark:placeholder:text-slate-600 resize-none leading-relaxed"
           />
         </div>
 

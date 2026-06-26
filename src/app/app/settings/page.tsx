@@ -442,7 +442,7 @@ function PromptsTab() {
                   </button>
                 </div>
                 {expanded === p.id && (
-                  <div className="mt-2 p-3 bg-muted/50 rounded-lg">
+                  <div className="mt-2 p-3 bg-muted rounded-lg">
                     <p className="text-xs text-muted-foreground leading-relaxed">{p.prompt}</p>
                   </div>
                 )}
@@ -805,7 +805,7 @@ function AccountTab() {
       </div>
 
       {/* Danger Zone */}
-      <div className="rounded-xl border border-red-200 bg-red-50/30 dark:bg-red-950/10 dark:border-red-900 p-5 space-y-4">
+      <div className="rounded-xl border border-red-200 bg-red-50 dark:bg-red-950 dark:border-red-900 p-5 space-y-4">
         <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 text-red-500" /> Danger Zone
         </h3>
@@ -1149,7 +1149,7 @@ function NichesTab() {
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">Presets</Label>
               {newPresets.map(p => (
-                <div key={p.id} className="flex items-center justify-between gap-2 bg-muted/40 rounded-lg px-3 py-2">
+                <div key={p.id} className="flex items-center justify-between gap-2 bg-muted rounded-lg px-3 py-2">
                   <div>
                     <span className="text-xs font-medium text-foreground">{p.label}</span>
                     {p.promptModifier && <span className="text-xs text-muted-foreground ml-2">{p.promptModifier.slice(0, 40)}…</span>}

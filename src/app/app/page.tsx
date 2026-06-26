@@ -112,7 +112,7 @@ function UploadZone({
         </div>
       ) : (
         <div
-          className="rounded-xl border-2 border-dotted border-gray-200 dark:border-gray-700 hover:border-[#5fe6c4] dark:hover:border-[#5fe6c4]/50 bg-gray-50/50 dark:bg-white/[0.02] hover:bg-[#eafbf4]/30 dark:hover:bg-[#5fe6c4]/5 aspect-square flex flex-col items-center justify-center cursor-pointer transition-all duration-200 ease-out"
+          className="rounded-xl border-2 border-dotted border-gray-200 dark:border-gray-700 hover:border-[#5fe6c4] dark:hover:border-[#5fe6c4]/50 bg-gray-50 dark:bg-[#1c1c1c] hover:bg-[#eafbf4] dark:hover:bg-[#1a2e28] aspect-square flex flex-col items-center justify-center cursor-pointer transition-all duration-200 ease-out"
           onClick={() => inputRef.current?.click()}
           onDrop={handleDrop}
           onDragOver={(e) => e.preventDefault()}
@@ -1402,7 +1402,7 @@ export default function GeneratePage() {
           {/* Image output */}
           <div className="bg-white dark:bg-card rounded-xl border border-gray-100 dark:border-border overflow-hidden">
             {loading ? (
-              <div className={cn("flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-800/60 bg-dot-canvas gap-4", ASPECT_RATIO_CLASS[aspectRatio])}>
+              <div className={cn("flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-800 bg-dot-canvas gap-4", ASPECT_RATIO_CLASS[aspectRatio])}>
                 <LoadingSpinner text={loadingMsg} />
                 <p className="text-xs text-gray-400">This may take 10–60 seconds</p>
               </div>
