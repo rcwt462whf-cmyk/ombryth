@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect, useMemo } from "react"
 import Image from "next/image"
-import { Upload, X, Download, Copy, Check, Wand2, Info, ChevronLeft, ChevronRight, ChevronDown, BookMarked, Link, ArrowRight, RotateCcw, Target, Hash, Folder } from "lucide-react"
+import { Upload, X, Download, Copy, Check, Wand2, Info, ChevronLeft, ChevronRight, ChevronDown, BookMarked, Link, Link2, Link2Off, ArrowRight, RotateCcw, Target, Hash, Folder, ImageIcon, Type } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Slider } from "@/components/ui/slider"
@@ -352,9 +352,10 @@ export default function GeneratePage() {
   const [captionSubject, setCaptionSubject] = useState("")
   const [platforms, setPlatforms] = useState<Platform[]>(["pinterest", "instagram"])
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>("2:3")
-  const [batchMode, setBatchMode] = useState(false)
+  const [imageCount, setImageCount] = useState(1)
+  const [captionCount, setCaptionCount] = useState(1)
+  const [linkedCounts, setLinkedCounts] = useState(true)
   const [aiTonedown, setAiTonedown] = useState(false)
-  const [captionVariations, setCaptionVariations] = useState(1)
   const [selectedVariation, setSelectedVariation] = useState(0)
   const [language, setLanguage] = useState<Language>("en")
 
@@ -517,9 +518,10 @@ export default function GeneratePage() {
           platforms,
           aspectRatio,
           language,
-          batchMode,
+          batchMode: imageCount >= 3,
+          imageCount,
           aiTonedown,
-          captionVariations,
+          captionVariations: captionCount,
           styleReferenceStrength: styleFile ? styleStrength : undefined,
           productReferenceStrength: productFile ? productStrength : undefined,
           hasStyleReference: !!styleFile,
@@ -1268,12 +1270,77 @@ export default function GeneratePage() {
               </Select>
             </div>
 
-            <div className="flex items-center justify-between py-1">
-              <div>
-                <p className="text-xs font-medium text-gray-700">Batch mode</p>
-                <p className="text-xs text-gray-400 mt-0.5">Generate 3 variations at once</p>
+            {/* Image & Caption count sliders */}
+            <div className="space-y-3 py-1">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Quantity</p>
+                <button
+                  onClick={() => setLinkedCounts(l => !l)}
+                  title={linkedCounts ? "Unlink sliders" : "Link sliders"}
+                  className={cn(
+                    "w-7 h-7 rounded-lg flex items-center justify-center border transition-colors",
+                    linkedCounts
+                      ? "border-[#5fe6c4] bg-[#eafbf4] text-[#0b3b30] dark:bg-[#5fe6c4]/10 dark:text-[#5fe6c4]"
+                      : "border-gray-200 dark:border-gray-700 text-gray-400 hover:border-gray-300"
+                  )}
+                >
+                  {linkedCounts ? <Link2 className="w-3.5 h-3.5" /> : <Link2Off className="w-3.5 h-3.5" />}
+                </button>
               </div>
-              <Switch checked={batchMode} onCheckedChange={setBatchMode} />
+
+              {/* Images slider */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <ImageIcon className="w-3.5 h-3.5 text-gray-400" />
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Images</span>
+                  </div>
+                  <span className="text-xs font-semibold text-[#0b3b30] dark:text-[#5fe6c4] tabular-nums w-4 text-right">{imageCount}</span>
+                </div>
+                <Slider
+                  min={0}
+                  max={5}
+                  step={1}
+                  value={[imageCount]}
+                  onValueChange={([v]) => {
+                    setImageCount(v)
+                    if (linkedCounts) setCaptionCount(v)
+                  }}
+                  className="py-1 green-slider"
+                />
+              </div>
+
+              {/* Captions slider */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <Type className="w-3.5 h-3.5 text-gray-400" />
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Captions</span>
+                  </div>
+                  <span className="text-xs font-semibold text-[#0b3b30] dark:text-[#5fe6c4] tabular-nums w-4 text-right">{captionCount}</span>
+                </div>
+                <Slider
+                  min={0}
+                  max={5}
+                  step={1}
+                  value={[captionCount]}
+                  onValueChange={([v]) => {
+                    setCaptionCount(v)
+                    if (linkedCounts) setImageCount(v)
+                  }}
+                  className="py-1 green-slider"
+                />
+              </div>
+
+              {imageCount === 0 && captionCount > 0 && (
+                <p className="text-[11px] text-[#0b3b30] dark:text-[#5fe6c4] flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#5fe6c4]" />
+                  Captions only — will use your uploaded image &amp; destination link
+                </p>
+              )}
+              {imageCount === 0 && captionCount === 0 && (
+                <p className="text-[11px] text-amber-500">Set at least one slider above zero to generate</p>
+              )}
             </div>
 
             <div className="flex items-center justify-between py-1">
@@ -1283,34 +1350,13 @@ export default function GeneratePage() {
               </div>
               <Switch checked={aiTonedown} onCheckedChange={setAiTonedown} />
             </div>
-
-            <div className="flex items-center justify-between py-1">
-              <div>
-                <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Caption variations</p>
-                <p className="text-xs text-gray-400 mt-0.5">Generate multiple caption sets to pick from</p>
-              </div>
-              <div className="flex gap-1">
-                {[1, 2, 3].map(n => (
-                  <button
-                    key={n}
-                    onClick={() => setCaptionVariations(n)}
-                    className={cn(
-                      "w-7 h-7 rounded-lg text-xs font-semibold border transition-colors",
-                      captionVariations === n
-                        ? "bg-[#5fe6c4] border-[#5fe6c4] text-[#0b3b30]"
-                        : "border-gray-200 text-gray-500 hover:border-gray-300"
-                    )}
-                  >{n}</button>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* Generate button */}
           <div className="space-y-2 pb-4">
             <button
               onClick={handleGenerate}
-              disabled={loading}
+              disabled={loading || (imageCount === 0 && captionCount === 0)}
               className={cn(
                 "w-full h-11 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all",
                 loading
@@ -1329,7 +1375,11 @@ export default function GeneratePage() {
               ) : (
                 <>
                   <Wand2 className="w-4 h-4" />
-                  {batchMode ? "Generate 3 Variations" : "Generate"}
+                  {imageCount === 0 && captionCount > 0
+                    ? `Write ${captionCount} Caption${captionCount > 1 ? "s" : ""}`
+                    : imageCount > 1 || captionCount > 1
+                      ? `Generate ${imageCount} img + ${captionCount} txt`
+                      : "Generate"}
                 </>
               )}
             </button>

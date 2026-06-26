@@ -167,4 +167,23 @@
       transparent
     );
   }
+
+  .green-slider [data-orientation="horizontal"] {
+    height: 8px;
+  }
+  .green-slider [role="slider"] {
+    width: 20px;
+    height: 20px;
+    background: #5fe6c4;
+    border-color: #4ad6b4;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+  }
+  .green-slider [data-orientation="horizontal"] > span {
+    background: #5fe6c4;
+  }
+  .green-slider > span:first-child {
+    background: rgba(95,230,196,0.2);
+    height: 8px;
+    border-radius: 9999px;
+  }
 }
