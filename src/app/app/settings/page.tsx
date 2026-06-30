@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import {
   Eye, EyeOff, Save, Check, Trash2, Key, Sliders,
   User, Sun, Moon, Monitor, Plus, BookMarked, Lock, CreditCard, Bot, AlertTriangle, BarChart2, Layers, X,
+  Link as LinkIcon, Search, Pencil,
 } from "lucide-react"
 import { ReferralCard } from "@/components/ReferralCard"
 import { Button } from "@/components/ui/button"
@@ -450,6 +451,184 @@ function PromptsTab() {
                 {expanded === p.id && (
                   <div className="mt-2 p-3 bg-muted rounded-lg">
                     <p className="text-xs text-muted-foreground leading-relaxed">{p.prompt}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─── Saved links ───────────────────────────────────────────────────────────────
+
+interface SavedLink {
+  id: string
+  label: string
+  url: string
+  title: string | null
+  description: string | null
+  created_at: string
+}
+
+function LinksTab() {
+  const { toast } = useToast()
+  const [links, setLinks] = useState<SavedLink[]>([])
+  const [loading, setLoading] = useState(true)
+  const [query, setQuery] = useState("")
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editLabel, setEditLabel] = useState("")
+  const [editUrl, setEditUrl] = useState("")
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    fetch("/api/saved-links")
+      .then(r => r.json())
+      .then(d => setLinks(d.links ?? []))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const filtered = links.filter(l => {
+    const q = query.trim().toLowerCase()
+    if (!q) return true
+    return (
+      l.label.toLowerCase().includes(q) ||
+      l.url.toLowerCase().includes(q) ||
+      (l.title ?? "").toLowerCase().includes(q) ||
+      (l.description ?? "").toLowerCase().includes(q)
+    )
+  })
+
+  function startEdit(l: SavedLink) {
+    setEditingId(l.id)
+    setEditLabel(l.label)
+    setEditUrl(l.url)
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+    setEditLabel("")
+    setEditUrl("")
+  }
+
+  async function saveEdit(id: string) {
+    if (!editLabel.trim() || !editUrl.trim()) return
+    setSaving(true)
+    try {
+      const res = await fetch("/api/saved-links", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, label: editLabel.trim(), url: editUrl.trim() }),
+      })
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      setLinks(prev => prev.map(l => l.id === id ? data.link : l))
+      toast({ title: "Link updated" })
+      cancelEdit()
+    } catch {
+      toast({ variant: "destructive", title: "Failed to update link" })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function deleteLink(id: string) {
+    const res = await fetch(`/api/saved-links?id=${id}`, { method: "DELETE" })
+    if (!res.ok) { toast({ variant: "destructive", title: "Failed to delete" }); return }
+    setLinks(prev => prev.filter(l => l.id !== id))
+    toast({ title: "Link removed" })
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
+        <div className="px-5 py-4 border-b border-border">
+          <h3 className="text-sm font-semibold text-foreground">
+            Saved links <Badge variant="secondary" className="ml-2 text-xs">{links.length}</Badge>
+          </h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Destination URLs saved from the Generate page. Search, edit, or remove them here.
+          </p>
+        </div>
+        <div className="px-5 py-3 border-b border-border">
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 text-muted-foreground absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <Input
+              placeholder="Search by label, URL, or page title…"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              className="h-8 pl-8 text-xs"
+            />
+          </div>
+        </div>
+        {loading ? (
+          <div className="p-8 flex justify-center">
+            <svg className="w-5 h-5 animate-spin text-muted-foreground" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+          </div>
+        ) : links.length === 0 ? (
+          <div className="p-10 text-center">
+            <LinkIcon className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">No saved links yet</p>
+            <p className="text-xs text-muted-foreground/70 mt-1">Save a destination URL from the Generate page to see it here.</p>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="p-10 text-center">
+            <p className="text-sm text-muted-foreground">No links match &ldquo;{query}&rdquo;</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-border">
+            {filtered.map(l => (
+              <div key={l.id} className="px-5 py-3">
+                {editingId === l.id ? (
+                  <div className="space-y-2">
+                    <Input
+                      value={editLabel}
+                      onChange={e => setEditLabel(e.target.value)}
+                      placeholder="Label"
+                      className="h-8 text-xs"
+                    />
+                    <Input
+                      value={editUrl}
+                      onChange={e => setEditUrl(e.target.value)}
+                      placeholder="https://…"
+                      className="h-8 text-xs font-mono"
+                    />
+                    <div className="flex gap-2">
+                      <Button size="sm" className="h-7 text-xs px-3" disabled={saving || !editLabel.trim() || !editUrl.trim()} onClick={() => saveEdit(l.id)}>
+                        {saving ? "Saving…" : "Save"}
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-7 text-xs px-3" onClick={cancelEdit}>Cancel</Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{l.label}</p>
+                      <a href={l.url} target="_blank" rel="noreferrer" className="text-xs text-muted-foreground hover:text-primary truncate block">
+                        {l.url}
+                      </a>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => startEdit(l)}
+                        className="text-muted-foreground hover:text-foreground transition-colors p-1.5"
+                        title="Edit"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => deleteLink(l.id)}
+                        className="text-muted-foreground hover:text-destructive transition-colors p-1.5"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -1501,7 +1680,7 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="keys">
-        <TabsList className="mb-6 h-9 grid w-full grid-cols-6">
+        <TabsList className="mb-6 h-9 grid w-full grid-cols-7">
           <TabsTrigger value="keys" className="text-xs gap-1">
             <Key className="w-3.5 h-3.5" /> Keys
           </TabsTrigger>
@@ -1510,6 +1689,9 @@ export default function SettingsPage() {
           </TabsTrigger>
           <TabsTrigger value="prompts" className="text-xs gap-1">
             <BookMarked className="w-3.5 h-3.5" /> Prompts
+          </TabsTrigger>
+          <TabsTrigger value="links" className="text-xs gap-1">
+            <LinkIcon className="w-3.5 h-3.5" /> Links
           </TabsTrigger>
           <TabsTrigger value="niches" className="text-xs gap-1">
             <Layers className="w-3.5 h-3.5" /> Niches
@@ -1569,6 +1751,11 @@ export default function SettingsPage() {
         {/* Prompts */}
         <TabsContent value="prompts" className="mt-0">
           <PromptsTab />
+        </TabsContent>
+
+        {/* Links */}
+        <TabsContent value="links" className="mt-0">
+          <LinksTab />
         </TabsContent>
 
         {/* Niches */}

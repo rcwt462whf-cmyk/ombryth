@@ -378,10 +378,19 @@ export default function GeneratePage() {
   const [savedPrompts, setSavedPrompts] = useState<{ id: string; name: string; prompt: string }[]>([])
   const [savedLinks, setSavedLinks] = useState<{ id: string; label: string; url: string; title: string | null; description: string | null }[]>([])
   const [collapsedFolders, setCollapsedFolders] = useState<Set<string>>(new Set())
+  const [savedLinkQuery, setSavedLinkQuery] = useState("")
   // Auto-organize saved links into folders by destination domain; strays → "Other".
   const linkGroups = useMemo(() => {
+    const q = savedLinkQuery.trim().toLowerCase()
+    const filteredLinks = q
+      ? savedLinks.filter(l =>
+          l.label.toLowerCase().includes(q) ||
+          l.url.toLowerCase().includes(q) ||
+          (l.title ?? "").toLowerCase().includes(q)
+        )
+      : savedLinks
     const groups: Record<string, typeof savedLinks> = {}
-    for (const l of savedLinks) {
+    for (const l of filteredLinks) {
       let domain = "Other"
       try { domain = new URL(l.url).hostname.replace(/^www\./, "") } catch { /* keep Other */ }
       ;(groups[domain] ??= []).push(l)
@@ -389,7 +398,7 @@ export default function GeneratePage() {
     return Object.entries(groups)
       .map(([domain, links]) => ({ domain, links }))
       .sort((a, b) => (a.domain === "Other" ? 1 : b.domain === "Other" ? -1 : b.links.length - a.links.length))
-  }, [savedLinks])
+  }, [savedLinks, savedLinkQuery])
   useEffect(() => {
     fetch("/api/prompts").then(r => r.json()).then(d => setSavedPrompts(d.prompts ?? []))
     fetch("/api/saved-links").then(r => r.json()).then(d => setSavedLinks(d.links ?? []))
@@ -1076,6 +1085,18 @@ export default function GeneratePage() {
             {/* Saved links quick-pick */}
             {savedLinks.length > 0 && (
               <div className="space-y-2">
+                {savedLinks.length > 4 && (
+                  <input
+                    type="text"
+                    placeholder="Search saved links…"
+                    value={savedLinkQuery}
+                    onChange={(e) => setSavedLinkQuery(e.target.value)}
+                    className="w-full h-8 px-2.5 text-xs rounded-lg border border-gray-200 bg-white text-gray-900 dark:bg-[#1c1c1c] dark:border-[#383838] dark:text-[#f2f2f2] focus:outline-none focus:ring-2 focus:ring-[#5fe6c4]/50 focus:border-[#5fe6c4] placeholder:text-gray-300 dark:placeholder:text-[#6f6f6f]"
+                  />
+                )}
+                {linkGroups.length === 0 && savedLinkQuery && (
+                  <p className="text-xs text-gray-400">No links match &ldquo;{savedLinkQuery}&rdquo;</p>
+                )}
                 {linkGroups.map(({ domain, links }) => {
                   const collapsed = collapsedFolders.has(domain)
                   return (
@@ -1097,19 +1118,38 @@ export default function GeneratePage() {
                       {!collapsed && (
                         <div className="flex flex-wrap gap-1.5 mt-1.5 pl-4">
                           {links.map(l => (
-                            <button
+                            <span
                               key={l.id}
-                              onClick={() => {
-                                setDestinationUrl(l.url)
-                                if (l.title || l.description) {
-                                  setDestinationContext({ title: l.title ?? "", description: l.description ?? "" })
-                                  setScrapeError(null)
-                                }
-                              }}
-                              className="inline-flex items-center gap-1.5 max-w-[220px] px-2.5 py-1.5 text-xs rounded-full border border-gray-200 bg-white text-gray-700 hover:border-[#5fe6c4] hover:bg-[#eafbf4] hover:text-[#0b3b30] dark:bg-[#232323] dark:border-[#383838] dark:text-[#cfcfcf] dark:hover:bg-[#5fe6c4]/15 dark:hover:border-[#5fe6c4] dark:hover:text-[#5fe6c4] transition-colors"
+                              className="group inline-flex items-center gap-1 max-w-[220px] pl-2.5 pr-1 py-1.5 text-xs rounded-full border border-gray-200 bg-white text-gray-700 hover:border-[#5fe6c4] hover:bg-[#eafbf4] hover:text-[#0b3b30] dark:bg-[#232323] dark:border-[#383838] dark:text-[#cfcfcf] dark:hover:bg-[#5fe6c4]/15 dark:hover:border-[#5fe6c4] dark:hover:text-[#5fe6c4] transition-colors"
                             >
-                              <span className="truncate">{l.label}</span>
-                            </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setDestinationUrl(l.url)
+                                  if (l.title || l.description) {
+                                    setDestinationContext({ title: l.title ?? "", description: l.description ?? "" })
+                                    setScrapeError(null)
+                                  }
+                                }}
+                                className="truncate"
+                                title={l.url}
+                              >
+                                {l.label}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={async (e) => {
+                                  e.stopPropagation()
+                                  if (!confirm(`Delete saved link "${l.label}"?`)) return
+                                  const res = await fetch(`/api/saved-links?id=${l.id}`, { method: "DELETE" })
+                                  if (res.ok) setSavedLinks(prev => prev.filter(x => x.id !== l.id))
+                                }}
+                                className="shrink-0 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity p-0.5"
+                                title="Delete"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </span>
                           ))}
                         </div>
                       )}
