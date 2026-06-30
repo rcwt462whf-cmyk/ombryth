@@ -5,8 +5,7 @@ import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell, Legend,
 } from "recharts"
-import { TrendingUp, Image as ImageIcon, Type, Layers, Zap } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { Image as ImageIcon, Type, Layers, Zap } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // ─── Constants ────────────────────────────────────────────────────────────────
