@@ -44,6 +44,8 @@ export interface GenerateRequest {
   promptOverride?: string
   aiTonedown?: boolean
   captionVariations?: number  // 1-5 — generate N caption sets in parallel
+  /** Pin specific caption formula(s) instead of random — e.g. force "cost-reveal" hook for a pricing campaign. Omitted fields stay random. */
+  lockedFormula?: { hook?: string; title?: string; angle?: string; cta?: string }
 }
 
 export interface PlatformOutput {

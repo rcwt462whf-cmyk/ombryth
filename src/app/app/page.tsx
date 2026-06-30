@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect, useMemo } from "react"
 import Image from "next/image"
-import { Upload, X, Download, Copy, Check, Wand2, Info, ChevronLeft, ChevronRight, ChevronDown, BookMarked, Link, Link2, Link2Off, ArrowRight, RotateCcw, Target, Hash, Folder, ImageIcon, Type } from "lucide-react"
+import { Upload, X, Download, Copy, Check, Wand2, Info, ChevronLeft, ChevronRight, ChevronDown, BookMarked, Link, Link2, Link2Off, ArrowRight, RotateCcw, Target, Hash, Folder, ImageIcon, Type, Lock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Slider } from "@/components/ui/slider"
@@ -152,6 +152,11 @@ function UploadZone({
       )}
     </div>
   )
+}
+
+// Formula names are kebab-case (e.g. "cost-reveal") — readable label only, no lookup needed
+function formatFormulaName(name: string): string {
+  return name.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
 function CopyButton({ text }: { text: string }) {
@@ -360,6 +365,14 @@ export default function GeneratePage() {
   const [selectedVariation, setSelectedVariation] = useState(0)
   const [language, setLanguage] = useState<Language>("en")
 
+  // Caption formula lock — pin a specific hook/title/angle/CTA instead of random (advanced, collapsed by default)
+  const [formulaLockOpen, setFormulaLockOpen] = useState(false)
+  const [formulaOptions, setFormulaOptions] = useState<{ hooks: string[]; titles: string[]; angles: string[]; ctas: string[] }>({ hooks: [], titles: [], angles: [], ctas: [] })
+  const [lockedHook, setLockedHook] = useState("")
+  const [lockedTitle, setLockedTitle] = useState("")
+  const [lockedAngle, setLockedAngle] = useState("")
+  const [lockedCta, setLockedCta] = useState("")
+
   // Strategy keywords
   const [strategyNiches, setStrategyNiches] = useState<StrategyNiche[]>([])
   const [strategyOpen, setStrategyOpen] = useState(false)
@@ -402,6 +415,9 @@ export default function GeneratePage() {
   useEffect(() => {
     fetch("/api/prompts").then(r => r.json()).then(d => setSavedPrompts(d.prompts ?? []))
     fetch("/api/saved-links").then(r => r.json()).then(d => setSavedLinks(d.links ?? []))
+    fetch("/api/caption-formulas").then(r => r.json()).then(d => {
+      if (d.hooks) setFormulaOptions(d)
+    })
     fetch("/api/user/defaults").then(r => r.json()).then(d => {
       const def = d.defaults ?? {}
       // Free usage counter
@@ -538,6 +554,12 @@ export default function GeneratePage() {
           hasProductReference: !!productFile,
           destinationContext: destinationContext ?? undefined,
           promptOverride: overridePromptRef.current ?? undefined,
+          lockedFormula: (lockedHook || lockedTitle || lockedAngle || lockedCta) ? {
+            hook: lockedHook || undefined,
+            title: lockedTitle || undefined,
+            angle: lockedAngle || undefined,
+            cta: lockedCta || undefined,
+          } : undefined,
         })
       )
       overridePromptRef.current = null
@@ -1391,6 +1413,50 @@ export default function GeneratePage() {
               </div>
               <Switch checked={aiTonedown} onCheckedChange={setAiTonedown} />
             </div>
+          </div>
+
+          {/* Caption formula lock — collapsible, advanced */}
+          <div className="bg-white dark:bg-card rounded-xl border border-gray-100 dark:border-border overflow-hidden">
+            <button
+              onClick={() => setFormulaLockOpen(!formulaLockOpen)}
+              className="w-full flex items-center justify-between px-4 py-3 text-left"
+            >
+              <div className="flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-gray-400" />
+                <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer">
+                  Caption Formula <span className="font-normal normal-case text-gray-400">(optional — defaults to random)</span>
+                </Label>
+              </div>
+              <ChevronDown className={cn("w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0", formulaLockOpen && "rotate-180")} />
+            </button>
+            {formulaLockOpen && (
+              <div className="px-4 pb-4 space-y-3">
+                <p className="text-xs text-gray-400">
+                  Pin a specific hook, title, angle or CTA instead of random — useful for a consistent campaign (e.g. always &quot;cost-reveal&quot; during a pricing push). Leave on Auto to keep variety.
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  {([
+                    ["Hook", lockedHook, setLockedHook, formulaOptions.hooks],
+                    ["Title", lockedTitle, setLockedTitle, formulaOptions.titles],
+                    ["Angle", lockedAngle, setLockedAngle, formulaOptions.angles],
+                    ["CTA", lockedCta, setLockedCta, formulaOptions.ctas],
+                  ] as const).map(([label, value, setValue, options]) => (
+                    <div key={label} className="space-y-1.5">
+                      <Label className="text-xs text-gray-600">{label}</Label>
+                      <Select value={value || "auto"} onValueChange={(v) => setValue(v === "auto" ? "" : v)}>
+                        <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="auto" className="text-xs">Auto (random)</SelectItem>
+                          {options.map((name) => (
+                            <SelectItem key={name} value={name} className="text-xs">{formatFormulaName(name)}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Generate button */}

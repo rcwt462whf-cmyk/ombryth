@@ -904,7 +904,7 @@ export async function POST(request: Request) {
       } else {
         // Decide all combos up front (sampled without replacement) so a batch of N variants
         // never repeats the same hook/title/angle/CTA, then run them in parallel.
-        const combos = pickFormulaCombos(captionVariations)
+        const combos = pickFormulaCombos(captionVariations, config.lockedFormula)
         textOutputs = await Promise.all(
           combos.map((combo) => runOneTextGeneration(combo))
         )
