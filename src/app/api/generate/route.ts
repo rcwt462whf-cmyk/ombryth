@@ -769,13 +769,12 @@ export async function POST(request: Request) {
           hasStyle ? config.stylePreset : undefined
         )
       } else {
-        const parts: string[] = []
-        if (productPhrase) parts.push(productPhrase)
+        const parts: string[] = [productPhrase ?? "professional lifestyle product photography"]
         if (config.customPrompt) parts.push(config.customPrompt)
         if (hasLighting && LIGHTING_PRESETS[config.lightingPreset!]) parts.push(LIGHTING_PRESETS[config.lightingPreset!].append)
         if (config.aspectRatio === "2:3") parts.push("portrait orientation")
         if (config.aspectRatio === "16:9") parts.push("wide horizontal composition")
-        finalPrompt = parts.length > 0 ? parts.join(", ") : "professional lifestyle product photography"
+        finalPrompt = parts.join(", ")
       }
       if (styleDescription) finalPrompt += `. ${styleDescription}`
     }
