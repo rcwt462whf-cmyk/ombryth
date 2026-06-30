@@ -116,6 +116,56 @@ async function generateWithFlux(
   return Buffer.from(await fetchResp.arrayBuffer())
 }
 
+async function generateWithFlux2Pro(
+  apiKey: string,
+  prompt: string,
+  aspectRatio: string
+): Promise<Buffer> {
+  const sizeMap: Record<string, { width: number; height: number }> = {
+    "2:3":  { width: 1024, height: 1536 },
+    "4:5":  { width: 1024, height: 1280 },
+    "1:1":  { width: 1024, height: 1024 },
+    "9:16": { width: 1024, height: 1820 },
+    "16:9": { width: 1820, height: 1024 },
+  }
+  const size = sizeMap[aspectRatio] ?? { width: 1024, height: 1024 }
+
+  const createResp = await fetch("https://api.bfl.ai/v1/flux-2-pro-preview", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Key": apiKey },
+    body: JSON.stringify({
+      prompt,
+      width: size.width,
+      height: size.height,
+      safety_tolerance: 2,
+      output_format: "jpeg",
+    }),
+  })
+  if (!createResp.ok) {
+    const err = await createResp.text()
+    throw new Error(`BFL API error ${createResp.status}: ${err}`)
+  }
+  const { id: taskId } = await createResp.json() as { id: string }
+
+  for (let i = 0; i < 120; i++) {
+    await new Promise((r) => setTimeout(r, 2000))
+    const pollResp = await fetch(`https://api.bfl.ai/v1/get_result?id=${taskId}`, {
+      headers: { "X-Key": apiKey },
+    })
+    const poll = await pollResp.json() as { status: string; result?: { sample?: string } }
+    if (poll.status === "Ready") {
+      const imageUrl = poll.result?.sample
+      if (!imageUrl) throw new Error("BFL returned Ready but no image URL")
+      const fetchResp = await fetch(imageUrl)
+      return Buffer.from(await fetchResp.arrayBuffer())
+    }
+    if (poll.status === "Error" || poll.status === "Content Moderated" || poll.status === "Request Moderated") {
+      throw new Error(`BFL generation failed: ${poll.status}`)
+    }
+  }
+  throw new Error("BFL generation timed out after 240s")
+}
+
 async function generateWithStability(
   apiKey: string,
   prompt: string,
@@ -473,6 +523,10 @@ async function generateOneImage(
       const replicate = new Replicate({ auth: keyMap.replicate })
       return generateWithFlux(replicate, imageModel, prompt, config.aspectRatio, styleBuffer, config.styleReferenceStrength ?? 40)
     }
+    case "flux-2-pro": {
+      if (!keyMap.bfl) throw new Error("BFL API key not configured. Add it in Settings → API Keys.")
+      return generateWithFlux2Pro(keyMap.bfl, prompt, config.aspectRatio)
+    }
     case "stability": {
       if (!keyMap.stability) throw new Error("Stability AI API key not configured. Add it in Settings.")
       return generateWithStability(keyMap.stability, prompt, config.aspectRatio, styleBuffer, config.styleReferenceStrength ?? 40)
@@ -755,7 +809,7 @@ export async function POST(request: Request) {
     }
 
     // Generate images (batch or single)
-    const batchCount = config.batchMode ? 3 : 1
+    const batchCount = Math.min(Math.max(1, config.imageCount ?? (config.batchMode ? 3 : 1)), 5)
 
     const imageBuffers = await Promise.all(
       Array.from({ length: batchCount }).map(() =>
@@ -790,7 +844,7 @@ export async function POST(request: Request) {
     const firstImageBase64 = imagesBase64[0]
 
     // Generate text content — N variations in parallel (each gets a fresh random hook style)
-    const captionVariations = Math.min(Math.max(1, config.captionVariations ?? 1), 3)
+    const captionVariations = Math.min(Math.max(1, config.captionVariations ?? 1), 5)
     let textOutputs: PlatformOutput[] = []
     let textOutput: PlatformOutput = {}
     let textModelUsed: string = config.textModel

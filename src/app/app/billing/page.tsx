@@ -54,7 +54,7 @@ export default async function BillingPage() {
                 "Unlimited generations",
                 "All AI image models",
                 "All AI text models",
-                "Batch mode (3 variations)",
+                "Batch mode (up to 5 variations)",
                 "Pinterest, Instagram & Blog content",
                 "Automatic metadata stripping",
               ].map((item) => (
@@ -108,7 +108,7 @@ export default async function BillingPage() {
               <ul className="space-y-1.5 mb-5">
                 {[
                   "Unlimited generations",
-                  "Batch mode (3 variations)",
+                  "Batch mode (up to 5 variations)",
                   "Priority support",
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-2 text-sm text-white/90 relative">

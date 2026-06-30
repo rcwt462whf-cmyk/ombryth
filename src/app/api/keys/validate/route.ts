@@ -86,6 +86,21 @@ export async function POST(request: Request) {
         return NextResponse.json({ valid: false, error: body?.message ?? "Invalid key" })
       }
 
+      if (provider === "bfl") {
+        // No free validation endpoint exists for BFL — confirming a key works requires
+        // submitting a real (billable) generation request. Use the smallest size and
+        // never poll/download the result, just check that the task was accepted.
+        const res = await fetch("https://api.bfl.ai/v1/flux-2-pro-preview", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-Key": key },
+          body: JSON.stringify({ prompt: "test", width: 256, height: 256 }),
+          signal,
+        })
+        if (res.ok) return NextResponse.json({ valid: true })
+        const body = await res.json().catch(() => ({}))
+        return NextResponse.json({ valid: false, error: body?.detail ?? "Invalid key" })
+      }
+
       // Unknown provider — skip validation
       return NextResponse.json({ valid: true, skipped: true })
     } catch {

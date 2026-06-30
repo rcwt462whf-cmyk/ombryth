@@ -224,6 +224,7 @@ const IMAGE_MODELS: { value: ImageModel; label: string; badge?: string }[] = [
   { value: "dalle3", label: "DALL-E 3", badge: "OpenAI" },
   { value: "flux-schnell", label: "Flux Schnell", badge: "Replicate" },
   { value: "flux-dev", label: "Flux Dev + img2img", badge: "Replicate" },
+  { value: "flux-2-pro", label: "Flux 2 Pro", badge: "BFL" },
   { value: "stability", label: "Stable Diffusion 3", badge: "Stability" },
   { value: "seedream", label: "Seedream 4.5", badge: "BytePlus" },
   { value: "seedream-5-lite", label: "Seedream 5 Lite", badge: "BytePlus" },
@@ -1378,7 +1379,11 @@ export default function GeneratePage() {
                   {imageCount === 0 && captionCount > 0
                     ? `Write ${captionCount} Caption${captionCount > 1 ? "s" : ""}`
                     : imageCount > 1 || captionCount > 1
-                      ? `Generate ${imageCount} img + ${captionCount} txt`
+                      ? (
+                        <span className="flex items-center gap-1">
+                          Generate {imageCount} <ImageIcon className="w-3.5 h-3.5" /> + {captionCount} <Type className="w-3.5 h-3.5" />
+                        </span>
+                      )
                       : "Generate"}
                 </>
               )}
@@ -1689,18 +1694,6 @@ export default function GeneratePage() {
                     />
                     <OutputField label="Alt Text" value={activeTextOutput.pinterest.altText} />
                     {destinationUrl && <OutputField label="Link" value={destinationUrl} />}
-                    {result.imageUrls?.[selectedImageIndex] && (
-                      <a
-                        href={`https://www.pinterest.com/pin/create/button/?url=${encodeURIComponent(destinationUrl || "https://ombryth.com")}&media=${encodeURIComponent(result.imageUrls[selectedImageIndex])}&description=${encodeURIComponent(
-                          activeTextOutput.pinterest.description +
-                          (activeTextOutput.pinterest.hashtags?.length ? " " + activeTextOutput.pinterest.hashtags.map((h: string) => `#${h}`).join(" ") : "")
-                        )}`}
-                        target="_blank" rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2 w-full py-2 rounded-lg bg-[#E60023] hover:bg-[#c1001f] text-white text-sm font-medium transition-colors"
-                      >
-                        <PinterestLogo className="w-4 h-4" /> Pin it
-                      </a>
-                    )}
                   </TabsContent>
                 )}
 

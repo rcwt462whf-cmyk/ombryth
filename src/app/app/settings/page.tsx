@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from "react"
 import { useTheme } from "next-themes"
-import { useRouter, useSearchParams } from "next/navigation"
-import { Suspense } from "react"
+import { useRouter } from "next/navigation"
 import {
   Eye, EyeOff, Save, Check, Trash2, Key, Sliders,
-  User, Sun, Moon, Monitor, Plus, BookMarked, Lock, CreditCard, Bot, AlertTriangle, BarChart2, Layers, X, Link2, Link2Off,
+  User, Sun, Moon, Monitor, Plus, BookMarked, Lock, CreditCard, Bot, AlertTriangle, BarChart2, Layers, X,
 } from "lucide-react"
 import { ReferralCard } from "@/components/ReferralCard"
 import { Button } from "@/components/ui/button"
@@ -55,6 +54,13 @@ const API_KEY_FIELDS = [
     description: "Flux Schnell and Flux Dev image generation",
     placeholder: "r8_…",
     color: "text-purple-700 bg-purple-50 dark:text-purple-400 dark:bg-purple-950",
+  },
+  {
+    provider: "bfl",
+    label: "Black Forest Labs",
+    description: "Flux 2 Pro image generation via BFL API",
+    placeholder: "bfl-…",
+    color: "text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950",
   },
   {
     provider: "stability",
@@ -1355,108 +1361,6 @@ function DefaultsTab() {
   )
 }
 
-// ─── Pinterest connection card ─────────────────────────────────────────────────
-
-function PinterestCard() {
-  const { toast } = useToast()
-  const [connected, setConnected] = useState(false)
-  const [connectedAt, setConnectedAt] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [disconnecting, setDisconnecting] = useState(false)
-
-  useEffect(() => {
-    fetch("/api/pinterest/status")
-      .then(r => r.json())
-      .then(d => { setConnected(d.connected); setConnectedAt(d.connectedAt) })
-      .finally(() => setLoading(false))
-  }, [])
-
-  async function disconnect() {
-    setDisconnecting(true)
-    try {
-      await fetch("/api/pinterest/disconnect", { method: "POST" })
-      setConnected(false)
-      setConnectedAt(null)
-      toast({ title: "Pinterest disconnected" })
-    } catch {
-      toast({ variant: "destructive", title: "Failed to disconnect" })
-    } finally {
-      setDisconnecting(false)
-    }
-  }
-
-  return (
-    <div className="flex items-start justify-between gap-4 px-5 py-4">
-      <div className="flex items-start gap-3">
-        {/* Pinterest logo */}
-        <div className="w-8 h-8 rounded-full bg-[#E60023] flex items-center justify-center shrink-0 mt-0.5">
-          <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white">
-            <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z" />
-          </svg>
-        </div>
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-foreground">Pinterest</span>
-            {!loading && (
-              connected
-                ? <span className="inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-400 font-medium"><Check className="w-3 h-3" /> Connected</span>
-                : <span className="text-xs text-muted-foreground">Not connected</span>
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {connected && connectedAt
-              ? `Post images directly to your Pinterest boards. Connected ${new Date(connectedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}.`
-              : "Post images directly to your Pinterest boards without downloading."}
-          </p>
-        </div>
-      </div>
-      <div className="shrink-0">
-        {loading ? (
-          <div className="w-20 h-8 bg-muted animate-pulse rounded-md" />
-        ) : connected ? (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={disconnect}
-            disabled={disconnecting}
-            className="h-8 text-xs gap-1.5 text-muted-foreground hover:text-destructive hover:border-destructive"
-          >
-            {disconnecting
-              ? <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
-              : <Link2Off className="w-3 h-3" />}
-            Disconnect
-          </Button>
-        ) : (
-          <a href="/api/pinterest/connect">
-            <Button size="sm" className="h-8 text-xs gap-1.5">
-              <Link2 className="w-3 h-3" />
-              Connect
-            </Button>
-          </a>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// ─── OAuth result toast (needs Suspense because of useSearchParams) ────────────
-
-function PinterestOAuthToast() {
-  const { toast } = useToast()
-  const searchParams = useSearchParams()
-
-  useEffect(() => {
-    const pinterest = searchParams.get("pinterest")
-    if (pinterest === "connected") {
-      toast({ title: "Pinterest connected!", description: "You can now post directly to your boards." })
-    } else if (pinterest === "error") {
-      toast({ variant: "destructive", title: "Pinterest connection failed", description: "Please try again." })
-    }
-  }, [searchParams, toast])
-
-  return null
-}
-
 // ─── Vynthr API Key card ───────────────────────────────────────────────────────
 
 function VynthrApiKeyCard() {
@@ -1591,9 +1495,6 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <Suspense fallback={null}>
-        <PinterestOAuthToast />
-      </Suspense>
       <div className="mb-6">
         <h1 className="font-display text-xl font-bold text-foreground">Settings</h1>
         <p className="text-sm text-muted-foreground mt-0.5">Manage your API keys, appearance, prompts and account</p>
@@ -1654,15 +1555,6 @@ export default function SettingsPage() {
                 ))}
               </div>
             )}
-          </div>
-
-          {/* Platform connections */}
-          <div className="bg-card rounded-xl border border-border overflow-hidden">
-            <div className="px-5 py-4 border-b border-border">
-              <h2 className="text-sm font-semibold text-foreground">Platform Connections</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">Connect accounts to post directly without downloading</p>
-            </div>
-            <PinterestCard />
           </div>
 
           {/* Vynthr / Personal API Keys */}

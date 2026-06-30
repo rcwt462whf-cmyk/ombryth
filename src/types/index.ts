@@ -1,4 +1,4 @@
-export type ImageModel = "dalle3" | "seedream" | "seedream-5-lite" | "flux-schnell" | "flux-dev" | "stability"
+export type ImageModel = "dalle3" | "seedream" | "seedream-5-lite" | "flux-schnell" | "flux-dev" | "flux-2-pro" | "stability"
 export type TextModel = "gpt4o" | "claude" | "gemini"
 export type Platform = "pinterest" | "instagram" | "facebook" | "google-ads"
 export type AspectRatio = "2:3" | "1:1" | "16:9" | "9:16" | "4:5"
@@ -35,6 +35,7 @@ export interface GenerateRequest {
   aspectRatio: AspectRatio
   language?: Language
   batchMode?: boolean
+  imageCount?: number  // 1-5 — how many image variations to generate
   styleReferenceStrength?: number
   productReferenceStrength?: number
   hasStyleReference?: boolean
@@ -42,7 +43,7 @@ export interface GenerateRequest {
   destinationContext?: { title: string; description: string }
   promptOverride?: string
   aiTonedown?: boolean
-  captionVariations?: number  // 1 | 2 | 3 — generate N caption sets in parallel
+  captionVariations?: number  // 1-5 — generate N caption sets in parallel
 }
 
 export interface PlatformOutput {
