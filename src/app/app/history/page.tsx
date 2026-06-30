@@ -44,10 +44,13 @@ type CaptionSet = {
   description2?: string
 }
 
+type FormulaCombo = { hook: string; title: string; angle: string; cta: string }
+
 type Generation = {
   id: string
   user_id: string
   captions?: Record<string, CaptionSet> | null
+  caption_variants?: FormulaCombo[] | null
   image_url: string | null
   status: string
   category_preset: string
@@ -59,6 +62,11 @@ type Generation = {
   has_product_reference: boolean
   product_description: string | null
   created_at: string
+}
+
+// caption_variants stores kebab-case formula names (e.g. "mistake-fix") — readable label only, no lookup needed
+function formulaLabel(name: string): string {
+  return name.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
 function extractStoragePath(imageUrl: string): string | null {
@@ -459,14 +467,29 @@ export default function HistoryPage() {
                   {/* Captions */}
                   {gen.captions && Object.keys(gen.captions).length > 0 && (
                     <div className="pt-0.5">
-                      <button
-                        onClick={() => setExpandedCaptions(expandedCaptions === gen.id ? null : gen.id)}
-                        className="text-[11px] font-medium text-[#0b9c75] dark:text-[#5fe6c4] hover:underline"
-                      >
-                        {expandedCaptions === gen.id ? "Hide captions" : "Show captions"}
-                      </button>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <button
+                          onClick={() => setExpandedCaptions(expandedCaptions === gen.id ? null : gen.id)}
+                          className="text-[11px] font-medium text-[#0b9c75] dark:text-[#5fe6c4] hover:underline"
+                        >
+                          {expandedCaptions === gen.id ? "Hide captions" : "Show captions"}
+                        </button>
+                        {gen.caption_variants?.[0] && (
+                          <span
+                            className="text-[10px] text-gray-400 dark:text-gray-500 truncate"
+                            title="The hook/title/angle/CTA formula used to write this caption — useful for spotting which combos convert"
+                          >
+                            {formulaLabel(gen.caption_variants[0].hook)} · {formulaLabel(gen.caption_variants[0].angle)}
+                          </span>
+                        )}
+                      </div>
                       {expandedCaptions === gen.id && (
                         <div className="mt-2 space-y-2">
+                          {gen.caption_variants?.[0] && (
+                            <p className="text-[10px] text-gray-400 dark:text-gray-500">
+                              Hook: {formulaLabel(gen.caption_variants[0].hook)} · Title: {formulaLabel(gen.caption_variants[0].title)} · Angle: {formulaLabel(gen.caption_variants[0].angle)} · CTA: {formulaLabel(gen.caption_variants[0].cta)}
+                            </p>
+                          )}
                           {(Object.entries(gen.captions) as [string, CaptionSet][])
                             .filter(([k]) => k !== "_variants")
                             .map(([platform, c]) => (
