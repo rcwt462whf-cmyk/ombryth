@@ -122,13 +122,13 @@ async function generateWithFlux2Pro(
   aspectRatio: string
 ): Promise<Buffer> {
   const sizeMap: Record<string, { width: number; height: number }> = {
-    "2:3":  { width: 1024, height: 1536 },
-    "4:5":  { width: 1024, height: 1280 },
-    "1:1":  { width: 1024, height: 1024 },
-    "9:16": { width: 1024, height: 1820 },
-    "16:9": { width: 1820, height: 1024 },
+    "1:1":  { width: 2048, height: 2048 },
+    "2:3":  { width: 1366, height: 2048 },
+    "4:5":  { width: 1638, height: 2048 },
+    "9:16": { width: 1152, height: 2048 },
+    "16:9": { width: 2048, height: 1152 },
   }
-  const size = sizeMap[aspectRatio] ?? { width: 1024, height: 1024 }
+  const size = sizeMap[aspectRatio] ?? { width: 2048, height: 2048 }
 
   const createResp = await fetch("https://api.bfl.ai/v1/flux-2-pro-preview", {
     method: "POST",
