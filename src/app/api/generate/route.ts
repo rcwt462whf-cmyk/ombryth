@@ -121,10 +121,12 @@ async function generateWithFlux2Pro(
   prompt: string,
   aspectRatio: string
 ): Promise<Buffer> {
+  // Long edge pinned at FLUX 2 Pro's 2048px cap; short edge maximized to the
+  // nearest multiple of 16 (diffusion models require dimensions divisible by 16).
   const sizeMap: Record<string, { width: number; height: number }> = {
     "1:1":  { width: 2048, height: 2048 },
-    "2:3":  { width: 1366, height: 2048 },
-    "4:5":  { width: 1638, height: 2048 },
+    "2:3":  { width: 1360, height: 2048 },
+    "4:5":  { width: 1632, height: 2048 },
     "9:16": { width: 1152, height: 2048 },
     "16:9": { width: 2048, height: 1152 },
   }
