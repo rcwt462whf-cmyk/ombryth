@@ -45,7 +45,7 @@ const TITLE_FORMULAS = [
   { name: "no-x-needed",     instruction: `Title promises the outcome without the expected cost/effort. e.g. "A warmer living room — no renovation needed" or "Hotel-feel lighting without rewiring anything"` },
   { name: "ranked",          instruction: `Title promises a ranked verdict, the ranking behind the click. e.g. "The best floor lamps for small rooms, ranked" or "Warmest-to-coolest bulbs, ranked for living rooms"` },
   { name: "mistakes-list",   instruction: `Title is a numbered list of mistakes, the list behind the click. e.g. "6 living room mistakes that quietly make it feel cheap" or "3 lighting mistakes almost everyone makes"` },
-  { name: "this-year",       instruction: `Title ties to the current year for timely search. e.g. "Living room lighting ideas worth trying in 2026" or "The cozy-corner setup everyone's copying in 2026"` },
+  { name: "this-year",       instruction: `Title ties to the current year ({{YEAR}}) for timely search. e.g. "Living room lighting ideas worth trying in {{YEAR}}" or "The cozy-corner setup everyone's copying in {{YEAR}}"` },
   { name: "where-to-buy",    instruction: `Title promises sourcing — where to actually find it without overpaying. e.g. "Where to actually find a good arc lamp (without overpaying)" or "The affordable version of that viral floor lamp"` },
 ]
 
@@ -66,25 +66,27 @@ const CONTENT_ANGLES = [
   { name: "ranked-picks",     instruction: `ANGLE: Ranked-picks — imply a ranked set of options; the ranking and links are one click away.` },
 ]
 
-// Rotating click-CTAs — each names exactly what the reader GETS by clicking. Never generic "link in bio".
+// Rotating click-CTAs — each names exactly what the reader GETS by clicking.
+// Two surfaces per CTA: Pinterest has a real clickable link inline ("in the link"),
+// Instagram/Facebook do not — only a bio link — so they get their own closer.
 // Kept large so diagnostics can isolate which CTA wording converts to the most outbound clicks.
 const CTA_STYLES = [
-  "I linked every piece — prices in the link. 👇",
-  "Full breakdown + sources in the link. 👇",
-  "Shopping list with links here. 👇",
-  "Exact products in the link. 👇",
-  "Step-by-step + links in the guide. 👇",
-  "Everything's linked — tap through. 👇",
-  "Get the full list in the link. 👇",
-  "Prices and links in the guide. 👇",
-  "Sources + where to buy in the link. 👇",
-  "The full list's one tap away. 👇",
-  "Every piece linked below. 👇",
-  "Full setup + costs in the link. 👇",
-  "See the ranked picks in the link. 👇",
-  "Grab the checklist in the link. 👇",
-  "The verdict's in the link. 👇",
-  "Tap through for all the links. 👇",
+  { name: "linked-every-piece", pinterest: "I linked every piece — prices in the link. 👇", bioLink: "I linked every piece — prices are in my bio. 👇" },
+  { name: "full-breakdown",     pinterest: "Full breakdown + sources in the link. 👇",        bioLink: "Full breakdown + sources — link in bio. 👇" },
+  { name: "shopping-list",      pinterest: "Shopping list with links here. 👇",                bioLink: "Shopping list is linked in my bio. 👇" },
+  { name: "exact-products",     pinterest: "Exact products in the link. 👇",                   bioLink: "Exact products linked in bio. 👇" },
+  { name: "step-by-step-guide", pinterest: "Step-by-step + links in the guide. 👇",             bioLink: "Step-by-step guide linked in bio. 👇" },
+  { name: "everything-linked",  pinterest: "Everything's linked — tap through. 👇",             bioLink: "Everything's linked in my bio — tap through. 👇" },
+  { name: "full-list",          pinterest: "Get the full list in the link. 👇",                 bioLink: "Get the full list — link in bio. 👇" },
+  { name: "prices-and-links",   pinterest: "Prices and links in the guide. 👇",                 bioLink: "Prices + the full guide are in my bio. 👇" },
+  { name: "where-to-buy",       pinterest: "Sources + where to buy in the link. 👇",             bioLink: "Sources + where to buy — linked in bio. 👇" },
+  { name: "one-tap-away",       pinterest: "The full list's one tap away. 👇",                  bioLink: "The full list's one tap away — bio link. 👇" },
+  { name: "linked-below",       pinterest: "Every piece linked below. 👇",                      bioLink: "Every piece is linked in my bio. 👇" },
+  { name: "setup-and-costs",    pinterest: "Full setup + costs in the link. 👇",                 bioLink: "Full setup + costs — link in bio. 👇" },
+  { name: "ranked-picks",       pinterest: "See the ranked picks in the link. 👇",               bioLink: "See the ranked picks — linked in bio. 👇" },
+  { name: "checklist",          pinterest: "Grab the checklist in the link. 👇",                 bioLink: "Grab the checklist — link in bio. 👇" },
+  { name: "verdict",            pinterest: "The verdict's in the link. 👇",                      bioLink: "The verdict's in my bio. 👇" },
+  { name: "tap-through",        pinterest: "Tap through for all the links. 👇",                  bioLink: "All the links are in my bio. 👇" },
 ]
 const LANGUAGE_NAMES: Record<string, string> = {
   "en": "English", "es": "Spanish", "pt-BR": "Brazilian Portuguese",
@@ -119,6 +121,57 @@ const PLATFORM_JSON: Record<string, string> = {
   "google-ads": `"google-ads": { "headline1": "30 chars", "headline2": "30 chars", "headline3": "30 chars", "description1": "90 chars", "description2": "90 chars", "altText": "..." }`,
 }
 
+export interface FormulaCombo {
+  hook: string
+  title: string
+  angle: string
+  cta: string
+}
+
+const ALL_HOOK_NAMES = HOOK_STYLES.map((h) => h.name)
+const ALL_TITLE_NAMES = TITLE_FORMULAS.map((t) => t.name)
+const ALL_ANGLE_NAMES = CONTENT_ANGLES.map((a) => a.name)
+const ALL_CTA_NAMES = CTA_STYLES.map((c) => c.name)
+
+/** Formula name lists, exposed so the UI can offer a "lock this formula" picker. */
+export const FORMULA_NAMES = {
+  hooks: ALL_HOOK_NAMES,
+  titles: ALL_TITLE_NAMES,
+  angles: ALL_ANGLE_NAMES,
+  ctas: ALL_CTA_NAMES,
+} as const
+
+function pickFormula<T extends { name: string }>(pool: readonly T[], forcedName?: string): T {
+  if (forcedName) {
+    const found = pool.find((p) => p.name === forcedName)
+    if (found) return found
+  }
+  return pool[Math.floor(Math.random() * pool.length)]
+}
+
+/**
+ * Pre-decides `count` formula combos so a multi-variant batch never repeats the same
+ * hook/title/angle/CTA twice — each field is sampled without replacement. Fields pinned
+ * via `locked` (the user's "lock this formula" choice) are held constant across the batch
+ * instead of being diversified.
+ */
+export function pickFormulaCombos(count: number, locked?: Partial<FormulaCombo>): FormulaCombo[] {
+  const pickDistinct = (names: readonly string[], lockedName: string | undefined): string[] => {
+    if (lockedName && names.includes(lockedName)) return Array(count).fill(lockedName)
+    const shuffled = [...names].sort(() => Math.random() - 0.5)
+    return Array.from({ length: count }, (_, i) => shuffled[i % shuffled.length])
+  }
+
+  const hooks = pickDistinct(ALL_HOOK_NAMES, locked?.hook)
+  const titles = pickDistinct(ALL_TITLE_NAMES, locked?.title)
+  const angles = pickDistinct(ALL_ANGLE_NAMES, locked?.angle)
+  const ctas = pickDistinct(ALL_CTA_NAMES, locked?.cta)
+
+  return Array.from({ length: count }, (_, i) => ({
+    hook: hooks[i], title: titles[i], angle: angles[i], cta: ctas[i],
+  }))
+}
+
 export function buildTextSystemPrompt(
   prompt: string,
   platforms: string[],
@@ -127,19 +180,34 @@ export function buildTextSystemPrompt(
   language?: string | null,
   productDescription?: string,
   hasImage?: boolean,
-  subject?: string
+  subject?: string,
+  forcedCombo?: FormulaCombo
 ): { prompt: string; variants: { hook: string; title: string; angle: string; cta: string } } {
   const persona = customPersona?.trim() || DEFAULT_SYSTEM_PERSONA
 
-  // Pick a random hook style, title formula, and content angle — forces genuine variety
-  const hookStyle = HOOK_STYLES[Math.floor(Math.random() * HOOK_STYLES.length)]
-  const titleFormula = TITLE_FORMULAS[Math.floor(Math.random() * TITLE_FORMULAS.length)]
-  const contentAngle = CONTENT_ANGLES[Math.floor(Math.random() * CONTENT_ANGLES.length)]
-  const ctaStyle = CTA_STYLES[Math.floor(Math.random() * CTA_STYLES.length)]
+  // Use the pre-decided combo when given (batch no-repeat / formula lock); otherwise pick at random.
+  const hookStyle = pickFormula(HOOK_STYLES, forcedCombo?.hook)
+  const titleFormula = pickFormula(TITLE_FORMULAS, forcedCombo?.title)
+  const contentAngle = pickFormula(CONTENT_ANGLES, forcedCombo?.angle)
+  const ctaStyle = pickFormula(CTA_STYLES, forcedCombo?.cta)
+
+  // "this-year" formula example text references the real current year, not a hardcoded one
+  const titleInstruction = titleFormula.instruction.replace(/\{\{YEAR\}\}/g, String(new Date().getFullYear()))
 
   // Build specs + JSON schema for ONLY the selected platforms (avoids generating hidden, paid-for captions).
   const platformSpecs = platforms.map((p) => PLATFORM_SPECS[p]).filter(Boolean).join("\n\n")
   const jsonSchema = `{ ${platforms.map((p) => PLATFORM_JSON[p]).filter(Boolean).join(", ")} }`
+
+  // CTA closer is platform-specific: Pinterest has a real inline link, Instagram/Facebook only a bio link.
+  const hasPinterest = platforms.includes("pinterest")
+  const hasBioLinkPlatform = platforms.includes("instagram") || platforms.includes("facebook")
+  const ctaLines = [
+    hasPinterest ? `- End the Pinterest description AND the Pinterest caption with exactly: "${ctaStyle.pinterest}"` : null,
+    hasBioLinkPlatform ? `- End the Instagram/Facebook caption(s) with exactly: "${ctaStyle.bioLink}" — NOT the Pinterest line above. Instagram and Facebook captions have no clickable inline link, only a bio link, so never say "in the link."` : null,
+  ].filter(Boolean).join("\n")
+  const ctaBlock = ctaLines
+    ? `\nCTA FOR THIS GENERATION (use verbatim as the closing line — platform-specific, do not mix them up):\n${ctaLines}\n`
+    : ""
 
   const subjectBlock = subject
     ? `\nSUBJECT — what this post is about. Every title, hook, description, caption and hashtag MUST be about this:\n→ ${subject}\n`
@@ -176,16 +244,13 @@ ${hookStyle.instruction}
 Open the gap with this structure — do not copy the example literally, and do NOT resolve it. The payoff stays behind the link.
 
 TITLE FORMULA FOR THIS GENERATION:
-${titleFormula.instruction}
+${titleInstruction}
 Write a title that follows this structure — do not copy the example literally. Vary your sentence structure and starting word.
-
-CTA FOR THIS GENERATION (use it verbatim as the closing line of the Pinterest description and the Instagram/Facebook captions):
-"${ctaStyle}"
-
+${ctaBlock}
 ⚠️ MANDATORY NON-NEGOTIABLES — failure on any of these is unacceptable:
 1. ON SUBJECT: Every field — title, hook, description, caption, hashtags — is about the SUBJECT (see TOPIC DISCIPLINE). The Pinterest title MUST contain the subject's main keyword. Off-subject copy is an automatic failure no matter how well it reads.
 2. CLICK GAP: Make the link the only way to get the specifics. Never list the actual products, full steps, prices or the full list in the caption — name the payoff, then point to the link.
-3. CTA: End every description/caption with the assigned CTA above, exactly as written. Never "on the blog", never "link in bio".
+3. CTA: End every description/caption with its assigned platform-specific CTA above, exactly as written. Never invent your own closing line, and never say "on the blog".
 4. EMOJIS: Include 1-2 emojis in every caption/description, placed naturally. Pick from: 🌿 💡 🚿 🛏️ 🏺 🌱 🪵 🏡 ✨ 👇 🪴 🧼
 5. HOOK: First sentence must use the hook formula — short, punchy, and it must leave something unresolved.
 6. TONE: Warm, conversational, like a knowledgeable friend. Not dry, not clinical, not a product listing.
@@ -207,7 +272,7 @@ Return ONLY the JSON. No markdown.${language && language !== "en" ? `\n\nLANGUAG
       hook: hookStyle.name,
       title: titleFormula.name,
       angle: contentAngle.name,
-      cta: ctaStyle,
+      cta: ctaStyle.name,
     },
   }
 }

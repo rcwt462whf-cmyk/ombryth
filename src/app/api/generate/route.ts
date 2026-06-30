@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { decryptKey } from "@/lib/encryption"
 import { buildPrompt, LIGHTING_PRESETS } from "@/lib/presets"
-import { buildTextSystemPrompt } from "@/lib/caption-engine"
+import { buildTextSystemPrompt, pickFormulaCombos, type FormulaCombo } from "@/lib/caption-engine"
 import { uploadImageBuffer } from "@/lib/storage"
 import { checkRateLimit } from "@/lib/rate-limit"
 import { sendWelcomeEmail } from "@/lib/emails/welcome"
@@ -861,14 +861,15 @@ export async function POST(request: Request) {
       (config.niche ?? config.categoryPreset ?? "").replace(/[-_]/g, " ").trim() ||
       ""
 
-    const runOneTextGeneration = async (): Promise<PlatformOutput> => {
-      // buildTextSystemPrompt picks a fresh random hook/title/angle/cta each call
+    const runOneTextGeneration = async (combo: FormulaCombo): Promise<PlatformOutput> => {
+      // combo is pre-decided so a multi-variant batch never repeats the same formula twice
       const { prompt: textSystemPrompt, variants } = buildTextSystemPrompt(
         captionContext, config.platforms, customSystemPrompt,
         config.destinationContext ?? null, config.language ?? null,
         product?.description,
         config.textModel === "claude",
-        captionSubject
+        captionSubject,
+        combo
       )
       // Attribution for A/B diagnostics (e.g. Vynthr): which formula combo produced this caption
       console.log(`[generate] caption variants → hook=${variants.hook} | title=${variants.title} | angle=${variants.angle} | cta="${variants.cta}"`)
@@ -901,9 +902,11 @@ export async function POST(request: Request) {
         textModelUsed = "none"
         textOutputs = [{}]
       } else {
-        // Run all variations in parallel — each gets a different hook style
+        // Decide all combos up front (sampled without replacement) so a batch of N variants
+        // never repeats the same hook/title/angle/CTA, then run them in parallel.
+        const combos = pickFormulaCombos(captionVariations)
         textOutputs = await Promise.all(
-          Array.from({ length: captionVariations }).map(() => runOneTextGeneration())
+          combos.map((combo) => runOneTextGeneration(combo))
         )
       }
       textOutput = textOutputs[0] ?? {}
