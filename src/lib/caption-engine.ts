@@ -69,24 +69,32 @@ const CONTENT_ANGLES = [
 // Rotating click-CTAs — each names exactly what the reader GETS by clicking.
 // Two surfaces per CTA: Pinterest has a real clickable link inline ("in the link"),
 // Instagram/Facebook do not — only a bio link — so they get their own closer.
+// Structurally varied on purpose (pointer/👇, question, fragment, plain statement) so an
+// account's posts don't all share the same closing cadence — that pattern is easy for
+// both algorithms and repeat followers to clock as formulaic over time.
 // Kept large so diagnostics can isolate which CTA wording converts to the most outbound clicks.
 const CTA_STYLES = [
+  // — classic pointer (👇) —
   { name: "linked-every-piece", pinterest: "I linked every piece — prices in the link. 👇", bioLink: "I linked every piece — prices are in my bio. 👇" },
   { name: "full-breakdown",     pinterest: "Full breakdown + sources in the link. 👇",        bioLink: "Full breakdown + sources — link in bio. 👇" },
-  { name: "shopping-list",      pinterest: "Shopping list with links here. 👇",                bioLink: "Shopping list is linked in my bio. 👇" },
-  { name: "exact-products",     pinterest: "Exact products in the link. 👇",                   bioLink: "Exact products linked in bio. 👇" },
-  { name: "step-by-step-guide", pinterest: "Step-by-step + links in the guide. 👇",             bioLink: "Step-by-step guide linked in bio. 👇" },
-  { name: "everything-linked",  pinterest: "Everything's linked — tap through. 👇",             bioLink: "Everything's linked in my bio — tap through. 👇" },
-  { name: "full-list",          pinterest: "Get the full list in the link. 👇",                 bioLink: "Get the full list — link in bio. 👇" },
-  { name: "prices-and-links",   pinterest: "Prices and links in the guide. 👇",                 bioLink: "Prices + the full guide are in my bio. 👇" },
-  { name: "where-to-buy",       pinterest: "Sources + where to buy in the link. 👇",             bioLink: "Sources + where to buy — linked in bio. 👇" },
-  { name: "one-tap-away",       pinterest: "The full list's one tap away. 👇",                  bioLink: "The full list's one tap away — bio link. 👇" },
-  { name: "linked-below",       pinterest: "Every piece linked below. 👇",                      bioLink: "Every piece is linked in my bio. 👇" },
-  { name: "setup-and-costs",    pinterest: "Full setup + costs in the link. 👇",                 bioLink: "Full setup + costs — link in bio. 👇" },
-  { name: "ranked-picks",       pinterest: "See the ranked picks in the link. 👇",               bioLink: "See the ranked picks — linked in bio. 👇" },
-  { name: "checklist",          pinterest: "Grab the checklist in the link. 👇",                 bioLink: "Grab the checklist — link in bio. 👇" },
-  { name: "verdict",            pinterest: "The verdict's in the link. 👇",                      bioLink: "The verdict's in my bio. 👇" },
-  { name: "tap-through",        pinterest: "Tap through for all the links. 👇",                  bioLink: "All the links are in my bio. 👇" },
+  { name: "step-by-step-guide", pinterest: "Step-by-step + links in the guide. 👇",            bioLink: "Step-by-step guide linked in bio. 👇" },
+  { name: "prices-and-links",   pinterest: "Prices and links in the guide. 👇",                bioLink: "Prices + the full guide are in my bio. 👇" },
+  { name: "setup-and-costs",    pinterest: "Full setup + costs in the link. 👇",               bioLink: "Full setup + costs — link in bio. 👇" },
+  { name: "tap-through",        pinterest: "Tap through for all the links. 👇",                bioLink: "All the links are in my bio. 👇" },
+  // — question-led, no emoji —
+  { name: "everything-linked",  pinterest: "Want the exact setup? Everything's linked.",       bioLink: "Want the exact setup? Everything's linked in my bio." },
+  { name: "where-to-buy",       pinterest: "Wondering where to buy it? It's linked.",          bioLink: "Wondering where to buy it? It's linked in my bio." },
+  { name: "ranked-picks",       pinterest: "Curious which ones made the cut? Ranked picks are linked.", bioLink: "Curious which ones made the cut? Ranked picks are in my bio." },
+  // — short fragment, no emoji —
+  { name: "shopping-list",      pinterest: "Shopping list, fully linked.",                     bioLink: "Shopping list, linked in my bio." },
+  { name: "full-list",          pinterest: "Full list. One tap away.",                         bioLink: "Full list. One tap away, in my bio." },
+  { name: "verdict",            pinterest: "The verdict, linked.",                             bioLink: "The verdict's in my bio." },
+  // — plain statement, no emoji —
+  { name: "exact-products",     pinterest: "Exact products are in the link — go ahead and tap.", bioLink: "Exact products are linked in my bio — go ahead and tap." },
+  { name: "one-tap-away",       pinterest: "The full list is one tap away.",                   bioLink: "The full list is one tap away — bio link." },
+  // — imperative, no emoji —
+  { name: "linked-below",       pinterest: "Tap the link for every piece.",                    bioLink: "Tap my bio for every piece." },
+  { name: "checklist",          pinterest: "Grab the checklist — it's linked.",                bioLink: "Grab the checklist — it's in my bio." },
 ]
 const LANGUAGE_NAMES: Record<string, string> = {
   "en": "English", "es": "Spanish", "pt-BR": "Brazilian Portuguese",
