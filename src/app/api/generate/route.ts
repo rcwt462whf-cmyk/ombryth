@@ -690,7 +690,10 @@ export async function POST(request: Request) {
     // fresh image — a text prompt alone cannot recreate the same photo.
     // The style image is only sent to BytePlus when doing product injection (multi-image).
     const isSeedream = config.imageModel === "seedream" || config.imageModel === "seedream-5-lite"
-    if (styleBuffer && (config.imageModel === "dalle3" || (isSeedream && !productBuffer))) {
+    // Flux 2 Pro (BFL) is text-only — it never receives the style image natively,
+    // so it needs the same text-described-style treatment as Seedream style-only.
+    const isFlux2Pro = config.imageModel === "flux-2-pro"
+    if (styleBuffer && (config.imageModel === "dalle3" || isFlux2Pro || (isSeedream && !productBuffer))) {
       if (keyMap.anthropic) {
         const anthropic = new Anthropic({ apiKey: keyMap.anthropic })
         styleDescription = await analyzeStyleReference(anthropic, styleBuffer, styleFile?.type ?? "image/jpeg", styleStrength).catch(() => undefined)
@@ -716,7 +719,9 @@ export async function POST(request: Request) {
     // For Seedream + style-only (no product): ALWAYS build from niche/custom base —
     // never use styleDescription as the full prompt, because the style image is also
     // sent natively and that double-signals Seedream to copy the original photo.
-    const seedreamStyleOnly = isSeedream && styleBuffer && !productBuffer
+    // Flux 2 Pro never sends the style image natively at all, so it always wants the
+    // text description to lead the prompt, product or not.
+    const seedreamStyleOnly = (isSeedream && styleBuffer && !productBuffer) || (isFlux2Pro && styleBuffer)
 
     let finalPrompt: string
     const hasNiche = !!(config.niche ?? config.categoryPreset)
