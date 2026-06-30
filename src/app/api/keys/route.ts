@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { encryptKey } from "@/lib/encryption"
 
-const VALID_PROVIDERS = ["openai", "anthropic", "gemini", "byteplus", "replicate", "stability"]
+const VALID_PROVIDERS = ["openai", "anthropic", "gemini", "byteplus", "replicate", "stability", "bfl"]
 
 export async function GET() {
   const supabase = await createClient()
