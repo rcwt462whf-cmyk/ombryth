@@ -838,16 +838,20 @@ export async function POST(request: Request) {
       )
     )
 
-    // Upload to Supabase Storage
-    const imageUrls = await Promise.all(
-      cleanBuffers.map((buf) => uploadImageBuffer(buf, user.id, "jpg"))
-    )
-
     // Base64 for immediate display
     const imagesBase64 = cleanBuffers.map((buf) => buf.toString("base64"))
 
     // Use the first generated image for Claude vision captioning
     const firstImageBase64 = imagesBase64[0]
+
+    // Kick off Storage upload now but don't await yet — captions below only need
+    // the in-memory buffer, so this overlaps with caption generation instead of blocking it.
+    const imageUrlsPromise = Promise.all(
+      cleanBuffers.map((buf) => uploadImageBuffer(buf, user.id, "jpg"))
+    )
+    // Avoid an unhandled-rejection window while it runs in the background — the real
+    // error is still surfaced below at `await imageUrlsPromise`, this just silences this copy.
+    imageUrlsPromise.catch(() => {})
 
     // Generate text content — N variations in parallel (each gets a fresh random hook style)
     const captionVariations = Math.min(Math.max(1, config.captionVariations ?? 1), 5)
@@ -918,6 +922,9 @@ export async function POST(request: Request) {
       textModelUsed = "failed"
       textOutputs = [{ _textError: errMsg }]
     }
+
+    // Upload was kicked off before caption generation — await it now that both have run
+    const imageUrls = await imageUrlsPromise
 
     // Save generation records (non-fatal — never block the response on a DB write error)
     try {
