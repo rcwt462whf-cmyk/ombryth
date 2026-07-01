@@ -2,102 +2,164 @@
 
 import { useEffect, useState } from "react"
 import {
-  AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Cell, Legend,
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts"
-import { Image as ImageIcon, Type, Layers, Zap } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { BarChart3 } from "lucide-react"
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const SPANS = [
-  { label: "7 days",  value: 7 },
-  { label: "30 days", value: 30 },
-  { label: "90 days", value: 90 },
-  { label: "All time", value: 365 * 5 },
-]
+type RangeKey = "24h" | "7d" | "30d" | "90d" | "all"
+type Bucket = "hour" | "day" | "week"
 
-const MODEL_LABELS: Record<string, string> = {
-  dalle3: "DALL-E 3",
-  "flux-schnell": "Flux Schnell",
-  "flux-dev": "Flux Dev",
-  "flux-2-pro": "Flux 2 Pro",
-  stability: "Stable Diffusion",
-  seedream: "Seedream",
-  "seedream-5-lite": "Seedream 5",
-  unknown: "Unknown",
-}
-
-const TEXT_MODEL_LABELS: Record<string, string> = {
-  gpt4o: "GPT-4o",
-  claude: "Claude Sonnet",
-  gemini: "Gemini Flash",
-  failed: "Failed",
-  unknown: "Unknown",
-}
-
-const PALETTE = [
-  "#5fe6c4", "#3b82f6", "#f59e0b", "#ec4899",
-  "#8b5cf6", "#10b981", "#f97316", "#14b8a6",
+const RANGES: { label: string; value: RangeKey }[] = [
+  { label: "Last 24 hours", value: "24h" },
+  { label: "Last 7 days", value: "7d" },
+  { label: "Last 30 days", value: "30d" },
+  { label: "Last 90 days", value: "90d" },
+  { label: "All time", value: "all" },
 ]
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface StatsData {
+interface ModelSeries {
+  key: string
+  label: string
+  kind: "image" | "text"
+  provider: string
+  color: string
   total: number
-  successful: number
-  byDay: { date: string; count: number }[]
-  byModel: { model: string; count: number }[]
-  byTextModel: { model: string; count: number }[]
+  series: { bucket: string; count: number }[]
+}
+
+interface StatsData {
+  range: RangeKey
+  bucket: Bucket
+  rangeStart: string
+  rangeEnd: string
+  total: number
+  totalRequests: number
+  models: ModelSeries[]
+  byProvider: { provider: string; label: string; color: string; total: number }[]
   byCategory: { category: string; count: number }[]
-  byDayByModel: Record<string, string | number>[]
-  allModels: string[]
 }
 
-// ─── Tiny helpers ─────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function fmtDate(iso: string, compact = false) {
-  const d = new Date(iso + "T00:00:00")
-  return d.toLocaleDateString("en-GB", compact
-    ? { day: "numeric", month: "short" }
-    : { day: "numeric", month: "short", year: "2-digit" })
+function fmtBucketLabel(key: string, bucket: Bucket) {
+  if (bucket === "hour") {
+    return new Date(key + ":00:00.000Z").toLocaleString("en-GB", {
+      day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: "UTC",
+    })
+  }
+  const label = new Date(key + "T00:00:00.000Z").toLocaleDateString("en-GB", {
+    day: "numeric", month: "short", timeZone: "UTC",
+  })
+  return bucket === "week" ? `Week of ${label}` : label
 }
 
-function StatCard({ icon: Icon, label, value, sub }: {
-  icon: React.ElementType; label: string; value: string | number; sub?: string
+function fmtAxis(key: string, bucket: Bucket) {
+  if (bucket === "hour") {
+    return new Date(key + ":00:00.000Z").toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })
+  }
+  return new Date(key + "T00:00:00.000Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" })
+}
+
+// Zip each model's aligned series into rows keyed by model for the stacked chart.
+function buildStacked(models: ModelSeries[]) {
+  const buckets = models[0]?.series.map(s => s.bucket) ?? []
+  return buckets.map((b, i) => {
+    const row: Record<string, string | number> = { bucket: b }
+    for (const m of models) row[m.key] = m.series[i]?.count ?? 0
+    return row
+  })
+}
+
+// ─── Hero tooltip ─────────────────────────────────────────────────────────────
+
+function HeroTooltip({ active, payload, label, models, bucket }: {
+  active?: boolean
+  payload?: { name: string; value: number }[]
+  label?: string
+  models: ModelSeries[]
+  bucket: Bucket
 }) {
+  if (!active || !payload?.length) return null
+  const rows = payload
+    .filter(p => p.value > 0)
+    .map(p => ({ ...p, model: models.find(m => m.key === p.name) }))
+  const total = rows.reduce((s, r) => s + r.value, 0)
   return (
-    <div className="bg-card rounded-xl border border-border p-5 flex items-start gap-4">
-      <div className="w-9 h-9 rounded-lg bg-[#5fe6c4]/10 flex items-center justify-center shrink-0">
-        <Icon className="w-4.5 h-4.5 text-[#5fe6c4]" style={{ width: 18, height: 18 }} />
-      </div>
-      <div className="min-w-0">
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="text-2xl font-bold text-foreground leading-tight tabular-nums">{value}</p>
-        {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
-      </div>
+    <div className="bg-popover border border-border rounded-lg shadow-lg px-3 py-2 text-xs min-w-[150px]">
+      <p className="text-muted-foreground font-medium mb-1.5">{label ? fmtBucketLabel(label, bucket) : ""}</p>
+      {rows.length === 0 ? (
+        <p className="text-muted-foreground">No requests</p>
+      ) : (
+        <div className="space-y-1">
+          {rows.map(r => (
+            <div key={r.name} className="flex items-center justify-between gap-4">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: r.model?.color }} />
+                <span className="text-foreground">{r.model?.label ?? r.name}</span>
+              </span>
+              <span className="font-semibold text-foreground tabular-nums">{r.value}</span>
+            </div>
+          ))}
+          {rows.length > 1 && (
+            <div className="flex items-center justify-between gap-4 pt-1 mt-1 border-t border-border">
+              <span className="text-muted-foreground">Total</span>
+              <span className="font-semibold text-foreground tabular-nums">{total}</span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
 
-// ─── Custom tooltip ───────────────────────────────────────────────────────────
+// ─── Model card (per-model, with area sparkline) ──────────────────────────────
 
-function ChartTooltip({ active, payload, label }: {
-  active?: boolean; payload?: { name: string; value: number; color: string }[]; label?: string
-}) {
-  if (!active || !payload?.length) return null
+function ModelCard({ model, totalRequests }: { model: ModelSeries; totalRequests: number }) {
+  const pct = totalRequests > 0 ? Math.round((model.total / totalRequests) * 100) : 0
+  const gradId = `spark-${model.key}`
   return (
-    <div className="bg-popover border border-border rounded-lg shadow-lg px-3 py-2 text-xs space-y-1 min-w-[120px]">
-      {label && <p className="text-muted-foreground font-medium mb-1.5">{fmtDate(label)}</p>}
-      {payload.map(p => (
-        <div key={p.name} className="flex items-center justify-between gap-4">
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: p.color }} />
-            <span className="text-foreground">{MODEL_LABELS[p.name] ?? p.name}</span>
-          </span>
-          <span className="font-semibold text-foreground tabular-nums">{p.value}</span>
+    <div className="bg-card rounded-xl border border-border p-4 flex flex-col gap-3">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: model.color }} />
+            <span className="text-sm font-medium text-foreground truncate" title={model.label}>{model.label}</span>
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-0.5 capitalize">{model.kind} model</p>
         </div>
-      ))}
+        <div className="text-right shrink-0">
+          <p className="text-2xl font-bold text-foreground tabular-nums leading-none">{model.total}</p>
+          <p className="text-[11px] text-muted-foreground mt-1">{pct}% of use</p>
+        </div>
+      </div>
+      <div className="h-14 -mx-1">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={model.series} margin={{ top: 4, right: 2, left: 2, bottom: 0 }}>
+            <defs>
+              <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={model.color} stopOpacity={0.35} />
+                <stop offset="100%" stopColor={model.color} stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <Area
+              type="monotone"
+              dataKey="count"
+              stroke={model.color}
+              strokeWidth={2}
+              fill={`url(#${gradId})`}
+              dot={false}
+              isAnimationActive={false}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   )
 }
@@ -115,18 +177,18 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
-// ─── Horizontal bar ───────────────────────────────────────────────────────────
+// ─── Horizontal bar (provider + category) ─────────────────────────────────────
 
 function HorizBar({ label, count, total, color }: { label: string; count: number; total: number; color: string }) {
   const pct = total > 0 ? Math.round((count / total) * 100) : 0
   return (
     <div className="flex items-center gap-3">
-      <span className="text-xs text-muted-foreground w-28 shrink-0 truncate" title={label}>{label}</span>
+      <span className="text-xs text-muted-foreground w-32 shrink-0 truncate" title={label}>{label}</span>
       <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
         <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
       </div>
       <span className="text-xs tabular-nums font-medium text-foreground w-8 text-right">{count}</span>
-      <span className="text-xs text-muted-foreground w-8 text-right">{pct}%</span>
+      <span className="text-xs text-muted-foreground w-9 text-right">{pct}%</span>
     </div>
   )
 }
@@ -134,239 +196,157 @@ function HorizBar({ label, count, total, color }: { label: string; count: number
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function UsagePage() {
-  const [span, setSpan] = useState(30)
+  const [range, setRange] = useState<RangeKey>("30d")
   const [data, setData] = useState<StatsData | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     setLoading(true)
-    fetch(`/api/stats?span=${span}`)
+    fetch(`/api/stats?range=${range}`)
       .then(r => r.json())
       .then(d => setData(d))
       .finally(() => setLoading(false))
-  }, [span])
+  }, [range])
 
-  const Skeleton = () => <div className="h-[200px] bg-muted animate-pulse rounded-lg" />
+  const models = data?.models ?? []
+  const stacked = buildStacked(models)
+  const hasData = !loading && data && models.length > 0
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="font-display text-xl font-bold text-foreground">Usage</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Generation stats across models and time</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Requests by model over time</p>
         </div>
-        <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
-          {SPANS.map(s => (
-            <button
-              key={s.value}
-              onClick={() => setSpan(s.value)}
-              className={cn(
-                "h-7 px-3 text-xs font-medium rounded-md transition-all",
-                span === s.value
-                  ? "bg-background shadow-sm text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
+        <Select value={range} onValueChange={(v) => setRange(v as RangeKey)}>
+          <SelectTrigger className="w-[160px] h-9 text-xs"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {RANGES.map(r => (
+              <SelectItem key={r.value} value={r.value} className="text-xs">{r.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <StatCard
-          icon={Zap}
-          label="Total generations"
-          value={loading ? "—" : (data?.total ?? 0)}
-          sub={loading ? undefined : `${data?.successful ?? 0} successful`}
-        />
-        <StatCard
-          icon={ImageIcon}
-          label="Image models used"
-          value={loading ? "—" : (data?.byModel.length ?? 0)}
-          sub="distinct models"
-        />
-        <StatCard
-          icon={Type}
-          label="Text models used"
-          value={loading ? "—" : (data?.byTextModel.length ?? 0)}
-          sub="distinct models"
-        />
-        <StatCard
-          icon={Layers}
-          label="Top category"
-          value={loading || !data?.byCategory.length ? "—" : (data.byCategory[0].category === "none" ? "Uncategorised" : data.byCategory[0].category)}
-          sub={loading || !data?.byCategory.length ? undefined : `${data.byCategory[0].count} gens`}
-        />
+      {/* Headline */}
+      <div className="flex items-baseline gap-2.5">
+        <span className="text-3xl font-bold text-foreground tabular-nums">
+          {loading || !data ? "—" : data.totalRequests}
+        </span>
+        <span className="text-sm text-muted-foreground">
+          model requests{hasData ? ` · ${data.total} generation${data.total === 1 ? "" : "s"} · ${models.length} model${models.length === 1 ? "" : "s"} used` : ""}
+        </span>
       </div>
 
-      {/* Generations over time */}
-      <Section title="Generations over time">
-        {loading ? <Skeleton /> : !data ? null : (
-          <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={data.byDay} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#5fe6c4" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#5fe6c4" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-              <XAxis
-                dataKey="date"
-                tickFormatter={(v) => fmtDate(v, true)}
-                tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
-                tickLine={false}
-                axisLine={false}
-                interval="preserveStartEnd"
-              />
-              <YAxis
-                allowDecimals={false}
-                tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <Tooltip content={<ChartTooltip />} />
-              <Area
-                type="monotone"
-                dataKey="count"
-                name="count"
-                stroke="#5fe6c4"
-                strokeWidth={2}
-                fill="url(#areaGrad)"
-                dot={false}
-                activeDot={{ r: 4, strokeWidth: 0 }}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        )}
-      </Section>
-
-      {/* By model stacked */}
-      {data && data.allModels.length > 1 && (
-        <Section title="Generations by image model (daily)">
-          {loading ? <Skeleton /> : (
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={data.byDayByModel} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+      {loading ? (
+        <div className="h-[280px] bg-muted animate-pulse rounded-xl" />
+      ) : !hasData ? (
+        <div className="bg-card rounded-xl border border-border py-16 flex flex-col items-center text-center">
+          <div className="w-11 h-11 rounded-full bg-muted flex items-center justify-center mb-3">
+            <BarChart3 className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <p className="text-sm font-medium text-foreground">No usage in this period</p>
+          <p className="text-xs text-muted-foreground mt-1">Generate some content and your model activity will show up here.</p>
+        </div>
+      ) : (
+        <>
+          {/* Hero — stacked area by model */}
+          <div className="bg-card rounded-xl border border-border p-5">
+            <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
+              <h3 className="text-sm font-semibold text-foreground">Requests over time</h3>
+              <div className="flex items-center gap-3 flex-wrap">
+                {models.map(m => (
+                  <span key={m.key} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <span className="w-2 h-2 rounded-full" style={{ background: m.color }} />
+                    {m.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <ResponsiveContainer width="100%" height={260}>
+              <AreaChart data={stacked} margin={{ top: 4, right: 8, left: -18, bottom: 0 }}>
+                <defs>
+                  {models.map(m => (
+                    <linearGradient key={m.key} id={`hero-${m.key}`} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={m.color} stopOpacity={0.5} />
+                      <stop offset="100%" stopColor={m.color} stopOpacity={0.05} />
+                    </linearGradient>
+                  ))}
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                 <XAxis
-                  dataKey="date"
-                  tickFormatter={(v) => fmtDate(v, true)}
+                  dataKey="bucket"
+                  tickFormatter={(v) => fmtAxis(v, data!.bucket)}
                   tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
                   tickLine={false}
                   axisLine={false}
                   interval="preserveStartEnd"
+                  minTickGap={24}
                 />
                 <YAxis
                   allowDecimals={false}
                   tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
                   tickLine={false}
                   axisLine={false}
+                  width={40}
                 />
-                <Tooltip content={<ChartTooltip />} />
-                <Legend
-                  formatter={(v) => <span className="text-xs text-muted-foreground">{MODEL_LABELS[v] ?? v}</span>}
-                  wrapperStyle={{ fontSize: 11 }}
-                />
-                {data.allModels.map((m, i) => (
-                  <Bar key={m} dataKey={m} name={m} stackId="a" fill={PALETTE[i % PALETTE.length]} radius={i === data.allModels.length - 1 ? [2, 2, 0, 0] : [0, 0, 0, 0]} />
+                <Tooltip content={<HeroTooltip models={models} bucket={data!.bucket} />} />
+                {models.map(m => (
+                  <Area
+                    key={m.key}
+                    type="monotone"
+                    dataKey={m.key}
+                    stackId="a"
+                    stroke={m.color}
+                    strokeWidth={2}
+                    fill={`url(#hero-${m.key})`}
+                    isAnimationActive={false}
+                  />
                 ))}
-              </BarChart>
+              </AreaChart>
             </ResponsiveContainer>
-          )}
-        </Section>
-      )}
+          </div>
 
-      {/* Image model breakdown */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Section title="Image model breakdown">
-          {loading ? <div className="h-40 bg-muted animate-pulse rounded-lg" /> : !data?.byModel.length ? (
-            <p className="text-xs text-muted-foreground">No data for this period</p>
-          ) : (
-            <div className="space-y-3">
-              {data.byModel.map((m, i) => (
-                <HorizBar
-                  key={m.model}
-                  label={MODEL_LABELS[m.model] ?? m.model}
-                  count={m.count}
-                  total={data.total}
-                  color={PALETTE[i % PALETTE.length]}
-                />
-              ))}
-            </div>
-          )}
-        </Section>
+          {/* Per-model cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {models.map(m => (
+              <ModelCard key={m.key} model={m} totalRequests={data!.totalRequests} />
+            ))}
+          </div>
 
-        <Section title="Text model breakdown">
-          {loading ? <div className="h-40 bg-muted animate-pulse rounded-lg" /> : !data?.byTextModel.length ? (
-            <p className="text-xs text-muted-foreground">No data for this period</p>
-          ) : (
-            <div className="space-y-3">
-              {data.byTextModel.map((m, i) => (
-                <HorizBar
-                  key={m.model}
-                  label={TEXT_MODEL_LABELS[m.model] ?? m.model}
-                  count={m.count}
-                  total={data.total}
-                  color={PALETTE[i % PALETTE.length]}
-                />
-              ))}
-            </div>
-          )}
-        </Section>
-      </div>
-
-      {/* Category breakdown */}
-      {data && data.byCategory.some(c => c.category !== "none") && (
-        <Section title="Top categories">
-          {loading ? <div className="h-40 bg-muted animate-pulse rounded-lg" /> : (
-            <div className="space-y-3">
-              {data.byCategory.map((c, i) => (
-                <HorizBar
-                  key={c.category}
-                  label={c.category === "none" ? "Uncategorised" : c.category}
-                  count={c.count}
-                  total={data.total}
-                  color={PALETTE[i % PALETTE.length]}
-                />
-              ))}
-            </div>
-          )}
-        </Section>
-      )}
-
-      {/* Per-model totals bar */}
-      {data && data.byModel.length > 0 && (
-        <Section title="Total generations per image model">
-          {loading ? <Skeleton /> : (
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={data.byModel} layout="vertical" margin={{ top: 0, right: 16, left: 60, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
-                <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} />
-                <YAxis
-                  type="category"
-                  dataKey="model"
-                  tickFormatter={(v) => MODEL_LABELS[v] ?? v}
-                  tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
-                  tickLine={false}
-                  axisLine={false}
-                  width={56}
-                />
-                <Tooltip
-                  formatter={(v, n) => [v, MODEL_LABELS[n as string] ?? n]}
-                  contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--border)", background: "var(--popover)" }}
-                />
-                {data.byModel.map((m, i) => (
-                  <Bar key={m.model} dataKey="count" fill={PALETTE[i % PALETTE.length]} radius={[0, 4, 4, 0]}>
-                    <Cell key={m.model} fill={PALETTE[i % PALETTE.length]} />
-                  </Bar>
+          {/* Secondary: provider + category */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Section title="By provider">
+              <div className="space-y-3">
+                {data!.byProvider.map(p => (
+                  <HorizBar key={p.provider} label={p.label} count={p.total} total={data!.totalRequests} color={p.color} />
                 ))}
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </Section>
+              </div>
+            </Section>
+
+            {data!.byCategory.some(c => c.category !== "none") ? (
+              <Section title="Top categories">
+                <div className="space-y-3">
+                  {data!.byCategory.map((c, i) => (
+                    <HorizBar
+                      key={c.category}
+                      label={c.category === "none" ? "Uncategorised" : c.category}
+                      count={c.count}
+                      total={data!.total}
+                      color={models[i % models.length]?.color ?? "#5fe6c4"}
+                    />
+                  ))}
+                </div>
+              </Section>
+            ) : (
+              <Section title="Top categories">
+                <p className="text-xs text-muted-foreground">No categorised generations yet.</p>
+              </Section>
+            )}
+          </div>
+        </>
       )}
     </div>
   )
