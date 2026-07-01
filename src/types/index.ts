@@ -40,7 +40,7 @@ export interface GenerateRequest {
   productReferenceStrength?: number
   hasStyleReference?: boolean
   hasProductReference?: boolean
-  destinationContext?: { title: string; description: string }
+  destinationContext?: { title: string; description: string; products?: { name: string; price?: string; rating?: string; reviewCount?: string; scarce?: boolean }[] }
   promptOverride?: string
   aiTonedown?: boolean
   captionVariations?: number  // 1-5 — generate N caption sets in parallel

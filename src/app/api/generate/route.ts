@@ -640,6 +640,18 @@ export async function POST(request: Request) {
     if (config.destinationContext) {
       config.destinationContext.title = sanitizeText(config.destinationContext.title, 200) ?? ""
       config.destinationContext.description = sanitizeText(config.destinationContext.description, 600) ?? ""
+      config.destinationContext.products = Array.isArray(config.destinationContext.products)
+        ? config.destinationContext.products
+            .slice(0, 8)
+            .map((p) => ({
+              name: sanitizeText(p?.name, 80) ?? "",
+              price: sanitizeText(p?.price, 20),
+              rating: sanitizeText(p?.rating, 6),
+              reviewCount: sanitizeText(p?.reviewCount, 12),
+              scarce: p?.scarce === true ? true : undefined,
+            }))
+            .filter((p) => p.name)
+        : undefined
     }
     // Validate platforms list against known values
     const VALID_PLATFORMS = ["pinterest", "instagram", "facebook", "google-ads"]
