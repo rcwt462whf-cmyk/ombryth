@@ -47,6 +47,11 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 ENCRYPTION_KEY=your_32_char_key_here
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Shared secret that lets /api/generate-pin authenticate its internal call to
+# /api/generate for the Vynthr integration. Generate with: openssl rand -hex 32
+# REQUIRED for the Vynthr pin pipeline to work — without it those calls return 401.
+INTERNAL_API_SECRET=your_random_hex_secret_here
 ```
 
 ## 5. Email (Resend)

@@ -16,7 +16,7 @@ function buildWelcomeHtml(referralCode?: string): string {
         <p style="margin: 0; font-size: 14px; color: #6b7280;">
           Your referral link:&nbsp;
           <a href="${APP_URL}/ref/${referralCode}"
-             style="color: #4f46e5; text-decoration: none; word-break: break-all;">
+             style="color: #0b9c75; text-decoration: none; word-break: break-all;">
             ${APP_URL}/ref/${referralCode}
           </a>
         </p>
@@ -42,9 +42,9 @@ function buildWelcomeHtml(referralCode?: string): string {
 
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            <td style="background-color: #5fe6c4;
                         padding: 40px 40px 36px 40px; text-align: center;">
-              <p style="margin: 0; font-size: 22px; font-weight: 700; color: #ffffff;
+              <p style="margin: 0; font-size: 22px; font-weight: 700; color: #0b3b30;
                          letter-spacing: -0.3px;">
                 Ombryth
               </p>
@@ -87,9 +87,9 @@ function buildWelcomeHtml(referralCode?: string): string {
                             <tr>
                               <td valign="top" width="36"
                                   style="padding-top: 1px;">
-                                <div style="width: 28px; height: 28px; background-color: #eef2ff;
+                                <div style="width: 28px; height: 28px; background-color: #eafbf4;
                                             border-radius: 50%; text-align: center; line-height: 28px;
-                                            font-size: 13px; font-weight: 700; color: #4f46e5;">
+                                            font-size: 13px; font-weight: 700; color: #0b3b30;">
                                   1
                                 </div>
                               </td>
@@ -112,9 +112,9 @@ function buildWelcomeHtml(referralCode?: string): string {
                             <tr>
                               <td valign="top" width="36"
                                   style="padding-top: 1px;">
-                                <div style="width: 28px; height: 28px; background-color: #eef2ff;
+                                <div style="width: 28px; height: 28px; background-color: #eafbf4;
                                             border-radius: 50%; text-align: center; line-height: 28px;
-                                            font-size: 13px; font-weight: 700; color: #4f46e5;">
+                                            font-size: 13px; font-weight: 700; color: #0b3b30;">
                                   2
                                 </div>
                               </td>
@@ -137,9 +137,9 @@ function buildWelcomeHtml(referralCode?: string): string {
                             <tr>
                               <td valign="top" width="36"
                                   style="padding-top: 1px;">
-                                <div style="width: 28px; height: 28px; background-color: #eef2ff;
+                                <div style="width: 28px; height: 28px; background-color: #eafbf4;
                                             border-radius: 50%; text-align: center; line-height: 28px;
-                                            font-size: 13px; font-weight: 700; color: #4f46e5;">
+                                            font-size: 13px; font-weight: 700; color: #0b3b30;">
                                   3
                                 </div>
                               </td>
@@ -164,8 +164,8 @@ function buildWelcomeHtml(referralCode?: string): string {
                   <td style="padding-bottom: 40px; text-align: center;">
                     <a href="${APP_URL}/app"
                        style="display: inline-block; padding: 14px 32px;
-                              background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-                              color: #ffffff; font-size: 15px; font-weight: 600;
+                              background-color: #5fe6c4;
+                              color: #0b3b30; font-size: 15px; font-weight: 600;
                               text-decoration: none; border-radius: 8px;
                               letter-spacing: 0.1px;">
                       Open Ombryth →

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { headers } from "next/headers"
 import { stripe } from "@/lib/stripe"
-import { createClient } from "@/lib/supabase/server"
+import { createServiceClient } from "@/lib/supabase/server"
 import {
   sendProWelcomeEmail,
   sendPaymentFailedEmail,
@@ -12,7 +12,7 @@ import type Stripe from "stripe"
 
 /** Look up a user's email by their Stripe customer id (for billing emails). */
 async function emailFor(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: Awaited<ReturnType<typeof createServiceClient>>,
   customerId: string,
 ): Promise<string | null> {
   const { data } = await supabase
@@ -45,7 +45,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
   }
 
-  const supabase = await createClient()
+  // Stripe calls this server-to-server with no user session, so the anon client's
+  // RLS (auth.uid() = id) would match zero rows and silently no-op every update.
+  // Service role is required to update users keyed by stripe_customer_id / referral_code.
+  const supabase = await createServiceClient()
 
   switch (event.type) {
     case "checkout.session.completed": {

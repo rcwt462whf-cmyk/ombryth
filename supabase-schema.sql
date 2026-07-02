@@ -166,3 +166,55 @@ create policy "Users can delete own images"
 -- alter table public.users add column if not exists referral_code text unique;
 -- alter table public.users add column if not exists referred_by text;
 -- alter table public.users add column if not exists referral_free_months integer default 0;
+
+-- ── Personal API keys (Pinflow / Vynthr integration) ─────────────────────────
+-- Issued to a user so external tools (Vynthr) can call /api/public/generations
+-- and /api/generate-pin on their behalf. Only the SHA-256 hash is stored — the raw
+-- key is shown once and never persisted. Server routes read this via the service-role
+-- client (they authenticate by hash, not a user session); the in-app management UI
+-- reads it under the user's session, hence the auth.uid() policy below.
+create table if not exists public.personal_api_keys (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.users(id) on delete cascade not null,
+  key_hash text not null unique,
+  key_prefix text not null,
+  label text,
+  last_used_at timestamptz,
+  created_at timestamptz default now() not null
+);
+
+alter table public.personal_api_keys enable row level security;
+
+-- Users manage their own keys in the app (list/create/revoke). The service role
+-- (used by the public API routes) bypasses RLS entirely.
+create policy "Users can manage own personal api keys"
+  on public.personal_api_keys for all using (auth.uid() = user_id);
+
+-- ── Pin jobs (async Vynthr generation queue) ─────────────────────────────────
+-- One row per pin requested by Vynthr via /api/generate-pin. Written and updated
+-- only by the service-role client; RLS is enabled so the public anon key cannot
+-- read it, with a self-select policy in case a user-facing job view is added later.
+create table if not exists public.pin_jobs (
+  id uuid primary key,
+  user_id uuid references public.users(id) on delete cascade not null,
+  workspace_id text,
+  blog_url text,
+  callback_url text,
+  status text not null default 'pending',
+  preset text,
+  source_id text,
+  external_row_id text,
+  image_url text,
+  error text,
+  completed_at timestamptz,
+  created_at timestamptz default now() not null
+);
+
+alter table public.pin_jobs enable row level security;
+
+create policy "Users can view own pin jobs"
+  on public.pin_jobs for select using (auth.uid() = user_id);
+
+-- ── caption_variants + captions columns (2026-06-22) ─────────────────────────
+-- alter table public.generations add column if not exists caption_variants jsonb;
+-- alter table public.generations add column if not exists captions jsonb;

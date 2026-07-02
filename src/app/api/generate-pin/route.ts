@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { waitUntil } from "@vercel/functions"
-import { createClient } from "@/lib/supabase/server"
+import { createServiceClient } from "@/lib/supabase/server"
+import { scrapeUrl, type ScrapedProduct } from "@/lib/scrape-context"
 import { createHash, randomUUID } from "crypto"
 
 // ─── Preset → Ombryth niche/style mapping ────────────────────────────────────
@@ -26,7 +27,7 @@ async function attemptGeneration(params: {
   blogUrl: string
   blogTitle?: string
   preset: string
-  destinationContext: { title: string; description: string } | null
+  destinationContext: { title: string; description: string; products?: ScrapedProduct[] } | null
   siteUrl: string
 }): Promise<{ imageUrl: string; pinterest: Record<string, unknown> | null }> {
   const { niche, style } = PRESET_MAP[params.preset] ?? PRESET_MAP.default
@@ -48,7 +49,11 @@ async function attemptGeneration(params: {
 
   const genResp = await fetch(`${params.siteUrl}/api/generate`, {
     method: "POST",
-    headers: { "x-vynthr-user-id": params.userId },
+    headers: {
+      "x-vynthr-user-id": params.userId,
+      // Proves this is a trusted server-to-server call, not a spoofed public request.
+      "x-internal-secret": process.env.INTERNAL_API_SECRET ?? "",
+    },
     body: fd,
   })
 
@@ -84,20 +89,19 @@ async function runGenerationAndCallback(params: {
     preset, sourceId, externalRowId, siteUrl,
   } = params
 
-  const supabase = await createClient()
+  const supabase = await createServiceClient()
 
-  // 1. Scrape blog URL for context — non-fatal
-  let destinationContext: { title: string; description: string } | null = null
+  // 1. Scrape blog URL for context — non-fatal. Call the shared lib directly instead of
+  // fetching /api/scrape-context over HTTP (that route needs a user session and would 401
+  // here, silently dropping all product/price context from Vynthr-generated pins).
+  let destinationContext: { title: string; description: string; products?: ScrapedProduct[] } | null = null
   try {
-    const scrapeResp = await fetch(`${siteUrl}/api/scrape-context`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: blogUrl }),
-    })
-    if (scrapeResp.ok) {
-      const d = await scrapeResp.json()
-      if (d.title || d.description) {
-        destinationContext = { title: d.title ?? blogTitle ?? "", description: d.description ?? "" }
+    const scraped = await scrapeUrl(blogUrl)
+    if (scraped.title || scraped.description || scraped.products.length > 0) {
+      destinationContext = {
+        title: scraped.title || blogTitle || "",
+        description: scraped.description,
+        products: scraped.products.length > 0 ? scraped.products : undefined,
       }
     }
   } catch { /* continue without context */ }
@@ -184,7 +188,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing API key" }, { status: 401 })
   }
 
-  const supabase = await createClient()
+  // Authenticated by hashed personal API key, not a user session — service role required
+  // to read personal_api_keys and write pin_jobs (no auth.uid() to satisfy RLS).
+  const supabase = await createServiceClient()
   const hash = hashKey(token)
 
   const { data: keyRow } = await supabase

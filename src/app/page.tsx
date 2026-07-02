@@ -26,7 +26,7 @@ const INTEGRATIONS = [
 ]
 
 const FAQ_ITEMS = [
-  { q: "Do I need all 6 API keys?", a: "No. OpenAI alone covers DALL·E 3 for images and GPT-4o for captions — that's everything you need to start. Other providers are optional and unlock additional image models." },
+  { q: "Do I need every API key?", a: "No. OpenAI alone covers DALL·E 3 for images and GPT-4o for captions — that's everything you need to start. Other providers are optional and unlock additional image models." },
   { q: "How much does it cost to generate an image?", a: "Roughly €0.03–0.07 per image depending on the model, billed directly by your AI provider. Ombryth's subscription is €2.99/month on top — that's it." },
   { q: "Who owns the generated images?", a: "You do. Ombryth claims no rights to your outputs. Check your AI provider's terms for any specific restrictions." },
   { q: "Is my API key safe?", a: "Yes. Keys are encrypted with AES-256 before storage and never logged or exposed. We use them only when you click Generate." },

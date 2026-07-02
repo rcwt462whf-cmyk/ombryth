@@ -957,7 +957,7 @@ export default function GeneratePage() {
                   </div>
                 )}
                 <Textarea
-                  placeholder="E.g. add a cozy throw blanket, warm coffee mug on the side, mossy stone wall in background…"
+                  placeholder="Anything goes — closeup shot, nighttime, shot from above, no plants, add a cozy throw blanket, autumn mood…"
                   value={customPrompt}
                   onChange={(e) => setCustomPrompt(e.target.value)}
                   className="text-sm resize-none"

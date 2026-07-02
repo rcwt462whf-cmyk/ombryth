@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createServiceClient } from "@/lib/supabase/server"
 import { createHash } from "crypto"
 
 // Public endpoint called by Pinflow to fetch a user's recent generations.
@@ -17,7 +17,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Missing API key" }, { status: 401 })
   }
 
-  const supabase = await createClient()
+  // Authenticated by hashed personal API key (Bearer), not a user session — so the
+  // anon client's RLS would block the personal_api_keys + generations reads. Service role.
+  const supabase = await createServiceClient()
   const hash = hashKey(token)
 
   // Look up the key

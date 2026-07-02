@@ -45,5 +45,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  // Only the auth-gated app and the auth pages need the session check. Running it on the
+  // marketing pages, API routes (incl. the Stripe webhook) and static assets was wasted work
+  // and added a Supabase round-trip to every request.
+  matcher: ["/app/:path*", "/login", "/signup"],
 }
