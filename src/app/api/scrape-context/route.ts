@@ -25,6 +25,6 @@ export async function POST(request: Request) {
     return NextResponse.json(result, { status: 200 })
   } catch (err) {
     console.error("[/api/scrape-context]", err)
-    return NextResponse.json({ title: "", description: "", products: [], url: "", error: "Could not fetch page" }, { status: 200 })
+    return NextResponse.json({ title: "", description: "", subtopics: [], products: [], url: "", error: "Could not fetch page" }, { status: 200 })
   }
 }

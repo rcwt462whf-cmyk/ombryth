@@ -748,6 +748,12 @@ export async function POST(request: Request) {
     if (config.destinationContext) {
       config.destinationContext.title = sanitizeText(config.destinationContext.title, 200) ?? ""
       config.destinationContext.description = sanitizeText(config.destinationContext.description, 600) ?? ""
+      config.destinationContext.subtopics = Array.isArray(config.destinationContext.subtopics)
+        ? config.destinationContext.subtopics
+            .map((s) => sanitizeText(s, 90))
+            .filter((s): s is string => !!s)
+            .slice(0, 10)
+        : undefined
       config.destinationContext.products = Array.isArray(config.destinationContext.products)
         ? config.destinationContext.products
             .slice(0, 8)
@@ -1079,7 +1085,7 @@ export async function POST(request: Request) {
         combo
       )
       // Attribution for A/B diagnostics (e.g. Vynthr): which formula combo produced this caption
-      console.log(`[generate] caption variants → hook=${variants.hook} | title=${variants.title} | angle=${variants.angle} | cta="${variants.cta}"`)
+      console.log(`[generate] caption variants → hook=${variants.hook} | title=${variants.title} | angle=${variants.angle} | cta="${variants.cta}"${variants.subtopic ? ` | subtopic="${variants.subtopic}"` : ""}`)
 
       let result: PlatformOutput = {}
       if (config.textModel === "gpt4o") {
@@ -1112,6 +1118,16 @@ export async function POST(request: Request) {
         // Decide all combos up front (sampled without replacement) so a batch of N variants
         // never repeats the same hook/title/angle/CTA, then run them in parallel.
         const combos = pickFormulaCombos(captionVariations, config.lockedFormula)
+        // Multi-variant runs: anchor each variation in a DIFFERENT real section of the
+        // destination post, so N captions = N distinct in-context angles into the same URL
+        // (multiple pins per link, each teasing its own subtopic) instead of N rephrasings.
+        // Single-caption runs get no forced focus — the model picks the strongest angle
+        // from the full subtopic list in the destination block.
+        const subtopics = config.destinationContext?.subtopics ?? []
+        if (captionVariations > 1 && subtopics.length > 0) {
+          const shuffled = [...subtopics].sort(() => Math.random() - 0.5)
+          combos.forEach((combo, i) => { combo.subtopic = shuffled[i % shuffled.length] })
+        }
         textOutputs = await Promise.all(
           combos.map((combo) => runOneTextGeneration(combo))
         )

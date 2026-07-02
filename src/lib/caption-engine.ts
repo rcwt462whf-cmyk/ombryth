@@ -134,6 +134,8 @@ export interface FormulaCombo {
   hook: string
   title: string
   angle: string
+  /** Destination-page subtopic this variation must anchor its tease in (assigned by the caller on multi-variant runs) */
+  subtopic?: string
   cta: string
 }
 
@@ -185,13 +187,13 @@ export function buildTextSystemPrompt(
   prompt: string,
   platforms: string[],
   customPersona?: string | null,
-  destinationContext?: { title: string; description: string; products?: { name: string; price?: string; rating?: string; reviewCount?: string; scarce?: boolean }[] } | null,
+  destinationContext?: { title: string; description: string; subtopics?: string[]; products?: { name: string; price?: string; rating?: string; reviewCount?: string; scarce?: boolean }[] } | null,
   language?: string | null,
   productDescription?: string,
   hasImage?: boolean,
   subject?: string,
   forcedCombo?: FormulaCombo
-): { prompt: string; variants: { hook: string; title: string; angle: string; cta: string } } {
+): { prompt: string; variants: { hook: string; title: string; angle: string; cta: string; subtopic?: string } } {
   const persona = customPersona?.trim() || DEFAULT_SYSTEM_PERSONA
 
   // Use the pre-decided combo when given (batch no-repeat / formula lock); otherwise pick at random.
@@ -229,14 +231,26 @@ export function buildTextSystemPrompt(
       }).join(", ")
     : ""
 
+  const subtopicList = destinationContext?.subtopics?.length
+    ? destinationContext.subtopics.slice(0, 10).join(" · ")
+    : ""
+
   const destinationLines = [
     destinationContext?.title ? `• Page: "${destinationContext.title}"` : null,
     destinationContext?.description ? `• Covers: "${destinationContext.description}"` : null,
+    subtopicList ? `• Sections inside the post (its ACTUAL subtopics): ${subtopicList}` : null,
     productNames ? `• Real products in it: ${productNames}` : null,
   ].filter(Boolean).join("\n")
 
   const destinationBlock = destinationLines
-    ? `\nWHAT THE LINK DELIVERS — this is the payoff to tease. Build the gap so the reader must click to get it; do NOT restate it verbatim and never print the URL:\n${destinationLines}\nLet this decide the angle and the exact value you withhold — reason from it, don't just append it.${productNames ? " You may name ONE real product with its exact price, rating and/or real \"limited stock\" status to make the tease concrete and credible (e.g. \"the €79 arc lamp\" or \"rated 4.8★ by 340 buyers\" or \"only a few left\") — never list more than one, and never give the full set. The rest staying behind the link is what earns the click. NEVER invent urgency or scarcity that isn't listed above as real — no fake \"selling out fast\" claims. Only cite a product if it plausibly matches the SUBJECT/image — on a multi-product roundup page, do NOT name an unrelated item just because it's in the data; if none clearly match, tease the value generically instead." : ""}\n`
+    ? `\nWHAT THE LINK DELIVERS — this is the payoff to tease. Build the gap so the reader must click to get it; do NOT restate it verbatim and never print the URL:\n${destinationLines}\nLet this decide the angle and the exact value you withhold — reason from it, don't just append it.${subtopicList ? " Ground the tease in what the post ACTUALLY covers — reference or hint at a real section from the list above so the promise is credible and specific. Never promise content the post doesn't have (teasing a section that isn't there earns a click and an instant bounce)." : ""}${productNames ? " You may name ONE real product with its exact price, rating and/or real \"limited stock\" status to make the tease concrete and credible (e.g. \"the €79 arc lamp\" or \"rated 4.8★ by 340 buyers\" or \"only a few left\") — never list more than one, and never give the full set. The rest staying behind the link is what earns the click. NEVER invent urgency or scarcity that isn't listed above as real — no fake \"selling out fast\" claims. Only cite a product if it plausibly matches the SUBJECT/image — on a multi-product roundup page, do NOT name an unrelated item just because it's in the data; if none clearly match, tease the value generically instead." : ""}\n`
+    : ""
+
+  // Multi-variant runs assign each variation a different real section of the post, so
+  // 5 captions = 5 distinct in-context angles into the same URL instead of 5 rephrasings.
+  const focusSubtopic = forcedCombo?.subtopic?.trim()
+  const subtopicFocusBlock = focusSubtopic
+    ? `\nASSIGNED ANGLE FOR THIS VARIATION — anchor the tease in this specific section of the post: "${focusSubtopic}". The hook and title must make the reader curious about THIS section's payoff specifically (without resolving it). This is the angle INTO the subject, not a replacement for it — SUBJECT discipline still applies to every field.\n`
     : ""
 
   const productBlock = productDescription
@@ -251,7 +265,7 @@ export function buildTextSystemPrompt(
 
 PRIMARY OBJECTIVE — the only success metric is the OUTBOUND CLICK:
 Every title, description and caption exists to make the viewer click through to the destination link. We are NOT optimising for saves, likes or follows — a save with no click is a failure. The image already earns the save; your copy's only job is to open a curiosity or value gap the viewer can ONLY close by clicking. Withhold the specifics — the exact products, prices, steps, shortlist or sources live behind the link. Tease enough that not clicking feels like missing out, but never resolve the gap in the caption itself.
-${subjectBlock}${productBlock}${destinationBlock}
+${subjectBlock}${productBlock}${destinationBlock}${subtopicFocusBlock}
 TOPIC DISCIPLINE — non-negotiable, this is the #1 failure to avoid:
 - Lock onto the ONE subject above before writing. Title, hook, description, caption AND hashtags must all be about that subject.
 - The image contains other eye-catching objects, colours and props. Do NOT write the post about them unless they ARE the subject. Example: subject "3-layer lighting in a living room" → write about the lighting layers (ambient / task / accent, warmth, placement), NOT the sofa, rug or art — even if they dominate the frame.
@@ -295,6 +309,7 @@ Return ONLY the JSON. No markdown.${language && language !== "en" ? `\n\nLANGUAG
       title: titleFormula.name,
       angle: contentAngle.name,
       cta: ctaStyle.name,
+      subtopic: focusSubtopic || undefined,
     },
   }
 }

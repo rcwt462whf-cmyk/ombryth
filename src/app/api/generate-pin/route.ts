@@ -27,7 +27,7 @@ async function attemptGeneration(params: {
   blogUrl: string
   blogTitle?: string
   preset: string
-  destinationContext: { title: string; description: string; products?: ScrapedProduct[] } | null
+  destinationContext: { title: string; description: string; subtopics?: string[]; products?: ScrapedProduct[] } | null
   siteUrl: string
 }): Promise<{ imageUrl: string; pinterest: Record<string, unknown> | null }> {
   const { niche, style } = PRESET_MAP[params.preset] ?? PRESET_MAP.default
@@ -94,13 +94,14 @@ async function runGenerationAndCallback(params: {
   // 1. Scrape blog URL for context — non-fatal. Call the shared lib directly instead of
   // fetching /api/scrape-context over HTTP (that route needs a user session and would 401
   // here, silently dropping all product/price context from Vynthr-generated pins).
-  let destinationContext: { title: string; description: string; products?: ScrapedProduct[] } | null = null
+  let destinationContext: { title: string; description: string; subtopics?: string[]; products?: ScrapedProduct[] } | null = null
   try {
     const scraped = await scrapeUrl(blogUrl)
-    if (scraped.title || scraped.description || scraped.products.length > 0) {
+    if (scraped.title || scraped.description || scraped.subtopics.length > 0 || scraped.products.length > 0) {
       destinationContext = {
         title: scraped.title || blogTitle || "",
         description: scraped.description,
+        subtopics: scraped.subtopics.length > 0 ? scraped.subtopics : undefined,
         products: scraped.products.length > 0 ? scraped.products : undefined,
       }
     }

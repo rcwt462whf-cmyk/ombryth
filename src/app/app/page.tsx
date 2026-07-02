@@ -383,7 +383,7 @@ export default function GeneratePage() {
 
   // Destination URL
   const [destinationUrl, setDestinationUrl] = useState("")
-  const [destinationContext, setDestinationContext] = useState<{ title: string; description: string; products?: { name: string; price?: string }[] } | null>(null)
+  const [destinationContext, setDestinationContext] = useState<{ title: string; description: string; subtopics?: string[]; products?: { name: string; price?: string }[] } | null>(null)
   const [scrapingUrl, setScrapingUrl] = useState(false)
   const [scrapeError, setScrapeError] = useState<string | null>(null)
 
@@ -507,7 +507,7 @@ export default function GeneratePage() {
       if (data.error) {
         setScrapeError("Could not fetch page — you can still generate without it.")
       } else {
-        setDestinationContext({ title: data.title, description: data.description, products: data.products })
+        setDestinationContext({ title: data.title, description: data.description, subtopics: data.subtopics, products: data.products })
       }
     } catch {
       setScrapeError("Network error — you can still generate without it.")
@@ -1234,6 +1234,9 @@ export default function GeneratePage() {
                   {destinationContext.title || destinationContext.description}
                   {destinationContext.products && destinationContext.products.length > 0 && (
                     <span className="opacity-70"> · {destinationContext.products.length} product{destinationContext.products.length > 1 ? "s" : ""} found</span>
+                  )}
+                  {destinationContext.subtopics && destinationContext.subtopics.length > 0 && (
+                    <span className="opacity-70"> · {destinationContext.subtopics.length} topic{destinationContext.subtopics.length > 1 ? "s" : ""} found</span>
                   )}
                 </p>
                 {destinationUrl && !savedLinks.some(l => l.url === destinationUrl) && (

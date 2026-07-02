@@ -12,9 +12,40 @@ export type ScrapedProduct = { name: string; price?: string; rating?: string; re
 export interface ScrapeResult {
   title: string
   description: string
+  /** The post's actual section headings (h2/h3) — the in-context subtopics captions can tease. */
+  subtopics: string[]
   products: ScrapedProduct[]
   url: string
   error?: string
+}
+
+// Headings that are page chrome, not content — never worth teasing in a caption.
+const BOILERPLATE_HEADING = /^(related|comments?|leave a|newsletter|subscribe|share|categories|tags|you may also|popular|recent posts?|table of contents|about( the author)?|search|follow|sign ?up|shop|cart|log ?in|navigation|menu|footer|sidebar|disclosure|disclaimer|affiliate)/i
+
+/**
+ * Extract the post's section headings as subtopics. Tolerates nested inline tags
+ * (<h2><strong>…</strong></h2> — the default in most WordPress/Elementor themes,
+ * which a naive [^<] regex silently misses), strips them, filters chrome headings,
+ * dedupes, and caps the list.
+ */
+function extractSubtopics(html: string): string[] {
+  const out: string[] = []
+  const seen = new Set<string>()
+  for (const tag of ["h2", "h3"]) {
+    for (const m of Array.from(html.matchAll(new RegExp(`<${tag}[^>]*>([\\s\\S]{1,400}?)<\\/${tag}>`, "gi")))) {
+      const text = m[1].replace(/<[^>]*>/g, " ").replace(/&(amp|#38);/g, "&").replace(/&(nbsp|#160);/g, " ").replace(/\s+/g, " ").trim()
+      if (text.length < 6 || text.length > 90) continue
+      if (BOILERPLATE_HEADING.test(text)) continue
+      const key = text.toLowerCase()
+      if (seen.has(key)) continue
+      seen.add(key)
+      out.push(text)
+      if (out.length >= 10) return out
+    }
+    // h2s found = the post has real structure; don't dilute with every h3 below them
+    if (out.length >= 3) break
+  }
+  return out
 }
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -167,19 +198,19 @@ function isPrivateHost(hostname: string): boolean {
  */
 export async function scrapeUrl(url: string): Promise<ScrapeResult> {
   if (!url || typeof url !== "string") {
-    return { title: "", description: "", products: [], url: "", error: "Missing URL" }
+    return { title: "", description: "", subtopics: [], products: [], url: "", error: "Missing URL" }
   }
   if (url.length > 500 || (!url.startsWith("http://") && !url.startsWith("https://"))) {
-    return { title: "", description: "", products: [], url, error: "Invalid URL" }
+    return { title: "", description: "", subtopics: [], products: [], url, error: "Invalid URL" }
   }
 
   // SSRF protection: block private/internal IP ranges + cloud metadata endpoints
   try {
     if (isPrivateHost(new URL(url).hostname)) {
-      return { title: "", description: "", products: [], url, error: "Invalid URL" }
+      return { title: "", description: "", subtopics: [], products: [], url, error: "Invalid URL" }
     }
   } catch {
-    return { title: "", description: "", products: [], url, error: "Invalid URL" }
+    return { title: "", description: "", subtopics: [], products: [], url, error: "Invalid URL" }
   }
 
   let html: string
@@ -192,10 +223,10 @@ export async function scrapeUrl(url: string): Promise<ScrapeResult> {
         "Accept-Language": "en-US,en;q=0.9",
       },
     })
-    if (!resp.ok) return { title: "", description: "", products: [], url, error: "Could not fetch page" }
+    if (!resp.ok) return { title: "", description: "", subtopics: [], products: [], url, error: "Could not fetch page" }
     html = await resp.text()
   } catch {
-    return { title: "", description: "", products: [], url, error: "Could not fetch page" }
+    return { title: "", description: "", subtopics: [], products: [], url, error: "Could not fetch page" }
   }
 
   const getMeta = (name: string): string => {
@@ -229,17 +260,18 @@ export async function scrapeUrl(url: string): Promise<ScrapeResult> {
 
   let articleContent = ""
   if (!ogDesc || ogDesc.length < 60) {
-    const paragraphs = Array.from(html.matchAll(/<p[^>]*>([^<]{80,600})<\/p>/gi))
-      .map(m => m[1].replace(/\s+/g, " ").trim())
-      .filter(p => !p.includes("cookie") && !p.includes("privacy") && !p.includes("©"))
+    // Tolerate inline tags inside paragraphs (<p>Some <a>linked</a> text</p>) — the old
+    // [^<] pattern only matched tag-free paragraphs, which barely exist on real blogs.
+    const paragraphs = Array.from(html.matchAll(/<p[^>]*>([\s\S]{80,800}?)<\/p>/gi))
+      .map(m => m[1].replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim())
+      .filter(p => p.length >= 80 && !p.includes("cookie") && !p.includes("privacy") && !p.includes("©"))
       .slice(0, 3)
     if (paragraphs.length > 0) articleContent = paragraphs.join(" ").slice(0, 400)
   }
 
-  const h2s = Array.from(html.matchAll(/<h2[^>]*>([^<]{5,100})<\/h2>/gi))
-    .map(m => m[1].replace(/\s+/g, " ").trim())
-    .slice(0, 5)
-  const keywords = h2s.length ? `Topics: ${h2s.join(", ")}` : ""
+  // Section headings are now a first-class subtopics field (not crammed into the
+  // description where a long og:description used to truncate them away).
+  const subtopics = extractSubtopics(html).map((s) => scrub(s, 90)).filter(Boolean)
 
   const description = ogDesc || articleContent || metaDesc
 
@@ -270,7 +302,8 @@ export async function scrapeUrl(url: string): Promise<ScrapeResult> {
 
   return {
     title: scrub(title, 200),
-    description: scrub([description, keywords].filter(Boolean).join(" | "), 600),
+    description: scrub(description, 600),
+    subtopics,
     products,
     url,
   }

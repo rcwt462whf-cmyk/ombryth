@@ -40,7 +40,7 @@ export interface GenerateRequest {
   productReferenceStrength?: number
   hasStyleReference?: boolean
   hasProductReference?: boolean
-  destinationContext?: { title: string; description: string; products?: { name: string; price?: string; rating?: string; reviewCount?: string; scarce?: boolean }[] }
+  destinationContext?: { title: string; description: string; subtopics?: string[]; products?: { name: string; price?: string; rating?: string; reviewCount?: string; scarce?: boolean }[] }
   promptOverride?: string
   aiTonedown?: boolean
   captionVariations?: number  // 1-5 — generate N caption sets in parallel
@@ -80,6 +80,8 @@ export interface PlatformOutput {
     title: string
     angle: string
     cta: string
+    /** The destination-page subtopic this variation was anchored to (multi-variant runs) */
+    subtopic?: string
   }
   _textError?: string
 }
